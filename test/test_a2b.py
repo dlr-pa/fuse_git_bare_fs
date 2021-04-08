@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+:Author: Daniel Mohr
+:Email: daniel.mohr@dlr.de
+:Date: 2021-04-08 (last change).
+"""
 
 import logging
 
@@ -25,7 +30,7 @@ class a2b(fusepy.LoggingMixIn, fusepy.Operations):
     def getattr(self, path, fh=None):
         # file:///usr/share/doc/python3/html/library/os.html#os.lstat
         stat = os.lstat(os.path.join(self.src_dir, path[1:]))
-        #return dict((key, getattr(stat, key)) for key in (
+        # return dict((key, getattr(stat, key)) for key in (
         #    'st_atime', 'st_gid', 'st_mode', 'st_mtime', 'st_size', 'st_uid'))
         return dict((key, getattr(stat, key)) for key in (
             'st_mode', 'st_uid', 'st_gid', 'st_size',
@@ -35,6 +40,8 @@ class a2b(fusepy.LoggingMixIn, fusepy.Operations):
         with open(os.path.join(self.src_dir, path[1:])) as fd:
             fd.seek(offset, 0)
             buf = fd.read(size)
+        if isinstance(buf, str):
+            buf = buf.encode()
         return buf
 
     def readdir(self, path, fh):

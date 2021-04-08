@@ -6,8 +6,8 @@
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
+import errno
 import logging
-
 import os
 import os.path
 import re
@@ -130,7 +130,9 @@ class repo_class():
         if (self.tree is None) or (not head in self.tree):
             self._read_tree()
         if (self.tree is None) or (not head in self.tree):
-            return dict()  # raise error?
+            # file:///usr/share/doc/python3/html/library/errno.html
+            # no such file or directory
+            raise fusepy.FuseOSError(errno.ENOENT)
         ret = dict()
         ret['st_uid'], ret['st_gid'], _ = fusepy.fuse_get_context()
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
@@ -143,7 +145,8 @@ class repo_class():
             # 100755 executable file
             # 120000 symbolic link
             if not tail in self.tree[head]['blobs']:
-                return dict()  # raise error?
+                # no such file or directory
+                raise fusepy.FuseOSError(errno.ENOENT)
             ret['st_mode'] = self.gitmode2st_mode[
                 self.tree[head]['blobs'][tail]['mode']]
             self._get_size_of_blob(head, tail)
@@ -155,9 +158,13 @@ class repo_class():
         if (self.tree is None) or (not head in self.tree):
             self._read_tree()
         if (self.tree is None) or (not head in self.tree):
-            return ''  # raise error?
+            # no such file or directory
+            raise fusepy.FuseOSError(errno.ENOENT)
         if not tail in self.tree[head]['blobs']:
-            return ''  # raise error?
+            # no such file or directory
+            raise fusepy.FuseOSError(errno.ENOENT)
+        # we read the complete file instead of the required part,
+        # this should be enhanced! (at least for unpacked objects)
         cp = subprocess.run(
             ["git cat-file --batch"],
             input=self.tree[head]['blobs'][tail]['hash'].encode(),
@@ -168,12 +175,15 @@ class repo_class():
         stopindex = -1
         if size is not None:
             stopindex = min(startindex + size, -1)
-        return cp.stdout.decode()[startindex:stopindex]
+        return cp.stdout[startindex:stopindex]
 
 
 class git_bare_repo(fusepy.LoggingMixIn, fusepy.Operations):
     """
-    simply mirror a directory
+    :Author: Daniel Mohr
+    :Date: 2021-04-08
+
+    read only access to the working tree of a git bare repository
     """
     # /usr/lib/python3/dist-packages/fusepy.py
 
@@ -186,17 +196,13 @@ class git_bare_repo(fusepy.LoggingMixIn, fusepy.Operations):
         return self.repo.getattr(path)
 
     def read(self, path, size, offset, fh):
-        # with open(os.path.join(self.src_dir, path[1:])) as fd:
-        #    fd.seek(offset, 0)
-        #    buf = fd.read(size)
-        # return buf
         return self.repo.read(path, size, offset)
 
     def readdir(self, path, fh):
         return ['.', '..'] + self.repo.readdir(path)
 
     def readlink(self, path):
-        return self.repo.read(path, None, 0)
+        return self.repo.read(path, None, 0).decode()
 
 
 if __name__ == '__main__':
@@ -211,7 +217,7 @@ if __name__ == '__main__':
         required=False,
         default=['master'],
         dest='root_object',
-        help='Defines the root repository object of the tree. default: master')
+        help='Defines the root repository object of the working tree. default: master')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
