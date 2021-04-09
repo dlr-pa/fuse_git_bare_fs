@@ -216,7 +216,9 @@ if __name__ == '__main__':
     epilog += '\n\n'
     description = '"fuse_git_bare_fs.py" is a tool to mount the working tree '
     description += 'of a git bare repository '
-    description += 'as a filesystem in user space (fuse).'
+    description += 'as a filesystem in user space (fuse). '
+    description += 'It gives only read access. '
+    description += 'For a write access you should do a git commit and use git.'
     parser = argparse.ArgumentParser(
         description=description,
         epilog=epilog,
@@ -237,6 +239,9 @@ if __name__ == '__main__':
         default=['master'],
         dest='root_object',
         help='Defines the root repository object of the working tree. '
+        'This will be given as a parameter to "git cat-file"; '
+        'hence you can look in the relevant man page of "git cat-file" '
+        'to understand how to specify the branch and or revision. '
         'default: master')
     parser.add_argument(
         '-daemon',
@@ -246,7 +251,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '-threads',
         action='store_false',
-        help='If given, the fuse mount will be threaded.')
+        help='If given, the fuse mount will be threaded. '
+        'This is not tested.')
     parser.add_argument(
         '-allow_other',
         action='store_true',
