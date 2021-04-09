@@ -6,14 +6,15 @@
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
+import argparse
 import errno
+import fusepy  # https://github.com/fusepy/fusepy
 import logging
 import os
 import os.path
 import re
 import subprocess
 
-import fusepy  # https://github.com/fusepy/fusepy
 
 # for ubuntu 18.04
 #  apt install python3-fusepy
@@ -206,8 +207,20 @@ class git_bare_repo(fusepy.LoggingMixIn, fusepy.Operations):
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
+    epilog = 'Examples:\n\n'
+    epilog += 'fuse_git_bare_fs.py a b\n\n'
+    epilog += 'sudo -u www-data fuse_git_bare_fs.py a b\n\n'
+    epilog += 'Author: Daniel Mohr\n'
+    epilog += 'Date: 2021-04-09\n'
+    epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
+    epilog += '\n\n'
+    description = '"fuse_git_bare_fs.py" is a tool to mount the working tree '
+    description += 'of a git bare repository '
+    description += 'as a filesystem in user space (fuse).'
+    parser = argparse.ArgumentParser(
+        description=description,
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         'src_dir',
         help='This is the path to a git bare repository. '

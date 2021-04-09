@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+rm -r build
+/usr/bin/env python3 setup.py install --home=~ --record installed_files.txt

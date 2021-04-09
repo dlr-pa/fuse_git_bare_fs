@@ -1,0 +1,7 @@
+*~
+*.pyc
+*.pyo
+MANIFEST
+build
+dist
+installed_files.txt
