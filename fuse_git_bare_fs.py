@@ -2,7 +2,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-08 (last change).
+:Date: 2021-04-09 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -13,7 +13,7 @@ import os.path
 import re
 import subprocess
 
-import fusepy
+import fusepy  # https://github.com/fusepy/fusepy
 
 # for ubuntu 18.04
 #  apt install python3-fusepy
@@ -165,16 +165,16 @@ class repo_class():
             raise fusepy.FuseOSError(errno.ENOENT)
         # we read the complete file instead of the required part,
         # this should be enhanced! (at least for unpacked objects)
-        cp = subprocess.run(
-            ["git cat-file --batch"],
-            input=self.tree[head]['blobs'][tail]['hash'].encode(),
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            cwd=self.src_dir, shell=True, timeout=3, check=True)
         self._get_size_of_blob(head, tail)
         startindex = -(1 + offset + self.tree[head]['blobs'][tail]['st_size'])
         stopindex = -1
         if size is not None:
             stopindex = min(startindex + size, -1)
+        cp = subprocess.run(
+            ["git cat-file --batch"],
+            input=self.tree[head]['blobs'][tail]['hash'].encode(),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            cwd=self.src_dir, shell=True, timeout=3, check=True)
         return cp.stdout[startindex:stopindex]
 
 
@@ -208,8 +208,14 @@ class git_bare_repo(fusepy.LoggingMixIn, fusepy.Operations):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('src_dir')
-    parser.add_argument('target_dir')
+    parser.add_argument(
+        'src_dir',
+        help='This is the path to a git bare repository. '
+        'The working tree of its root_object (e. g. master) will be '
+        'transparent available in the target_dir.')
+    parser.add_argument(
+        'target_dir',
+        help='This is the mountpoint.')
     parser.add_argument(
         '-root_object',
         nargs=1,
@@ -217,14 +223,31 @@ if __name__ == '__main__':
         required=False,
         default=['master'],
         dest='root_object',
-        help='Defines the root repository object of the working tree. default: master')
+        help='Defines the root repository object of the working tree. '
+        'default: master')
+    parser.add_argument(
+        '-daemon',
+        action='store_false',
+        help='If given, go to background and work as a daemon. '
+        'To unmount you can do: fusermount -u target_dir')
+    parser.add_argument(
+        '-threads',
+        action='store_false',
+        help='If given, the fuse mount will be threaded.')
+    parser.add_argument(
+        '-allow_other',
+        action='store_true',
+        help='If given, allows other users to use the fuse mount point. '
+        'Therefore you have to allow this in /etc/fuse.conf by '
+        'uncommenting "user_allow_other" there.')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
 
     fuse = fusepy.FUSE(
-        git_bare_repo(args.src_dir, args.root_object[0].encode()),
+        git_bare_repo(os.path.abspath(args.src_dir),
+                      args.root_object[0].encode()),
         args.target_dir,
-        foreground=True,
-        nothreads=True,
-        allow_other=False)
+        foreground=args.daemon,
+        nothreads=args.threads,
+        allow_other=args.allow_other)
