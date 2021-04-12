@@ -101,7 +101,7 @@ done
 
 echo "## create mountpoints ##"
 if [ $test_environment -eq 1 ]; then # test environment
-    repolist="foo bar baz gitolite-admin testing"
+    repolist=$(ls -1 $gitoliterepos; echo "foo bar baz gitolite-admin testing")
 else
     repolist=$(gitolite list-phy-repos)
 fi

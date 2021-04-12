@@ -1,0 +1,65 @@
+#!/bin/bash
+mydir=$(mktemp -d)
+echo -e "create a heavy test environment in: $mydir\n"
+mkdir $mydir/repos
+mkdir $mydir/repos/server
+mkdir $mydir/repos/client
+mkdir $mydir/webdav
+mkdir $mydir/webdav/removeme
+
+for repo in gitolite-admin foo bar baz; do
+    echo $repo
+    cd $mydir/repos/server
+    git init --bare $repo.git
+    cd $mydir/repos/client
+    git clone ../server/$repo.git
+done
+
+i=1
+while [ $i -le 10 ]; do
+    repo=repo$i
+    echo $repo
+    cd $mydir/repos/server
+    git init --bare $repo.git
+    cd $mydir/repos/client
+    git clone ../server/$repo.git
+    i=$(( i + 1 ))
+done
+
+cd $mydir/repos/client/gitolite-admin
+mkdir keydir
+for username in u1 u2 u3 u4 u5; do
+    echo -n a > keydir/$username.pub
+    git add keydir/$username.pub
+done
+i=1
+while [ $i -le 30 ]; do
+    username=user$i
+    echo -n a > keydir/$username.pub
+    git add keydir/$username.pub
+    i=$(( i + 1 ))
+done
+
+git commit -m init
+git push
+
+#for repo in foo bar; do
+i=1
+while [ $i -le 10 ]; do
+    repo=repo$i
+    echo $repo
+    cd $mydir/repos/client/$repo
+    echo "fuse_git_bare_fs rocks" > a.txt
+    git add a.txt
+    git commit -m "added a.txt"
+    date > b.txt
+    git add b.txt
+    git commit -m "added b.txt"
+    git push
+    i=$(( i + 1 ))
+done
+
+echo -e "\ncreated a heavy test environment in: $mydir\n"
+
+echo -e "./mount_ssh_accounts $mydir\n"
+echo "./umount_ssh_accounts $mydir"

@@ -244,7 +244,10 @@ if __name__ == '__main__':
     description += 'of a git bare repository '
     description += 'as a filesystem in user space (fuse). '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git.'
+    description += 'For a write access you should do a git commit and use git. '
+    description += 'This script needs about 7.6 MB of memory to run. '
+    description += 'More memory is necessary for large working trees or '
+    description += 'to provide file content.'
     parser = argparse.ArgumentParser(
         description=description,
         epilog=epilog,
