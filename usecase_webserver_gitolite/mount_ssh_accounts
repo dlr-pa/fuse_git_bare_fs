@@ -1,0 +1,145 @@
+#!/bin/bash
+# adapt the pathes:
+#  * gitolitehome
+#  * workdir
+#  * outputdir
+# the other pathes should be fine, but check:
+#  * gitoliterepos
+#  * gitoliteadminrepo
+#  * keydir
+
+gitolitehome=/var/lib/gitolite
+gitoliterepos=$gitolitehome/repositories
+gitoliteadminrepo=$gitoliterepos/gitolite-admin.git
+# the gitoliteadminrepo will be mounted to workdir (readonly),
+# the directory will be created with mkdir:
+workdir=$gitolitehome/cache_gitolite-admin
+keydir=$workdir/keydir
+# in the outputdir the repositories will be mounted
+outputdir=/var/www/gitolite/webdav
+# set the file mode of the output:
+outputdirmode=755
+outputfilemode=644
+
+# for testing we use the given command line parameter as base directory
+test_environment=0
+if [ $# -eq 1 ]; then # test environment
+    gitolitehome=$1
+    gitoliterepos=$gitolitehome/repos/server
+    gitoliteadminrepo=$gitoliterepos/gitolite-admin.git
+    workdir=$gitolitehome/cache_gitolite-admin
+    keydir=$workdir/keydir
+    outputdir=$1/webdav
+    test_environment=1
+fi
+
+echo "gitolitehome: $gitolitehome"
+echo "gitoliterepos: $gitoliterepos"
+echo "gitoliteadminrepo: $gitoliteadminrepo"
+echo "workdir: $workdir"
+echo "keydir: $keydir"
+echo -e "outputdir: $outputdir\n"
+
+if [ ! -d $outputdir ]; then
+    echo "error: outputdir $outputdir does not exists"
+    exit 1
+fi
+
+if [ ! -d $workdir ]; then
+    mkdir $workdir
+fi
+
+echo "## mount gitoliteadminrepo ##"
+mountpoint -q $workdir
+exit_status=$?
+if [ $exit_status -ne 0 ]; then
+    fuse_git_bare_fs.py -daemon $gitoliteadminrepo $workdir && echo "$gitoliteadminrepo mounted on $workdir"
+fi
+
+if [ $test_environment -eq 1 ]; then # test environment
+    userlist=$(basename --suffix=.pub $keydir/*; echo "u1 u2 foo bar admin")
+else
+    userlist=$((gitolite list-users | grep -v @; basename --suffix=.pub $keydir/*) | sort -u)
+fi
+
+echo $userlist
+
+echo "## create user dir ##"
+for username in $userlist; do
+    if [ ! $username = "admin" ]; then
+	echo $username
+	if [ ! -d $outputdir/$username ]; then
+	    mkdir --mode=$outputdirmode $outputdir/$username
+	    echo "Require user $username" > $outputdir/$username/.htaccess
+	    chmod $outputfilemode $outputdir/$username/.htaccess
+	fi
+    fi
+done
+
+echo "## remove obsolete user dir ##"
+for subdirname in $(ls -1 $outputdir); do
+    echo $userlist | grep -w -q $subdirname
+    exit_status=$?
+    if [ $exit_status -ne 0 -o $subdirname = "admin" ]; then
+	# check mount and do unumount if necessary
+	for subsubdirname in $(ls -1 $outputdir/$subdirname); do
+	    if [ -d $outputdir/$subdirname/$subsubdirname ]; then
+		mountpoint -q $outputdir/$subdirname/$subsubdirname
+		exit_status=$?
+		if [ $exit_status -eq 0 ]; then
+		    fusermount -u $outputdir/$subdirname/$subsubdirname && echo "unmounted $outputdir/$subdirname/$subsubdirname"
+		fi
+		# remove directory
+		rmdir $outputdir/$subdirname/$subsubdirname && echo "removed $outputdir/$subdirname/$subsubdirname"
+	    fi
+	done
+	# remove directory
+	rm $outputdir/$subdirname/.htaccess
+	rmdir $outputdir/$subdirname && echo "removed $outputdir/$subdirname"
+    fi
+done
+
+echo "## create mountpoints ##"
+if [ $test_environment -eq 1 ]; then # test environment
+    repolist="foo bar baz gitolite-admin testing"
+else
+    repolist=$(gitolite list-phy-repos)
+fi
+
+for username in $userlist; do
+    if [ ! $username = "admin" ]; then
+	echo $username
+	for repo in $repolist; do
+	    if [ $repo != "gitolite-admin" ]; then
+		if [ $test_environment -eq 1 ]; then # test environment
+		    exit_status=0
+		else
+		    gitolite access -q $repo $username
+		    exit_status=$?
+		fi
+		if [ $exit_status -eq 0 ]; then
+		    if [ -d $gitoliterepos/$repo -o -d $gitoliterepos/$repo.git ]; then
+			if [ ! -d $outputdir/$username/$repo ]; then
+			    mkdir --mode=$outputdirmode $outputdir/$username/$repo
+			fi
+			mountpoint -q $outputdir/$username/$repo
+			exit_status=$?
+			if [ $exit_status -ne 0 ]; then
+			    if [ -d $gitoliterepos/$repo ]; then
+				fuse_git_bare_fs.py -daemon -allow_other $gitoliterepos/$repo $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+			    elif [ -d $gitoliterepos/$repo.git ]; then
+				fuse_git_bare_fs.py -daemon -allow_other $gitoliterepos/$repo.git $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+			    fi
+			fi
+		    fi
+		fi
+	    fi
+	done
+    fi
+done
+
+if [ $# -eq 1 ]; then # test environment
+    echo -e "\nremove all mountpoints: ./umount_ssh_accounts $1"
+else
+    echo -e "\nremove all mountpoints: ./umount_ssh_accounts"
+fi
