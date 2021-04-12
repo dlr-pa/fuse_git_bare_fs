@@ -2,7 +2,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-09 (last change).
+:Date: 2021-04-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,6 +14,8 @@ import os
 import os.path
 import re
 import subprocess
+import time
+import warnings
 
 
 # for ubuntu 18.04
@@ -25,7 +27,7 @@ import subprocess
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-08
+    :Date: 2021-04-12
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -43,7 +45,7 @@ class repo_class():
         self.time = None
         self._read_tree()
 
-    def _chache_up_to_date(self):
+    def _cache_up_to_date(self):
         cp = subprocess.run(
             ["git cat-file --batch-check='%(objectname)'"],
             input=self.root_object,
@@ -54,7 +56,7 @@ class repo_class():
         return False
 
     def _update_cache(self):
-        if not self._chache_up_to_date():
+        if not self._cache_up_to_date():
             self.tree = None
             self.commit_hash = None
             self.tree_hash = None
@@ -63,6 +65,13 @@ class repo_class():
                 ["git cat-file --batch"], input=self.root_object,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 cwd=self.src_dir, shell=True, timeout=3, check=True)
+            if cp.stdout.startswith(self.root_object):
+                # empty repo or self.root_object does not exists
+                msg = 'root repository object "%s" does not exists. ' % \
+                  self.root_object
+                msg += 'Mountpoint will be empty.'
+                warnings.warn(msg)
+                return False
             splittedstdout = cp.stdout.decode().split('\n')
             self.commit_hash = splittedstdout[0].split()[0]
             for data in splittedstdout:
@@ -75,6 +84,7 @@ class repo_class():
                     if res:
                         self.time = int(res[0])
                         break
+        return True
 
     def _git_cat_file(self, git_object):
         cp = subprocess.run(
@@ -84,7 +94,8 @@ class repo_class():
         return cp.stdout.decode()
 
     def _read_tree(self):
-        self._update_cache()
+        if not self._update_cache():
+            return
         self.tree = dict()
         # self.tree[path] =
         #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
@@ -124,7 +135,10 @@ class repo_class():
         """
         if (self.tree is None) or (not path in self.tree):
             self._read_tree()
-        return self.tree[path]['listdir']
+        if (self.tree is None) or (not path in self.tree):
+            return []
+        else:
+            return self.tree[path]['listdir']
 
     def getattr(self, path):
         head, tail = os.path.split(path)
@@ -133,7 +147,19 @@ class repo_class():
         if (self.tree is None) or (not head in self.tree):
             # file:///usr/share/doc/python3/html/library/errno.html
             # no such file or directory
-            raise fusepy.FuseOSError(errno.ENOENT)
+            print('getattr', head, tail)
+            if (tail == '') and (head == '/'):
+                msg = 'root repository object "%s" does not exists. ' % \
+                  self.root_object
+                msg += 'Mountpoint will be empty.'
+                warnings.warn(msg)
+                ret = {'st_mode': 16893, 'st_size': 4096}
+                ret['st_uid'], ret['st_gid'], _ = fusepy.fuse_get_context()
+                ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = \
+                  time.time()
+                return ret
+            else:
+                raise fusepy.FuseOSError(errno.ENOENT)
         ret = dict()
         ret['st_uid'], ret['st_gid'], _ = fusepy.fuse_get_context()
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
@@ -211,7 +237,7 @@ if __name__ == '__main__':
     epilog += 'fuse_git_bare_fs.py a b\n\n'
     epilog += 'sudo -u www-data fuse_git_bare_fs.py a b\n\n'
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-04-09\n'
+    epilog += 'Date: 2021-04-12\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     description = '"fuse_git_bare_fs.py" is a tool to mount the working tree '
@@ -259,6 +285,10 @@ if __name__ == '__main__':
         help='If given, allows other users to use the fuse mount point. '
         'Therefore you have to allow this in /etc/fuse.conf by '
         'uncommenting "user_allow_other" there.')
+    parser.add_argument(
+        '-raw_fi',
+        action='store_true',
+        help='If given, use fuse_file_info instead of fh filed in fusepy.')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
@@ -269,4 +299,5 @@ if __name__ == '__main__':
         args.target_dir,
         foreground=args.daemon,
         nothreads=args.threads,
-        allow_other=args.allow_other)
+        allow_other=args.allow_other,
+        raw_fi=args.raw_fi)

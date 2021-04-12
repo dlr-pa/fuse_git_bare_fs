@@ -238,12 +238,14 @@ class CheckModulesModulefinder(Command):
 # necessary modules
 required_modules = ['argparse',
                     'errno',
+                    'fusepy',
                     'logging',
                     'os',
                     'os.path',
                     're',
                     'subprocess',
-                    'fusepy']
+                    'time',
+                    'warnings']
 # optional modules for python3 setup.py check_modules
 required_modules += ['importlib']
 # optional modules for python3 setup.py check_modules_modulefinder
