@@ -14,6 +14,12 @@ for repo in gitolite-admin foo bar baz; do
     cd $mydir/repos/client
     git clone ../server/$repo.git
 done
+mkdir $mydir/repos/server/repodir
+cd $mydir/repos/server/repodir
+git init --bare foo_bar_baz.git
+mkdir $mydir/repos/client/repodir
+cd $mydir/repos/client/repodir
+git clone ../../server/repodir/foo_bar_baz.git
 
 cd $mydir/repos/client/gitolite-admin
 mkdir keydir
@@ -24,7 +30,7 @@ done
 git commit -m init
 git push
 
-for repo in foo bar; do
+for repo in foo bar repodir/foo_bar_baz; do
     cd $mydir/repos/client/$repo
     echo "fuse_git_bare_fs rocks" > a.txt
     git add a.txt
