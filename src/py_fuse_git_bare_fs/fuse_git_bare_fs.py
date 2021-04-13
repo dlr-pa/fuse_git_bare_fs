@@ -49,7 +49,7 @@ def fuse_git_bare_fs_tree(args):
     if args.daemon:  # running in foreground
         import logging
         if args.get_user_list_from_gitolite:
-            from .git_bare_repo_tree import git_bare_repo_tree_gitolite_logging
+            from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite_logging
             logging.basicConfig(level=logging.DEBUG)
             fuse = fusepy.FUSE(
                 git_bare_repo_tree_gitolite_logging(
@@ -74,7 +74,7 @@ def fuse_git_bare_fs_tree(args):
                 raw_fi=args.raw_fi)
     else:
         if args.get_user_list_from_gitolite:
-            from .git_bare_repo_tree import git_bare_repo_tree_gitolite
+            from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite
             logging.basicConfig(level=logging.DEBUG)
             fuse = fusepy.FUSE(
                 git_bare_repo_tree_gitolite(
