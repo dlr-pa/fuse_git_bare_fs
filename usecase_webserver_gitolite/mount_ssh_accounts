@@ -53,7 +53,7 @@ echo "## mount gitoliteadminrepo ##"
 mountpoint -q $workdir
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
-    fuse_git_bare_fs.py -daemon $gitoliteadminrepo $workdir && echo "$gitoliteadminrepo mounted on $workdir"
+    fuse_git_bare_fs.py repo -daemon $gitoliteadminrepo $workdir && echo "$gitoliteadminrepo mounted on $workdir"
 fi
 
 if [ $test_environment -eq 1 ]; then # test environment
@@ -136,9 +136,9 @@ for username in $userlist; do
 			exit_status=$?
 			if [ $exit_status -ne 0 ]; then
 			    if [ -d $gitoliterepos/$repo ]; then
-				fuse_git_bare_fs.py -daemon -allow_other $gitoliterepos/$repo $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+				fuse_git_bare_fs.py repo -daemon -allow_other $gitoliterepos/$repo $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
 			    elif [ -d $gitoliterepos/$repo.git ]; then
-				fuse_git_bare_fs.py -daemon -allow_other $gitoliterepos/$repo.git $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+				fuse_git_bare_fs.py repo -daemon -allow_other $gitoliterepos/$repo.git $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
 			    fi
 			fi
 		    fi
