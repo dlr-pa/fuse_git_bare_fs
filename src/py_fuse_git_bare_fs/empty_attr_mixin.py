@@ -10,7 +10,11 @@ import time
 
 
 class _empty_attr_mixin():
-    _empty_attr = {'st_mode': 16893, 'st_size': 4096,
-                   'st_uid': os.geteuid(), 'st_gid': os.getegid()}
-    _empty_attr['st_atime'] = _empty_attr['st_mtime'] = \
-        _empty_attr['st_ctime'] = int(time.time())
+    _empty_dir_attr = {'st_mode': 16893, 'st_size': 4096,
+                       'st_uid': os.geteuid(), 'st_gid': os.getegid()}
+    _empty_dir_attr['st_atime'] = _empty_dir_attr['st_mtime'] = \
+        _empty_dir_attr['st_ctime'] = int(time.time())
+    _empty_file_attr = {'st_mode': 33204,
+                        'st_uid': os.geteuid(), 'st_gid': os.getegid()}
+    _empty_file_attr['st_atime'] = _empty_file_attr['st_mtime'] = \
+        _empty_file_attr['st_ctime'] = int(time.time())

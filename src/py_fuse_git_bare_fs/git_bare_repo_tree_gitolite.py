@@ -20,6 +20,7 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
 
     read only access to working trees of git bare repositories
     """
+
     def __init__(self, src_dir, root_object, provide_htaccess):
         self.src_dir = src_dir
         self.root_object = root_object
@@ -48,14 +49,25 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
             repopath = '/'
         return repopath
 
+    def _get_htaccess_content(self, username):
+        # this restrict access to the content for other users
+        # but we should also permit directory listing for others
+        content = b'Require user ' + username.encode() + b'\n'
+        return content
+
     def getattr(self, path, fh=None):
         if path == '/':
-            return self._empty_attr
+            return self._empty_dir_attr
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:
             raise fusepy.FuseOSError(errno.ENOENT)
-        if path == '/' + actual_user:
-            return self._empty_attr
+        elif path == '/' + actual_user:
+            return self._empty_dir_attr
+        elif (self.provide_htaccess and
+              (path == '/' + actual_user + '/.htaccess')):
+            file_attr = self._empty_file_attr.copy()
+            file_attr['st_size'] = len(self._get_htaccess_content(actual_user))
+            return file_attr
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # check if path is part of repo path
             part_of_repo_path = False
@@ -64,8 +76,8 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
                     part_of_repo_path = True
                     break
             if part_of_repo_path:
-                return self._empty_attr
-            else:# no such file or directory
+                return self._empty_dir_attr
+            else:  # no such file or directory
                 raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].getattr(
             self._extract_repopath_from_path(actual_user, actual_repo, path))
@@ -74,6 +86,14 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
+        elif (self.provide_htaccess and
+              (path == '/' + actual_user + '/.htaccess')):
+            startindex = offset
+            stopindex = 1024  # assume no usename is longer than 1011
+            if size is not None:
+                stopindex = startindex + size
+            print('content', self._get_htaccess_content(actual_user)[startindex:stopindex])
+            return self._get_htaccess_content(actual_user)[startindex:stopindex]
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
@@ -87,10 +107,12 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        if path == '/' + actual_user:
+        elif path == '/' + actual_user:
             retlist = []
             for repo in self.repos.get_repos(user=actual_user):
                 retlist.append(repo.split('/')[0])
+            if self.provide_htaccess:
+                retlist.append('.htaccess')
             return retlist
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # check if path is part of repo path
