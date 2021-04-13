@@ -49,12 +49,24 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         return repopath
 
     def getattr(self, path, fh=None):
+        if path == '/':
+            return self._empty_attr
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:
+            raise fusepy.FuseOSError(errno.ENOENT)
+        if path == '/' + actual_user:
             return self._empty_attr
         actual_repo = self._extract_repo_from_path(actual_user, path)
-        if actual_repo is None:
-            return self._empty_attr
+        if actual_repo is None:  # check if path is part of repo path
+            part_of_repo_path = False
+            for repo in self.repos.get_repos():
+                if repo.startswith(path[2+len(actual_user):]):
+                    part_of_repo_path = True
+                    break
+            if part_of_repo_path:
+                return self._empty_attr
+            else:# no such file or directory
+                raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].getattr(
             self._extract_repopath_from_path(actual_user, actual_repo, path))
 

@@ -44,6 +44,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
                 repopath = '/'
             return self.repos[actual_repo].getattr(repopath)
         else:
+
             return self._empty_attr
 
     def read(self, path, size, offset, fh):

@@ -7,6 +7,7 @@
 
 import errno
 import fusepy  # https://github.com/fusepy/fusepy
+import os
 import os.path
 import re
 import subprocess
@@ -24,6 +25,7 @@ class repo_class():
     """
     time_regpat = re.compile(r' ([0-9]+) [+0-9]+$')
     gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
+    st_uid_st_gid = (os.geteuid(), os.getegid())
 
     def __init__(self, src_dir, root_object):
         self.src_dir = src_dir
@@ -145,14 +147,14 @@ class repo_class():
                 msg += 'Mountpoint will be empty.'
                 warnings.warn(msg)
                 ret = {'st_mode': 16893, 'st_size': 4096}
-                ret['st_uid'], ret['st_gid'], _ = fusepy.fuse_get_context()
+                ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
                 ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = \
                     time.time()
                 return ret
             else:
                 raise fusepy.FuseOSError(errno.ENOENT)
         ret = dict()
-        ret['st_uid'], ret['st_gid'], _ = fusepy.fuse_get_context()
+        ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
         if (tail == '') or (path in self.tree):  # path is dir
             ret['st_mode'] = 16893
