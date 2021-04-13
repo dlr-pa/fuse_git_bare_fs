@@ -17,7 +17,7 @@ import warnings
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-12
+    :Date: 2021-04-13
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -57,8 +57,9 @@ class repo_class():
                 cwd=self.src_dir, shell=True, timeout=3, check=True)
             if cp.stdout.startswith(self.root_object):
                 # empty repo or self.root_object does not exists
-                msg = 'root repository object "%s" does not exists. ' % \
-                    self.root_object
+                msg = \
+                  'root repository object "%s" in "%s" does not exists. ' % \
+                  (self.root_object, self.src_dir)
                 msg += 'Mountpoint will be empty.'
                 warnings.warn(msg)
                 return False

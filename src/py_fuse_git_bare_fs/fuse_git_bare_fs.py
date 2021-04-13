@@ -46,7 +46,56 @@ def fuse_git_bare_fs_tree(args):
     :Email: daniel.mohr@dlr.de
     :Date: 2021-04-13 (last change).
     """
-    pass
+    if args.daemon:  # running in foreground
+        import logging
+        if args.get_user_list_from_gitolite:
+            from .git_bare_repo_tree import git_bare_repo_tree_gitolite_logging
+            logging.basicConfig(level=logging.DEBUG)
+            fuse = fusepy.FUSE(
+                git_bare_repo_tree_gitolite_logging(
+                    os.path.abspath(args.src_dir),
+                    args.root_object[0].encode(),
+                    args.provide_htaccess),
+                args.target_dir,
+                foreground=args.daemon,
+                nothreads=args.threads,
+                allow_other=args.allow_other,
+                raw_fi=args.raw_fi)
+        else:
+            from .git_bare_repo_tree import git_bare_repo_tree_logging
+            logging.basicConfig(level=logging.DEBUG)
+            fuse = fusepy.FUSE(
+                git_bare_repo_tree_logging(os.path.abspath(args.src_dir),
+                                           args.root_object[0].encode()),
+                args.target_dir,
+                foreground=args.daemon,
+                nothreads=args.threads,
+                allow_other=args.allow_other,
+                raw_fi=args.raw_fi)
+    else:
+        if args.get_user_list_from_gitolite:
+            from .git_bare_repo_tree import git_bare_repo_tree_gitolite
+            logging.basicConfig(level=logging.DEBUG)
+            fuse = fusepy.FUSE(
+                git_bare_repo_tree_gitolite(
+                    os.path.abspath(args.src_dir),
+                    args.root_object[0].encode(),
+                    args.provide_htaccess),
+                args.target_dir,
+                foreground=args.daemon,
+                nothreads=args.threads,
+                allow_other=args.allow_other,
+                raw_fi=args.raw_fi)
+        else:
+            from .git_bare_repo_tree import git_bare_repo_tree
+            fuse = fusepy.FUSE(
+                git_bare_repo_tree(os.path.abspath(args.src_dir),
+                                   args.root_object[0].encode()),
+                args.target_dir,
+                foreground=args.daemon,
+                nothreads=args.threads,
+                allow_other=args.allow_other,
+                raw_fi=args.raw_fi)
 
 
 def my_argument_parser():
@@ -146,12 +195,13 @@ def my_argument_parser():
     description += 'as a filesystem in user space (fuse). '
     description += 'The idea is to provide the git repositories manage by '
     description += 'a gitolite instance. Therefore parameters for this '
-    description += 'purpose are available. '
+    description += 'purpose are available. It is assumed that the bare '
+    description += 'repositories are named like "*.git". '
     description += 'It gives only read access. '
     description += 'For a write access you should do a git commit and use git. '
     epilog = 'Examples:\n\n'
     epilog += 'fuse_git_bare_fs.py tree a b\n\n'
-    epilog += 'sudo -u gitolite fuse_git_bare_fs.py tree -get_user_list_from_gitolite -provide_htaccess /var/lib/gitolite/repositories /var/www/gitolite/webdav\n\n'
+    epilog += 'sudo -u gitolite fuse_git_bare_fs.py tree -daemon -allow_other -get_user_list_from_gitolite -provide_htaccess /var/lib/gitolite/repositories /var/www/gitolite/webdav\n\n'
     epilog += 'Author: Daniel Mohr\n'
     epilog += 'Date: 2021-04-13\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
