@@ -1,27 +1,17 @@
-#!/usr/bin/env python3
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-12 (last change).
+:Date: 2021-04-13 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
-import argparse
 import errno
 import fusepy  # https://github.com/fusepy/fusepy
-import logging
-import os
 import os.path
 import re
 import subprocess
 import time
 import warnings
-
-
-# for ubuntu 18.04
-#  apt install python3-fusepy
-# ./fuse_git_bare_fs.py a b
-# sudo -u www-data ./fuse_git_bare_fs.py a b
 
 
 class repo_class():
@@ -68,7 +58,7 @@ class repo_class():
             if cp.stdout.startswith(self.root_object):
                 # empty repo or self.root_object does not exists
                 msg = 'root repository object "%s" does not exists. ' % \
-                  self.root_object
+                    self.root_object
                 msg += 'Mountpoint will be empty.'
                 warnings.warn(msg)
                 return False
@@ -150,13 +140,13 @@ class repo_class():
             print('getattr', head, tail)
             if (tail == '') and (head == '/'):
                 msg = 'root repository object "%s" does not exists. ' % \
-                  self.root_object
+                    self.root_object
                 msg += 'Mountpoint will be empty.'
                 warnings.warn(msg)
                 ret = {'st_mode': 16893, 'st_size': 4096}
                 ret['st_uid'], ret['st_gid'], _ = fusepy.fuse_get_context()
                 ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = \
-                  time.time()
+                    time.time()
                 return ret
             else:
                 raise fusepy.FuseOSError(errno.ENOENT)
@@ -203,104 +193,3 @@ class repo_class():
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
         return cp.stdout[startindex:stopindex]
-
-
-class git_bare_repo(fusepy.LoggingMixIn, fusepy.Operations):
-    """
-    :Author: Daniel Mohr
-    :Date: 2021-04-08
-
-    read only access to the working tree of a git bare repository
-    """
-    # /usr/lib/python3/dist-packages/fusepy.py
-
-    def __init__(self, src_dir, root_object):
-        self.src_dir = src_dir
-        self.root_object = root_object
-        self.repo = repo_class(self.src_dir, self.root_object)
-
-    def getattr(self, path, fh=None):
-        return self.repo.getattr(path)
-
-    def read(self, path, size, offset, fh):
-        return self.repo.read(path, size, offset)
-
-    def readdir(self, path, fh):
-        return ['.', '..'] + self.repo.readdir(path)
-
-    def readlink(self, path):
-        return self.repo.read(path, None, 0).decode()
-
-
-if __name__ == '__main__':
-    epilog = 'Examples:\n\n'
-    epilog += 'fuse_git_bare_fs.py a b\n\n'
-    epilog += 'sudo -u www-data fuse_git_bare_fs.py a b\n\n'
-    epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-04-12\n'
-    epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
-    epilog += '\n\n'
-    description = '"fuse_git_bare_fs.py" is a tool to mount the working tree '
-    description += 'of a git bare repository '
-    description += 'as a filesystem in user space (fuse). '
-    description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
-    description += 'This script needs about 7.6 MB of memory to run. '
-    description += 'More memory is necessary for large working trees or '
-    description += 'to provide file content.'
-    parser = argparse.ArgumentParser(
-        description=description,
-        epilog=epilog,
-        formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument(
-        'src_dir',
-        help='This is the path to a git bare repository. '
-        'The working tree of its root_object (e. g. master) will be '
-        'transparent available in the target_dir.')
-    parser.add_argument(
-        'target_dir',
-        help='This is the mountpoint.')
-    parser.add_argument(
-        '-root_object',
-        nargs=1,
-        type=str,
-        required=False,
-        default=['master'],
-        dest='root_object',
-        help='Defines the root repository object of the working tree. '
-        'This will be given as a parameter to "git cat-file"; '
-        'hence you can look in the relevant man page of "git cat-file" '
-        'to understand how to specify the branch and or revision. '
-        'default: master')
-    parser.add_argument(
-        '-daemon',
-        action='store_false',
-        help='If given, go to background and work as a daemon. '
-        'To unmount you can do: fusermount -u target_dir')
-    parser.add_argument(
-        '-threads',
-        action='store_false',
-        help='If given, the fuse mount will be threaded. '
-        'This is not tested.')
-    parser.add_argument(
-        '-allow_other',
-        action='store_true',
-        help='If given, allows other users to use the fuse mount point. '
-        'Therefore you have to allow this in /etc/fuse.conf by '
-        'uncommenting "user_allow_other" there.')
-    parser.add_argument(
-        '-raw_fi',
-        action='store_true',
-        help='If given, use fuse_file_info instead of fh filed in fusepy.')
-    args = parser.parse_args()
-
-    logging.basicConfig(level=logging.DEBUG)
-
-    fuse = fusepy.FUSE(
-        git_bare_repo(os.path.abspath(args.src_dir),
-                      args.root_object[0].encode()),
-        args.target_dir,
-        foreground=args.daemon,
-        nothreads=args.threads,
-        allow_other=args.allow_other,
-        raw_fi=args.raw_fi)
