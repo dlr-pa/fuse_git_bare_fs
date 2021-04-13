@@ -1,0 +1,58 @@
+#!/bin/bash
+# adapt the pathes:
+#  * gitolitehome
+#  * workdir
+#  * outputdir
+
+# in the outputdir the repositories will are mounted
+gitolitehome=/var/lib/gitolite
+workdir=$gitolitehome/cache_gitolite-admin
+outputdir=/var/www/gitolite/webdav
+
+if [ $# -eq 1 ]; then # test environment
+    gitolitehome=$1
+    workdir=$gitolitehome/cache_gitolite-admin
+    outputdir=$1/webdav
+fi
+
+echo "gitolitehome: $gitolitehome"
+echo "workdir: $workdir"
+echo -e "outputdir: $outputdir\n"
+
+for subdirname in $(ls -1 $outputdir); do
+    # check mount and do unumount if necessary
+    for subsubdirname in $(ls -1 $outputdir/$subdirname); do
+	if [ -d $outputdir/$subdirname/$subsubdirname ]; then
+	    mountpoint -q $outputdir/$subdirname/$subsubdirname
+	    exit_status=$?
+	    if [ $exit_status -eq 0 ]; then
+		fusermount -u $outputdir/$subdirname/$subsubdirname && echo "unmounted $outputdir/$subdirname/$subsubdirname"
+	    fi
+	    # remove directory
+	    rmdir $outputdir/$subdirname/$subsubdirname
+	    exit_status=$?
+	    if [ $exit_status -eq 0 ]; then
+		echo "removed $outputdir/$subdirname/$subsubdirname"
+	    else
+		for path in $(find $outputdir/$subdirname/$subsubdirname -fstype fuse -type d); do
+		    mountpoint -q $path
+		    exit_status=$?
+		    if [ $exit_status -eq 0 ]; then
+			fusermount -u $path && echo "unmounted $path"
+			rmdir $path
+		    fi
+		done
+		rmdir $outputdir/$subdirname/$subsubdirname
+	    fi
+	fi
+    done
+    # remove directory
+    rm $outputdir/$subdirname/.htaccess
+    rmdir $outputdir/$subdirname && echo "removed $outputdir/$subdirname"
+done
+
+mountpoint -q $workdir
+exit_status=$?
+if [ $exit_status -eq 0 ]; then
+    fusermount -u $workdir && echo "unmounted $workdir"
+fi

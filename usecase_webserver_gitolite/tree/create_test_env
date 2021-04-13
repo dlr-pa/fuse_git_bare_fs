@@ -1,0 +1,51 @@
+#!/bin/bash
+mydir=$(mktemp -d)
+echo -e "create a test environment in: $mydir\n"
+mkdir $mydir/repos
+mkdir $mydir/repos/server
+mkdir $mydir/repos/client
+mkdir $mydir/webdav
+mkdir $mydir/webdav/removeme
+
+for repo in gitolite-admin foo bar baz; do
+    echo $repo
+    cd $mydir/repos/server
+    git init --bare $repo.git
+    cd $mydir/repos/client
+    git clone ../server/$repo.git
+done
+mkdir $mydir/repos/server/repodir
+cd $mydir/repos/server/repodir
+git init --bare foo_bar_baz.git
+mkdir $mydir/repos/client/repodir
+cd $mydir/repos/client/repodir
+git clone ../../server/repodir/foo_bar_baz.git
+
+cd $mydir/repos/client/gitolite-admin
+mkdir keydir
+for username in u1 u2 u3 u4 u5; do
+    echo -n a > keydir/$username.pub
+    git add keydir/$username.pub
+done
+git commit -m init
+git push
+
+for repo in foo bar repodir/foo_bar_baz; do
+    cd $mydir/repos/client/$repo
+    echo "fuse_git_bare_fs rocks" > a.txt
+    git add a.txt
+    git commit -m "added a.txt"
+    date > b.txt
+    git add b.txt
+    git commit -m "added b.txt"
+    git push
+done
+
+mkdir $mydir/target
+
+echo -e "\ncreated a test environment in: $mydir\n"
+
+echo "alias gitolite='echo'"
+echo -e "fuse_git_bare_fs.py tree $mydir/repos/server $mydir/target\n"
+
+echo "./umount_ssh_accounts $mydir"
