@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-13 (last change).
+:Date: 2021-04-14 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ import warnings
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-13
+    :Date: 2021-04-14
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -60,8 +60,8 @@ class repo_class():
             if cp.stdout.startswith(self.root_object):
                 # empty repo or self.root_object does not exists
                 msg = \
-                  'root repository object "%s" in "%s" does not exists. ' % \
-                  (self.root_object, self.src_dir)
+                    'root repository object "%s" in "%s" does not exists. ' % \
+                    (self.root_object, self.src_dir)
                 msg += 'Mountpoint will be empty.'
                 warnings.warn(msg)
                 return False
@@ -126,7 +126,8 @@ class repo_class():
         """
         :param path: string of the path to read/list
         """
-        if (self.tree is None) or (not path in self.tree):
+        if ((not self._cache_up_to_date()) or
+                (self.tree is None) or (not path in self.tree)):
             self._read_tree()
         if (self.tree is None) or (not path in self.tree):
             return []
@@ -135,12 +136,12 @@ class repo_class():
 
     def getattr(self, path):
         head, tail = os.path.split(path)
-        if (self.tree is None) or (not head in self.tree):
+        if ((not self._cache_up_to_date()) or
+            (self.tree is None) or (not head in self.tree)):
             self._read_tree()
         if (self.tree is None) or (not head in self.tree):
             # file:///usr/share/doc/python3/html/library/errno.html
             # no such file or directory
-            print('getattr', head, tail)
             if (tail == '') and (head == '/'):
                 msg = 'root repository object "%s" does not exists. ' % \
                     self.root_object
