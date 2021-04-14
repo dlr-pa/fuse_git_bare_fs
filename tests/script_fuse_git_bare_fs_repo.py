@@ -108,6 +108,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
+            # further tests: readdir
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'a', 'b', 'd', 'l', 'foo'})
@@ -117,7 +118,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
-            # further tests:
+            # further tests: getattr
             file_status = os.lstat(
                 os.path.join(tmpdir, mountpointdir, 'bar'))
             self.assertEqual(file_status.st_mode, 41471)
@@ -134,6 +135,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # further tests:
+            # read (but did getattr before; should be tested on module)
             with open(os.path.join(tmpdir, mountpointdir, 'baz')) as fd:
                 data = fd.read()
             self.assertEqual(data, 'abc..xyz\n')
