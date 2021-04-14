@@ -176,7 +176,8 @@ class repo_class():
 
     def read(self, path, size, offset):
         head, tail = os.path.split(path)
-        if (self.tree is None) or (not head in self.tree):
+        if ((not self._cache_up_to_date()) or
+            (self.tree is None) or (not head in self.tree)):
             self._read_tree()
         if (self.tree is None) or (not head in self.tree):
             # no such file or directory

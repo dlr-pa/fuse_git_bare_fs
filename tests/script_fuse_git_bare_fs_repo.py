@@ -127,6 +127,16 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
             with open(os.path.join(tmpdir, mountpointdir, 'bar')) as fd:
                 data = fd.read()
             self.assertEqual(data, 'abc\n')
+            # adapt data
+            cp = subprocess.run(
+                ['echo abc..xyz>baz; git add baz; git commit -m baz; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # further tests:
+            with open(os.path.join(tmpdir, mountpointdir, 'baz')) as fd:
+                data = fd.read()
+            self.assertEqual(data, 'abc..xyz\n')
             # remove mount
             cp = subprocess.run(
                 ['fusermount -u ' + mountpointdir],
