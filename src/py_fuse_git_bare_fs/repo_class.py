@@ -27,7 +27,7 @@ class repo_class():
     gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
     st_uid_st_gid = (os.geteuid(), os.getegid())
 
-    def __init__(self, src_dir, root_object):
+    def __init__(self, src_dir, root_object=b'master'):
         self.src_dir = src_dir
         self.root_object = root_object
         self.tree = None

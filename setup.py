@@ -105,6 +105,7 @@ class TestWithPytest(Command):
             pyargs += ['--pylint']
         if self.pytestverbose:
             pyargs += ['--verbose']
+        pyargs += ['tests/py_fuse_git_bare_fs_repo_class.py']
         pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
         if self.src == 'installed':
             pyargs += ['tests/main.py']

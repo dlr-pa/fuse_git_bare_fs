@@ -74,6 +74,9 @@ def module(suite):
     print('add tests for the module')
     loader = unittest.defaultTestLoader
     suite.addTest(loader.loadTestsFromTestCase(test_module_import))
+    # py_fuse_git_bare_fs.repo_class
+    suite.addTest(loader.loadTestsFromName(
+        'tests.py_fuse_git_bare_fs_repo_class'))
 
 
 def scripts(suite):
