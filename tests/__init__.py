@@ -7,4 +7,4 @@
 
 """
 
-from .main import scripts
+from .main import module, scripts

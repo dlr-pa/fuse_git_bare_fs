@@ -5,3 +5,7 @@ MANIFEST
 build
 dist
 installed_files.txt
+.cache/
+.coverage
+coverage_report/
+

@@ -6,11 +6,31 @@
 
 aggregation of tests
 
-run with: env python3 setup.py run_unittest
+run with:
+
+env python3 setup.py run_unittest
+
+or:
+
+env python3 setup.py run_pytest
 """
 
 
 import unittest
+
+
+class test_module_import(unittest.TestCase):
+    """
+    :Author: Daniel Mohr
+    :Date: 2021-04-14
+    """
+
+    def test_module_import(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-14
+        """
+        import py_fuse_git_bare_fs
 
 
 class test_scripts_executable(unittest.TestCase):
@@ -34,11 +54,27 @@ class test_scripts_executable(unittest.TestCase):
             # check at least minimal help output
             self.assertTrue(len(cp.stdout) >= 775)
             # check begin of help output
-            self.assertTrue(cp.stdout.startswith(b'usage: fuse_git_bare_fs.py'))
+            self.assertTrue(cp.stdout.startswith(
+                b'usage: fuse_git_bare_fs.py'))
             # check end of help output
             self.assertTrue(cp.stdout.endswith(
-                b'License: ' + \
+                b'License: ' +
                 b'GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.\n'))
+
+
+def module(suite):
+    """
+    :Author: Daniel Mohr
+    :Email: daniel.mohr@dlr.de
+    :Date: 2021-04-14
+    :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
+
+    add tests for the module
+    """
+    print('add tests for the module')
+    loader = unittest.defaultTestLoader
+    suite.addTest(loader.loadTestsFromTestCase(test_module_import))
+
 
 def scripts(suite):
     """
@@ -52,3 +88,6 @@ def scripts(suite):
     print('add tests for the scripts')
     loader = unittest.defaultTestLoader
     suite.addTest(loader.loadTestsFromTestCase(test_scripts_executable))
+    # fuse_git_bare_fs.py repo
+    suite.addTest(loader.loadTestsFromName(
+        'tests.script_fuse_git_bare_fs_repo'))

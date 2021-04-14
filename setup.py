@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-13
+:Date: 2021-04-14
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,7 +14,7 @@ class TestWithPytest(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-09
+    :Date: 2021-04-14
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with pytest
@@ -29,6 +29,7 @@ class TestWithPytest(Command):
          '(installing is not necessary). ' +
          'The command line scripts are not tested for local. ' +
          'default: installed'),
+        ('coverage', None, 'use pytest-cov to generate a coverage report'),
         ('pylint', None, 'if given, run pylint'),
         ('pytestverbose', None, 'increase verbosity of pytest'),
         ('parallel', None, 'run tests in parallel')]
@@ -54,8 +55,9 @@ class TestWithPytest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-09
+        :Date: 2021-04-14
         """
+        # env python3 setup.py run_pytest
         import sys
         import os.path
         if self.src == 'installed':
@@ -88,10 +90,22 @@ class TestWithPytest(Command):
                 pyargs += ['-n %i' % nthreads]
             except:
                 pass
+        if self.coverage:
+            # env python3 setup.py run_pytest --coverage
+            coverage_dir = 'coverage_report/'
+            # first we need to clean the target directory
+            if os.path.isdir(coverage_dir):
+                files = os.listdir(coverage_dir)
+                for f in files:
+                    os.remove(os.path.join(coverage_dir, f))
+            pyargs += ['--cov=py_fuse_git_bare_fs', '--no-cov-on-fail',
+                       '--cov-report=html:' + coverage_dir,
+                       '--cov-report=term:skip-covered']
         if self.pylint:
             pyargs += ['--pylint']
         if self.pytestverbose:
             pyargs += ['--verbose']
+        pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
         if self.src == 'installed':
             pyargs += ['tests/main.py']
         pyplugins = []
@@ -103,7 +117,7 @@ class TestWithUnittest(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-09
+    :Date: 2021-04-14
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with unittest
@@ -136,8 +150,9 @@ class TestWithUnittest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-09
+        :Date: 2021-04-14
         """
+        # env python3 setup.py run_unittest
         import sys
         import os.path
         if self.src == 'installed':
@@ -152,6 +167,7 @@ class TestWithUnittest(Command):
         import unittest
         suite = unittest.TestSuite()
         import tests
+        tests.module(suite)
         setup_self = self
 
         class test_required_module_import(unittest.TestCase):
@@ -261,7 +277,7 @@ required_modules += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-04-13',
+    version='2021-04-14',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
