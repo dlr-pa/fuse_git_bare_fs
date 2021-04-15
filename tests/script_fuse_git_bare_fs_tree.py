@@ -79,6 +79,50 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
             cp.stdout.close()
             cp.stderr.close()
 
+    def test_fuse_git_bare_fs_tree_daemon(self):
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir, mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            cp = subprocess.run(
+                ['git init --bare ' + reponame + '.git'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            cp = subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            cp = subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run tests
+            cp = subprocess.run(
+                ['fuse_git_bare_fs.py tree -daemon ' +
+                 serverdir + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, reponame + '.git'))),
+                {'a', 'b', 'd', 'l'})
+            # remove mount
+            cp = subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
