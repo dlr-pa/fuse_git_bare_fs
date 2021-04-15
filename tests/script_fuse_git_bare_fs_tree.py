@@ -20,7 +20,9 @@ Or you can run only one test, e. g.::
 """
 
 import os
+import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -116,6 +118,65 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, reponame + '.git'))),
                 {'a', 'b', 'd', 'l'})
+            # remove mount
+            cp = subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+
+    def test_fuse_git_bare_fs_tree_gitolite(self):
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            src_file_name = os.path.join('data', 'gitolite')
+            if not os.path.isfile(src_file_name):
+                src_file_name = os.path.join(os.path.dirname(
+                    sys.modules['tests'].__file__), 'data', 'gitolite')
+            shutil.copy(src_file_name, os.path.join(tmpdir, 'gitolite'))
+            cp = subprocess.run(
+                [os.path.join(tmpdir, 'gitolite') + ' createenv'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            cp = subprocess.run(
+                ['fuse_git_bare_fs.py tree -daemon -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite') + ' ' +
+                 serverdir + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir))),
+                {'user1', 'user2'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user1'))),
+                {'.htaccess', 'repo1', 'repo2', 'repo3'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user2'))),
+                {'.htaccess', 'repo3'})
+            for username in ['user1', 'user2']:
+                with open(os.path.join(
+                        tmpdir,
+                        mountpointdir,
+                        username,
+                        '.htaccess')) as fd:
+                    data = fd.read()
+                self.assertEqual(data, 'Require user ' + username + '\n')
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user1', 'repo1'))),
+                {'b', })
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user1', 'repo2'))),
+                {'c', })
             # remove mount
             cp = subprocess.run(
                 ['fusermount -u ' + mountpointdir],

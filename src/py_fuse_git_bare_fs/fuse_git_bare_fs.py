@@ -53,7 +53,8 @@ def fuse_git_bare_fs_tree(args):
             operations_instance = git_bare_repo_tree_gitolite_logging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
-                args.provide_htaccess)
+                args.provide_htaccess,
+                args.gitolite_cmd[0])
         else:
             from .git_bare_repo_tree import git_bare_repo_tree_logging
             logging.basicConfig(level=logging.DEBUG)
@@ -63,11 +64,11 @@ def fuse_git_bare_fs_tree(args):
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite
-            logging.basicConfig(level=logging.DEBUG)
             operations_instance = git_bare_repo_tree_gitolite(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
-                args.provide_htaccess)
+                args.provide_htaccess,
+                args.gitolite_cmd[0])
         else:
             from .git_bare_repo_tree import git_bare_repo_tree
             operations_instance = git_bare_repo_tree(
@@ -187,7 +188,7 @@ def my_argument_parser():
     epilog += 'fuse_git_bare_fs.py tree a b\n\n'
     epilog += 'sudo -u gitolite fuse_git_bare_fs.py tree -daemon -allow_other -get_user_list_from_gitolite -provide_htaccess /var/lib/gitolite/repositories /var/www/gitolite/webdav\n\n'
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-04-13\n'
+    epilog += 'Date: 2021-04-15\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     tree_parser = argparse.ArgumentParser(add_help=False)
@@ -213,6 +214,15 @@ def my_argument_parser():
         '-provide_htaccess',
         action='store_true',
         help='This creates ".htaccess" files in the user directories. This only appears if the flag "-get_user_list_from_gitolite" is given.')
+    parser_tree.add_argument(
+        '-gitolite_cmd',
+        nargs=1,
+        type=str,
+        required=False,
+        default=['gitolite'],
+        dest='gitolite_cmd',
+        help='Defines the gitolite command. You can give an absolute path.'
+        'default: gitolite')
     return parser
 
 

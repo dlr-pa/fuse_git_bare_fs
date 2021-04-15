@@ -1,12 +1,13 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-13 (last change).
+:Date: 2021-04-15 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import os.path
 import subprocess
+import warnings
 
 from .repo_class import repo_class
 
@@ -17,9 +18,10 @@ class user_repos():
     :Date: 2021-04-13
     """
 
-    def __init__(self, repopath, root_object):
+    def __init__(self, repopath, root_object, gitolite_cmd='gitolite'):
         self.repopath = repopath
         self.root_object = root_object  # not used for gitolite-admin
+        self.gitolite_cmd = gitolite_cmd
         self.adminrepo = os.path.join(self.repopath, 'gitolite-admin.git')
         self.commit_hash = None
         self.users = None
@@ -48,7 +50,7 @@ class user_repos():
                 cwd=self.adminrepo, shell=True, timeout=3, check=True)
             if cp.stdout.startswith(b"master"):
                 # empty repo or "master" does not exists
-                msg = 'root repository object "maser" does not exists.'
+                msg = 'root repository object "master" does not exists.'
                 warnings.warn(msg)
                 return False
             splittedstdout = cp.stdout.decode().split('\n')
@@ -60,7 +62,7 @@ class user_repos():
         if (not self._cache_up_to_date()) or (self.users is None):
             self._update_cache()
             cp = subprocess.run(
-                ["gitolite list-users"],
+                [self.gitolite_cmd + ' list-users'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 cwd=self.adminrepo, shell=True, timeout=3, check=True)
             self.users = []
@@ -76,7 +78,7 @@ class user_repos():
         if (not self._cache_up_to_date()) or (self.repos is None):
             self._update_cache()
             cp = subprocess.run(
-                ["gitolite list-phy-repos"],
+                [self.gitolite_cmd + ' list-phy-repos'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 cwd=self.adminrepo, shell=True, timeout=3, check=True)
             repos = []
@@ -106,7 +108,7 @@ class user_repos():
                 self.userrepoaccess[user] = []
                 for reponame in self.repos:
                     cp = subprocess.run(
-                        ['gitolite access -q ' + reponame + ' ' + user],
+                        [self.gitolite_cmd + ' access -q ' + reponame + ' ' + user],
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                         cwd=self.adminrepo, shell=True, timeout=3, check=False)
                     if cp.returncode == 0:  # access
