@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-13 (last change).
+:Date: 2021-04-15 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,88 +14,72 @@ def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-13 (last change).
+    :Date: 2021-04-15 (last change).
     """
+    operations_instance = None
     if args.daemon:  # running in foreground
         import logging
         from .git_bare_repo import git_bare_repo_logging
         logging.basicConfig(level=logging.DEBUG)
-        fuse = fusepy.FUSE(
-            git_bare_repo_logging(os.path.abspath(args.src_dir),
-                                  args.root_object[0].encode()),
-            args.target_dir,
-            foreground=args.daemon,
-            nothreads=args.threads,
-            allow_other=args.allow_other,
-            raw_fi=args.raw_fi)
+        operations_instance = git_bare_repo_logging(
+            os.path.abspath(args.src_dir),
+            args.root_object[0].encode())
     else:
         from .git_bare_repo import git_bare_repo
-        fuse = fusepy.FUSE(
-            git_bare_repo(os.path.abspath(args.src_dir),
-                          args.root_object[0].encode()),
-            args.target_dir,
-            foreground=args.daemon,
-            nothreads=args.threads,
-            allow_other=args.allow_other,
-            raw_fi=args.raw_fi)
+        operations_instance = git_bare_repo(
+            os.path.abspath(args.src_dir),
+            args.root_object[0].encode())
+    fuse = fusepy.FUSE(
+        operations_instance,
+        args.target_dir,
+        foreground=args.daemon,
+        nothreads=args.threads,
+        allow_other=args.allow_other,
+        raw_fi=args.raw_fi)
 
 
 def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-13 (last change).
+    :Date: 2021-04-15 (last change).
     """
+    operations_instance = None
     if args.daemon:  # running in foreground
         import logging
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite_logging
             logging.basicConfig(level=logging.DEBUG)
-            fuse = fusepy.FUSE(
-                git_bare_repo_tree_gitolite_logging(
-                    os.path.abspath(args.src_dir),
-                    args.root_object[0].encode(),
-                    args.provide_htaccess),
-                args.target_dir,
-                foreground=args.daemon,
-                nothreads=args.threads,
-                allow_other=args.allow_other,
-                raw_fi=args.raw_fi)
+            operations_instance = git_bare_repo_tree_gitolite_logging(
+                os.path.abspath(args.src_dir),
+                args.root_object[0].encode(),
+                args.provide_htaccess)
         else:
             from .git_bare_repo_tree import git_bare_repo_tree_logging
             logging.basicConfig(level=logging.DEBUG)
-            fuse = fusepy.FUSE(
-                git_bare_repo_tree_logging(os.path.abspath(args.src_dir),
-                                           args.root_object[0].encode()),
-                args.target_dir,
-                foreground=args.daemon,
-                nothreads=args.threads,
-                allow_other=args.allow_other,
-                raw_fi=args.raw_fi)
+            operations_instance = git_bare_repo_tree_logging(
+                os.path.abspath(args.src_dir),
+                args.root_object[0].encode())
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite
             logging.basicConfig(level=logging.DEBUG)
-            fuse = fusepy.FUSE(
-                git_bare_repo_tree_gitolite(
-                    os.path.abspath(args.src_dir),
-                    args.root_object[0].encode(),
-                    args.provide_htaccess),
-                args.target_dir,
-                foreground=args.daemon,
-                nothreads=args.threads,
-                allow_other=args.allow_other,
-                raw_fi=args.raw_fi)
+            operations_instance = git_bare_repo_tree_gitolite(
+                os.path.abspath(args.src_dir),
+                args.root_object[0].encode(),
+                args.provide_htaccess)
         else:
             from .git_bare_repo_tree import git_bare_repo_tree
-            fuse = fusepy.FUSE(
-                git_bare_repo_tree(os.path.abspath(args.src_dir),
-                                   args.root_object[0].encode()),
-                args.target_dir,
-                foreground=args.daemon,
-                nothreads=args.threads,
-                allow_other=args.allow_other,
-                raw_fi=args.raw_fi)
+            operations_instance = git_bare_repo_tree(
+                os.path.abspath(args.src_dir),
+                args.root_object[0].encode())
+    fuse = fusepy.FUSE(
+        operations_instance,
+        args.target_dir,
+        foreground=args.daemon,
+        nothreads=args.threads,
+        allow_other=args.allow_other,
+        raw_fi=args.raw_fi)
 
 
 def my_argument_parser():
