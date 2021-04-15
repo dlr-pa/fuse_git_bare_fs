@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-14
+:Date: 2021-04-15
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 aggregation of tests
@@ -83,7 +83,7 @@ def scripts(suite):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-03-04
+    :Date: 2021-04-15
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     add tests for the scripts
@@ -94,3 +94,6 @@ def scripts(suite):
     # fuse_git_bare_fs.py repo
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_repo'))
+    # fuse_git_bare_fs.py tree
+    suite.addTest(loader.loadTestsFromName(
+        'tests.script_fuse_git_bare_fs_tree'))

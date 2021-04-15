@@ -8,11 +8,11 @@ tests the class repo_class in the module py_fuse_git_bare_fs
 
 You can run this file directly:
 
-env python3 py_fuse_git_bare_fs_repo_class.py
+  env python3 py_fuse_git_bare_fs_repo_class.py
 
 Or you can run only one test, e. g.:
 
-env python3 dabu_scripts_pydabu_check_arg_file_not_exists.py check_arg_file_not_exists.test_check_arg_file_not_exists
+  env python3 py_fuse_git_bare_fs_repo_class.py py_fuse_git_bare_fs_repo_class.test_repo_class
 """
 
 
