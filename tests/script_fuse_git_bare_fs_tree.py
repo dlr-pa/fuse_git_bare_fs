@@ -73,7 +73,7 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                     break
             self.assertEqual(
                 set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame + '.git'))),
+                    os.path.join(tmpdir, mountpointdir, reponame))),
                 {'a', 'b', 'd', 'l'})
             cp.terminate()
             cp.wait(timeout=3)
@@ -116,7 +116,7 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                 timeout=3, check=True)
             self.assertEqual(
                 set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame + '.git'))),
+                    os.path.join(tmpdir, mountpointdir, reponame))),
                 {'a', 'b', 'd', 'l'})
             # remove mount
             cp = subprocess.run(

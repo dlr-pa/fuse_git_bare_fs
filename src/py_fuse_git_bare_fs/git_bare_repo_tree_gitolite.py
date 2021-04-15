@@ -115,15 +115,16 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
                 retlist.append(repo.split('/')[0])
             if self.provide_htaccess:
                 retlist.append('.htaccess')
-            return retlist
+            return list(set(retlist))
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # check if path is part of repo path
             repos = []
             for repo in self.repos.get_repos():
                 if repo.startswith(path[2+len(actual_user):]):
-                    repos.append(repo[1+len(path[2+len(actual_user):]):])
+                    repos.append(
+                        repo[1+len(path[2+len(actual_user):]):].split('/')[0])
             if len(repos) > 0:  # path is part of repo path
-                return repos
+                return list(set(repos))
             else:  # no such file or directory
                 raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].readdir(

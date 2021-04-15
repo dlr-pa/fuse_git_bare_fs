@@ -28,72 +28,107 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     def __init__(self, src_dir, root_object):
         self.src_dir = src_dir
         self.root_object = root_object
-        self.repos = dict()
+        # list
+        self.repos = self._get_repos()
+
+    def _get_repos(self):
+        repos = dict()
+        for dirpath, dirnames, filenames in os.walk(self.src_dir):
+            for dirname in dirnames:
+                if dirname.endswith('.git'):
+                    if dirname == '.git':
+                        reposrcname = dirpath[1 + len(self.src_dir):]
+                        repos[reposrcname] = [reposrcname, None]
+                        break
+                    else:
+                        reposrcname = os.path.join(
+                            dirpath, dirname)[1 + len(self.src_dir):]
+                        reponame = reposrcname[:-4]
+                        repos[reponame] = [reposrcname, None]
+        return repos
+
+    def _extract_repo_from_path(self, path):
+        actual_repo = None
+        for repo in self.repos.keys():
+            if path.startswith('/' + repo):
+                actual_repo = repo
+                break
+        return actual_repo
+
+    def _extract_repopath_from_path(self, actual_repo, path):
+        repopath = path[1+len(actual_repo):]
+        if len(repopath) == 0:
+            repopath = '/'
+        return repopath
 
     def getattr(self, path, fh=None):
-        # /foo/bar.git/baz
-        pathsplitted = self.find_git_repo.findall(path)
-        if pathsplitted:
-            actual_repo = pathsplitted[0][0][1:][:-4]
-            if not actual_repo in self.repos:
-                self.repos[actual_repo] = repo_class(
-                    os.path.join(self.src_dir, actual_repo) + '.git',
-                    self.root_object)
-            repopath = pathsplitted[0][1]
-            if len(repopath) == 0:
-                repopath = '/'
-            return self.repos[actual_repo].getattr(repopath)
-        else:
+        if path == '/':
             return self._empty_dir_attr
+        actual_repo = self._extract_repo_from_path(path)
+        if actual_repo is None:  # check if path is part of repo path
+            part_of_repo_path = False
+            for repo in self.repos.keys():
+                if repo.startswith(path[1:]):
+                    part_of_repo_path = True
+                    break
+            if part_of_repo_path:
+                return self._empty_dir_attr
+            else:  # no such file or directory
+                raise fusepy.FuseOSError(errno.ENOENT)
+        if self.repos[actual_repo][1] is None:
+            self.repos[actual_repo][1] = repo_class(
+                os.path.join(self.src_dir, self.repos[actual_repo][0]),
+                self.root_object)
+        return self.repos[actual_repo][1].getattr(
+            self._extract_repopath_from_path(actual_repo, path))
 
     def read(self, path, size, offset, fh):
-        # /foo/bar.git/baz
-        pathsplitted = self.find_git_repo.findall(path)
-        if pathsplitted:
-            actual_repo = pathsplitted[0][0][1:]
-            if not actual_repo in self.repos:
-                self.repos[actual_repo] = repo_class(
-                    os.path.join(self.src_dir, actual_repo) + '.git',
-                    self.root_object)
-            return self.repos[actual_repo].read(
-                pathsplitted[0][1], size, offset)
-        else:
-            # no such file or directory
+        actual_repo = self._extract_repo_from_path(path)
+        if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
+        if self.repos[actual_repo][1] is None:
+            self.repos[actual_repo][1] = repo_class(
+                os.path.join(self.src_dir, self.repos[actual_repo][0]),
+                self.root_object)
+        return self.repos[actual_repo][1].read(
+            self._extract_repopath_from_path(actual_repo, path),
+            size, offset)
 
     def readdir(self, path, fh):
         # /foo/bar.git/baz
         if path == '/':
-            return os.listdir(os.path.join(self.src_dir, path[1:]))
-        pathsplitted = self.find_git_repo.findall(path)
-        if pathsplitted:
-            actual_repo = pathsplitted[0][0][1:]
-            if not actual_repo in self.repos:
-                self.repos[actual_repo] = repo_class(
-                    os.path.join(self.src_dir, actual_repo),
-                    self.root_object)
-            return self.repos[actual_repo].readdir(
-                '/' + pathsplitted[0][1])
-        elif os.path.isdir(os.path.join(self.src_dir, path[1:])):
-            return os.listdir(os.path.join(self.src_dir, path[1:]))
-        else:
-            # no such file or directory
-            raise fusepy.FuseOSError(errno.ENOENT)
+            retlist = []
+            for repo in self.repos.keys():
+                retlist.append(repo.split('/')[0])
+            return list(set(retlist))
+        actual_repo = self._extract_repo_from_path(path)
+        if actual_repo is None:  # check if path is part of repo path
+            repos = []
+            for repo in self.repos.keys():
+                if repo.startswith(path[1:]):
+                    repos.append(repo[1+len(path[1:]):].split('/')[0])
+            if len(repos) > 0:  # path is part of repo path
+                return list(set(repos))
+            else:  # no such file or directory
+                raise fusepy.FuseOSError(errno.ENOENT)
+        if self.repos[actual_repo][1] is None:
+            self.repos[actual_repo][1] = repo_class(
+                os.path.join(self.src_dir, self.repos[actual_repo][0]),
+                self.root_object)
+        return self.repos[actual_repo][1].readdir(
+            self._extract_repopath_from_path(actual_repo, path))
 
     def readlink(self, path):
-        # /foo/bar.git/baz
-        pathsplitted = self.find_git_repo.findall(path)
-        if pathsplitted:
-            actual_repo = pathsplitted[0][0][1:]
-            if not actual_repo in self.repos:
-                self.repos[actual_repo] = repo_class(
-                    os.path.join(self.src_dir, actual_repo) + '.git',
-                    self.root_object)
-            return self.repos[actual_repo].read(
-                pathsplitted[0][1], None, 0).decode()
-        else:
-            # no such file or directory
+        actual_repo = self._extract_repo_from_path(path)
+        if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
+        if self.repos[actual_repo][1] is None:
+            self.repos[actual_repo][1] = repo_class(
+                os.path.join(self.src_dir, self.repos[actual_repo][0]),
+                self.root_object)
+        return self.repos[actual_repo][1].read(
+            self._extract_repopath_from_path(actual_repo, path),
+            None, 0).decode()
 
 
 class git_bare_repo_tree(
