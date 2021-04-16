@@ -50,7 +50,8 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     def _extract_repo_from_path(self, path):
         actual_repo = None
         for repo in self.repos.keys():
-            if path.startswith('/' + repo):
+            res = re.findall('^\/' + repo + '$|^\/' + repo + '\/' , path)
+            if res:
                 actual_repo = repo
                 break
         return actual_repo
