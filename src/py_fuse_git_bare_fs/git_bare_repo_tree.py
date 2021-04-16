@@ -23,7 +23,6 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     read only access to working trees of git bare repositories
     """
     # /usr/lib/python3/dist-packages/fusepy.py
-    find_git_repo = re.compile('(.*.git)(.*)')
 
     def __init__(self, src_dir, root_object):
         self.src_dir = src_dir
@@ -50,7 +49,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     def _extract_repo_from_path(self, path):
         actual_repo = None
         for repo in self.repos.keys():
-            res = re.findall('^\/' + repo + '$|^\/' + repo + '\/' , path)
+            res = re.findall('^\/' + repo + '$|^\/' + repo + '\/', path)
             if res:
                 actual_repo = repo
                 break
