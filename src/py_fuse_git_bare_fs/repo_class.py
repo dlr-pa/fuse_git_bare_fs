@@ -23,7 +23,7 @@ class repo_class():
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
     """
-    time_regpat = re.compile(r' ([0-9]+) [+0-9]+$')
+    time_regpat = re.compile(r' ([0-9]+) [+\-0-9]+$')
     tree_content_regpat = re.compile(
         r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
     gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
