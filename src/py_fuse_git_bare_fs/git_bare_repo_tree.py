@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-15 (last change).
+:Date: 2021-04-16 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ from .repo_class import repo_class
 class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-13
+    :Date: 2021-04-16
 
     read only access to working trees of git bare repositories
     """
