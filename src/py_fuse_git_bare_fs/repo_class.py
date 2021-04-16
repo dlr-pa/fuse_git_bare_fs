@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-14 (last change).
+:Date: 2021-04-16 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ import warnings
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-14
+    :Date: 2021-04-16
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -110,7 +110,7 @@ class repo_class():
                 elif obj_type == 'tree':
                     self.tree[act_path]['listdir'].append(obj_name)
                     obj_path = os.path.join(act_path, obj_name)
-                    trees = [(obj_path, obj_hash)]
+                    trees.append((obj_path, obj_hash))
                     self.tree[obj_path] = dict()
 
     def _get_size_of_blob(self, head, tail):
@@ -129,10 +129,9 @@ class repo_class():
         if ((not self._cache_up_to_date()) or
                 (self.tree is None) or (not path in self.tree)):
             self._read_tree()
-        if (self.tree is None) or (not path in self.tree):
-            return []
-        else:
-            return self.tree[path]['listdir']
+            if (self.tree is None) or (not path in self.tree):
+                return []
+        return self.tree[path]['listdir']
 
     def getattr(self, path):
         head, tail = os.path.split(path)
