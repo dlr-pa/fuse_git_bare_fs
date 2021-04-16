@@ -106,8 +106,10 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         if actual_repo is None:  # check if path is part of repo path
             repos = []
             for repo in self.repos.keys():
-                if repo.startswith(path[1:]):
-                    repos.append(repo[1+len(path[1:]):].split('/')[0])
+                res = re.findall(
+                    '^' + path + '$|^' + path + '\/([^\/]+)', '/' + repo)
+                if res:
+                    repos.append(res[0])
             if len(repos) > 0:  # path is part of repo path
                 return list(set(repos))
             else:  # no such file or directory
