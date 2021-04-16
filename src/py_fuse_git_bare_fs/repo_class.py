@@ -24,6 +24,8 @@ class repo_class():
     https://git-scm.com/docs/git-cat-file
     """
     time_regpat = re.compile(r' ([0-9]+) [+0-9]+$')
+    tree_content_regpat = re.compile(
+        r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
     gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
     st_uid_st_gid = (os.geteuid(), os.getegid())
 
@@ -102,16 +104,18 @@ class repo_class():
             for line in git_objects:
                 if len(line) < 8:
                     continue
-                (obj_mode, obj_type, obj_hash, obj_name) = line.split()
-                if obj_type == 'blob':
-                    self.tree[act_path]['listdir'].append(obj_name)
-                    self.tree[act_path]['blobs'][obj_name] = {
-                        'mode': obj_mode, 'hash': obj_hash}
-                elif obj_type == 'tree':
-                    self.tree[act_path]['listdir'].append(obj_name)
-                    obj_path = os.path.join(act_path, obj_name)
-                    trees.append((obj_path, obj_hash))
-                    self.tree[obj_path] = dict()
+                res = self.tree_content_regpat.findall(line)
+                if res:
+                    (obj_mode, obj_type, obj_hash, obj_name) = res[0]
+                    if obj_type == 'blob':
+                        self.tree[act_path]['listdir'].append(obj_name)
+                        self.tree[act_path]['blobs'][obj_name] = {
+                            'mode': obj_mode, 'hash': obj_hash}
+                    elif obj_type == 'tree':
+                        self.tree[act_path]['listdir'].append(obj_name)
+                        obj_path = os.path.join(act_path, obj_name)
+                        trees.append((obj_path, obj_hash))
+                        self.tree[obj_path] = dict()
 
     def _get_size_of_blob(self, head, tail):
         if not 'size' in self.tree[head]['blobs'][tail]:
