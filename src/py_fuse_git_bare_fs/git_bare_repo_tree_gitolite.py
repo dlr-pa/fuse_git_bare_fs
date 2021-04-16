@@ -1,13 +1,14 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-15 (last change).
+:Date: 2021-04-16 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import errno
 import fusepy  # https://github.com/fusepy/fusepy
 import os.path
+import re
 
 from .empty_attr_mixin import _empty_attr_mixin
 from .user_repos import user_repos
@@ -16,7 +17,7 @@ from .user_repos import user_repos
 class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-15
+    :Date: 2021-04-16
 
     read only access to working trees of git bare repositories
     """
@@ -39,7 +40,10 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     def _extract_repo_from_path(self, actual_user, path):
         actual_repo = None
         for repo in self.repos.get_repos():
-            if path.startswith('/' + os.path.join(actual_user, repo)):
+            repopath = os.path.join(actual_user, repo)
+            res = re.findall('^\/' + repopath + '$|^\/' +
+                             repopath + '\/', path)
+            if res:
                 actual_repo = repo
                 break
         return actual_repo
@@ -120,9 +124,11 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         if actual_repo is None:  # check if path is part of repo path
             repos = []
             for repo in self.repos.get_repos():
-                if repo.startswith(path[2+len(actual_user):]):
-                    repos.append(
-                        repo[1+len(path[2+len(actual_user):]):].split('/')[0])
+                mypath = path[2+len(actual_user):]
+                res = re.findall(
+                    '^' + mypath + '$|^' + mypath + '\/([^\/]+)', repo)
+                if res:
+                    repos.append(res[0])
             if len(repos) > 0:  # path is part of repo path
                 return list(set(repos))
             else:  # no such file or directory
