@@ -31,21 +31,21 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         self.src_dir = src_dir
         self.root_object = root_object
         self.repos = dict()
-        self.lock = read_write_lock()
+        self._lock = read_write_lock()
         t0 = time.time()
-        with self.lock.write_locked():
+        with self._lock.write_locked():
             self.repos = self._get_repos()
         self._update_repos_time = time.time()
         self._update_repos_dt = max(6, (self._update_repos_time - t0) * 100)
 
     def _del_(self):
-        self.lock.acquire_write()
+        self._lock.acquire_write()
 
     def _update_repos(self):
         if time.time() - self._update_repos_time > self._update_repos_dt:
             t0 = time.time()
             repos = self._get_repos()
-            with self.lock.write_locked():
+            with self._lock.write_locked():
                 for reponame in repos:  # add new found repos
                     if reponame not in self.repos:
                         self.repos[reponame] = repos[reponame]
@@ -58,11 +58,11 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
 
     def _get_repos(self):
         """
-        self.lock has to have the write lock, e. g.::
+        self._lock has to have the write lock, e. g.::
 
-          self.lock.acquire_write()
+          self._lock.acquire_write()
           ...
-          self.lock.release_write()
+          self._lock.release_write()
         """
         repos = dict()
         for dirpath, dirnames, filenames in os.walk(self.src_dir):
@@ -81,11 +81,11 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
 
     def _extract_repo_from_path(self, path):
         """
-        self.lock has to have the read lock, e. g.::
+        self._lock has to have the read lock, e. g.::
 
-          self.lock.acquire_read()
+          self._lock.acquire_read()
           ...
-          self.lock.release_read()
+          self._lock.release_read()
         """
         actual_repo = None
         for repo in self.repos.keys():
@@ -105,7 +105,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         if path == '/':
             return self._empty_dir_attr
         self._update_repos()
-        self.lock.acquire_read()
+        self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # check if path is part of repo path
             part_of_repo_path = False
@@ -114,13 +114,13 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
                     part_of_repo_path = True
                     break
             if part_of_repo_path:
-                self.lock.release_read()
+                self._lock.release_read()
                 return self._empty_dir_attr
             else:  # no such file or directory
-                self.lock.release_read()
+                self._lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo_list = self.repos[actual_repo]
-        self.lock.release_read()
+        self._lock.release_read()
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
@@ -131,13 +131,13 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
 
     def read(self, path, size, offset, fh):
         self._update_repos()
-        self.lock.acquire_read()
+        self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # no such file or directory
-            self.lock.release_read()
+            self._lock.release_read()
             raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo_list = self.repos[actual_repo]
-        self.lock.release_read()
+        self._lock.release_read()
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
@@ -150,12 +150,12 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     def readdir(self, path, fh):
         # /foo/bar.git/baz
         self._update_repos()
-        self.lock.acquire_read()
+        self._lock.acquire_read()
         if path == '/':
             retlist = []
             for repo in self.repos.keys():
                 retlist.append(repo.split('/')[0])
-            self.lock.release_read()
+            self._lock.release_read()
             return list(set(retlist))
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # check if path is part of repo path
@@ -166,13 +166,13 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
                 if res:
                     repos.append(res[0])
             if len(repos) > 0:  # path is part of repo path
-                self.lock.release_read()
+                self._lock.release_read()
                 return list(set(repos))
             else:  # no such file or directory
-                self.lock.release_read()
+                self._lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo_list = self.repos[actual_repo]
-        self.lock.release_read()
+        self._lock.release_read()
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
@@ -183,13 +183,13 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
 
     def readlink(self, path):
         self._update_repos()
-        self.lock.acquire_read()
+        self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # no such file or directory
-            self.lock.release_read()
+            self._lock.release_read()
             raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo_list = self.repos[actual_repo]
-        self.lock.release_read()
+        self._lock.release_read()
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
