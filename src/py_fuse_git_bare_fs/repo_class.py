@@ -224,15 +224,17 @@ class repo_class():
             raise fusepy.FuseOSError(errno.ENOENT)
         # we read the complete file instead of the required part,
         # this should be enhanced! (at least for unpacked objects)
+        # e. g.: cache file content for a few seconds
         self._get_size_of_blob(head, tail)
-        startindex = -(1 + offset + self.tree[head]['blobs'][tail]['st_size'])
-        stopindex = -1
-        if size is not None:
-            stopindex = min(startindex + size, -1)
         cp = subprocess.run(
             ["git cat-file --batch"],
             input=self.tree[head]['blobs'][tail]['hash'].encode(),
             stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
+        startindex = len(cp.stdout) - 1 - \
+            self.tree[head]['blobs'][tail]['st_size'] + offset
         self.lock.release_read()
+        stopindex = len(cp.stdout) - 1
+        if size is not None:
+            stopindex = min(startindex + size, len(cp.stdout) - 1)
         return cp.stdout[startindex:stopindex]
