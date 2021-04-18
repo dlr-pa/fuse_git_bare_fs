@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-15
+:Date: 2021-04-18
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs.py tree'
@@ -31,7 +31,7 @@ import unittest
 class script_fuse_git_bare_fs_tree(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-15
+    :Date: 2021-04-18
     """
 
     def test_fuse_git_bare_fs_tree(self):
