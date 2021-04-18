@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-16
+:Date: 2021-04-18
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs.py repo'
@@ -29,7 +29,7 @@ import unittest
 class script_fuse_git_bare_fs_repo(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-14
+    :Date: 2021-04-18
     """
 
     def test_fuse_git_bare_fs_repo(self):
@@ -88,7 +88,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-14
+        :Date: 2021-04-18
 
         This test creates a repo, put some files in and 
         mount it, check for fiels.
@@ -125,6 +125,12 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+            t0 = time.time()
+            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+                # typical it needs less than 0.2 seconds
+                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                    break
+                time.sleep(0.1)
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'a', 'b', 'd', 'l'})
@@ -209,7 +215,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-16
+        :Date: 2021-04-18
 
         This test creates a repo, put some files in and 
         mount it, check for files.
@@ -246,8 +252,19 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+            time.sleep(0.3)
+            # adapt data
+            cp = subprocess.run(
+                ['git branch foo; git checkout foo; echo "f">f;'
+                 'git rm -r a b l d; git add f; git commit -m f; '
+                 'git push --set-upstream origin foo'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run tests
             self.assertEqual(
-                os.listdir(os.path.join(tmpdir, mountpointdir)), [])
+                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                set(['f']))
             # remove mount
             cp = subprocess.run(
                 ['fusermount -u ' + mountpointdir],
