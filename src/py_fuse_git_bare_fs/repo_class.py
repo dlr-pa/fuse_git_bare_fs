@@ -39,6 +39,8 @@ class repo_class():
         self.tree_hash = None
         # we use the last commit time for everything, could be enhanced
         self.time = None
+        self.content_cache = dict()
+        self.content_cache_size = 0
         self.lock = read_write_lock()
         with self.lock.write_locked():
             self._read_tree()
@@ -62,6 +64,7 @@ class repo_class():
             self.commit_hash = None
             self.tree_hash = None
             self.time = None
+            self.content_cache = dict()
             cp = subprocess.run(
                 ["git cat-file --batch"], input=self.root_object,
                 stdout=subprocess.PIPE,
@@ -207,6 +210,13 @@ class repo_class():
             updated_cache = True
             with self.lock.write_locked():
                 self._read_tree(update_cache=True)
+        else:
+            # remove old cached files
+            now = time.time()
+            for key in list(self.content_cache.keys()):
+                if now - self.content_cache[key][0] > 3:
+                    self.content_cache_size -= self.content_cache[key][2]
+                    del self.content_cache[key]
         head, tail = os.path.split(path)
         self.lock.acquire_read()
         if ((updated_cache) or
@@ -226,11 +236,26 @@ class repo_class():
         # this should be enhanced! (at least for unpacked objects)
         # e. g.: cache file content for a few seconds
         self._get_size_of_blob(head, tail)
+        if path in self.content_cache:
+            startindex = self.content_cache[path][2] - 1 - \
+                self.tree[head]['blobs'][tail]['st_size'] + offset
+            stopindex = self.content_cache[path][2] - 1
+            if size is not None:
+                stopindex = min(startindex + size,
+                                self.content_cache[path][2] - 1)
+            ret = self.content_cache[path][1][startindex:stopindex]
+            self.content_cache[path][0] = time.time()
+            self.lock.release_read()
+            return ret
         cp = subprocess.run(
             ["git cat-file --batch"],
             input=self.tree[head]['blobs'][tail]['hash'].encode(),
             stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
+        if self.content_cache_size + len(cp.stdout) < 104857600:
+            # use a simple cache for the file content of up to 100 MB
+            self.content_cache[path] = [time.time(), cp.stdout, len(cp.stdout)]
+            self.content_cache_size += self.content_cache[path][2]
         startindex = len(cp.stdout) - 1 - \
             self.tree[head]['blobs'][tail]['st_size'] + offset
         self.lock.release_read()
