@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-16 (last change).
+:Date: 2021-04-18 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,11 +14,13 @@ import subprocess
 import time
 import warnings
 
+from .read_write_lock import read_write_lock
+
 
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-16
+    :Date: 2021-04-18
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -37,13 +39,15 @@ class repo_class():
         self.tree_hash = None
         # we use the last commit time for everything, could be enhanced
         self.time = None
-        self._read_tree()
+        self.locks = read_write_lock()
+        with self.locks.write_locked():
+            self._read_tree()
 
     def _cache_up_to_date(self):
         cp = subprocess.run(
             ["git cat-file --batch-check='%(objectname)'"],
             input=self.root_object,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
         if cp.stdout.decode().strip() == self.commit_hash:
             return True
@@ -57,7 +61,7 @@ class repo_class():
             self.time = None
             cp = subprocess.run(
                 ["git cat-file --batch"], input=self.root_object,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
                 cwd=self.src_dir, shell=True, timeout=3, check=True)
             if cp.stdout.startswith(self.root_object):
                 # empty repo or self.root_object does not exists
@@ -84,7 +88,7 @@ class repo_class():
     def _git_cat_file(self, git_object):
         cp = subprocess.run(
             ['git cat-file -p ' + git_object],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
         return cp.stdout.decode()
 
@@ -122,7 +126,7 @@ class repo_class():
             cp = subprocess.run(
                 ["git cat-file --batch-check='%(objectsize)'"],
                 input=self.tree[head]['blobs'][tail]['hash'].encode(),
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
                 cwd=self.src_dir, shell=True, timeout=3, check=True)
             self.tree[head]['blobs'][tail]['st_size'] = int(cp.stdout.decode())
 
@@ -140,7 +144,7 @@ class repo_class():
     def getattr(self, path):
         head, tail = os.path.split(path)
         if ((not self._cache_up_to_date()) or
-            (self.tree is None) or (not head in self.tree)):
+                (self.tree is None) or (not head in self.tree)):
             self._read_tree()
         if (self.tree is None) or (not head in self.tree):
             # file:///usr/share/doc/python3/html/library/errno.html
@@ -180,7 +184,7 @@ class repo_class():
     def read(self, path, size, offset):
         head, tail = os.path.split(path)
         if ((not self._cache_up_to_date()) or
-            (self.tree is None) or (not head in self.tree)):
+                (self.tree is None) or (not head in self.tree)):
             self._read_tree()
         if (self.tree is None) or (not head in self.tree):
             # no such file or directory
@@ -198,6 +202,6 @@ class repo_class():
         cp = subprocess.run(
             ["git cat-file --batch"],
             input=self.tree[head]['blobs'][tail]['hash'].encode(),
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
         return cp.stdout[startindex:stopindex]
