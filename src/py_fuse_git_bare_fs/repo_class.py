@@ -39,9 +39,12 @@ class repo_class():
         self.tree_hash = None
         # we use the last commit time for everything, could be enhanced
         self.time = None
-        self.locks = read_write_lock()
-        with self.locks.write_locked():
+        self.lock = read_write_lock()
+        with self.lock.write_locked():
             self._read_tree()
+
+    def __del__(self):
+        self.lock.acquire_write()
 
     def _cache_up_to_date(self):
         cp = subprocess.run(
@@ -53,8 +56,8 @@ class repo_class():
             return True
         return False
 
-    def _update_cache(self):
-        if not self._cache_up_to_date():
+    def _update_cache(self, update_cache=None):
+        if (update_cache) or (not self._cache_up_to_date()):
             self.tree = None
             self.commit_hash = None
             self.tree_hash = None
@@ -92,8 +95,8 @@ class repo_class():
             cwd=self.src_dir, shell=True, timeout=3, check=True)
         return cp.stdout.decode()
 
-    def _read_tree(self):
-        if not self._update_cache():
+    def _read_tree(self, update_cache=None):
+        if not self._update_cache(update_cache=update_cache):
             return
         self.tree = dict()
         # self.tree[path] =
@@ -122,7 +125,7 @@ class repo_class():
                         self.tree[obj_path] = dict()
 
     def _get_size_of_blob(self, head, tail):
-        if not 'size' in self.tree[head]['blobs'][tail]:
+        if not 'st_size' in self.tree[head]['blobs'][tail]:
             cp = subprocess.run(
                 ["git cat-file --batch-check='%(objectsize)'"],
                 input=self.tree[head]['blobs'][tail]['hash'].encode(),
@@ -134,33 +137,48 @@ class repo_class():
         """
         :param path: string of the path to read/list
         """
-        if ((not self._cache_up_to_date()) or
-                (self.tree is None) or (not path in self.tree)):
-            self._read_tree()
-            if (self.tree is None) or (not path in self.tree):
-                return []
-        return self.tree[path]['listdir']
+        if not self._cache_up_to_date():
+            with self.lock.write_locked():
+                self._read_tree(update_cache=True)
+        self.lock.acquire_read()
+        ret = None
+        if (self.tree is None) or (not path in self.tree):
+            ret = []
+        else:
+            ret = self.tree[path]['listdir']
+        self.lock.release_read()
+        return ret
 
     def getattr(self, path):
+        updated_cache = False
+        if not self._cache_up_to_date():
+            updated_cache = True
+            with self.lock.write_locked():
+                self._read_tree(update_cache=True)
         head, tail = os.path.split(path)
-        if ((not self._cache_up_to_date()) or
+        self.lock.acquire_read()
+        if ((updated_cache) or
                 (self.tree is None) or (not head in self.tree)):
-            self._read_tree()
-        if (self.tree is None) or (not head in self.tree):
-            # file:///usr/share/doc/python3/html/library/errno.html
-            # no such file or directory
-            if (tail == '') and (head == '/'):
-                msg = 'root repository object "%s" does not exists. ' % \
-                    self.root_object
-                msg += 'Mountpoint will be empty.'
-                warnings.warn(msg)
-                ret = {'st_mode': 16893, 'st_size': 4096}
-                ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
-                ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = \
-                    time.time()
-                return ret
-            else:
-                raise fusepy.FuseOSError(errno.ENOENT)
+            if not updated_cache:
+                with self.lock.write_locked():
+                    self._read_tree()
+            if (self.tree is None) or (not head in self.tree):
+                # file:///usr/share/doc/python3/html/library/errno.html
+                # no such file or directory
+                if (tail == '') and (head == '/'):
+                    msg = 'root repository object "%s" does not exists. ' % \
+                        self.root_object
+                    msg += 'Mountpoint will be empty.'
+                    warnings.warn(msg)
+                    ret = {'st_mode': 16893, 'st_size': 4096}
+                    ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
+                    ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = \
+                        time.time()
+                    self.lock.release_read()
+                    return ret
+                else:
+                    self.lock.release_read()
+                    raise fusepy.FuseOSError(errno.ENOENT)
         ret = dict()
         ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
@@ -174,23 +192,35 @@ class repo_class():
             # 120000 symbolic link
             if not tail in self.tree[head]['blobs']:
                 # no such file or directory
+                self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
             ret['st_mode'] = self.gitmode2st_mode[
                 self.tree[head]['blobs'][tail]['mode']]
             self._get_size_of_blob(head, tail)
             ret['st_size'] = self.tree[head]['blobs'][tail]['st_size']
+        self.lock.release_read()
         return ret
 
     def read(self, path, size, offset):
+        updated_cache = False
+        if not self._cache_up_to_date():
+            updated_cache = True
+            with self.lock.write_locked():
+                self._read_tree(update_cache=True)
         head, tail = os.path.split(path)
-        if ((not self._cache_up_to_date()) or
+        self.lock.acquire_read()
+        if ((updated_cache) or
                 (self.tree is None) or (not head in self.tree)):
-            self._read_tree()
-        if (self.tree is None) or (not head in self.tree):
-            # no such file or directory
-            raise fusepy.FuseOSError(errno.ENOENT)
+            if not updated_cache:
+                with self.lock.write_locked():
+                    self._read_tree()
+            if (self.tree is None) or (not head in self.tree):
+                # no such file or directory
+                self.lock.release_read()
+                raise fusepy.FuseOSError(errno.ENOENT)
         if not tail in self.tree[head]['blobs']:
             # no such file or directory
+            self.lock.release_read()
             raise fusepy.FuseOSError(errno.ENOENT)
         # we read the complete file instead of the required part,
         # this should be enhanced! (at least for unpacked objects)
@@ -204,4 +234,5 @@ class repo_class():
             input=self.tree[head]['blobs'][tail]['hash'].encode(),
             stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
+        self.lock.release_read()
         return cp.stdout[startindex:stopindex]
