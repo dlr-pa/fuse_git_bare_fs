@@ -38,18 +38,21 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
+        reponame1 = 'repo1'
+        reponame2 = 'foo/repo2'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
+            for dirpath in [serverdir, clientdir, mountpointdir,
+                            os.path.join(serverdir, 'foo'),
+                            os.path.join(clientdir, 'foo')]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
             cp = subprocess.run(
-                ['git init --bare ' + reponame + '.git'],
+                ['git init --bare ' + reponame1 + '.git'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, serverdir),
                 timeout=3, check=True)
             cp = subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
+                ['git clone ../' + os.path.join(serverdir, reponame1)],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir),
                 timeout=3, check=True)
@@ -57,9 +60,25 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                 ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
                  'git add a b l d/c; git commit -m init; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame1),
                 timeout=3, check=True)
-            # run tests
+            cp = subprocess.run(
+                ['git init --bare ' + reponame2 + '.git'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            cp = subprocess.run(
+                ['git clone ../../' + os.path.join(serverdir, reponame2)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, 'foo'),
+                timeout=3, check=True)
+            cp = subprocess.run(
+                ['echo "2">2;'
+                 'git add 2; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame2),
+                timeout=3, check=True)
+            # run tests (bare repositories)
             cp = subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs.py tree ' +
                  serverdir + ' ' +
@@ -73,7 +92,32 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                     break
             self.assertEqual(
                 set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame))),
+                    os.path.join(tmpdir, mountpointdir, reponame1))),
+                {'a', 'b', 'd', 'l'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, reponame2))),
+                {'2'})
+            cp.terminate()
+            cp.wait(timeout=3)
+            cp.kill()
+            cp.stdout.close()
+            cp.stderr.close()
+            # run tests (non bare repositories)
+            cp = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs.py tree ' +
+                 clientdir + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            t0 = time.time()
+            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+                # typical it needs less than 0.4 seconds
+                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                    break
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, reponame1))),
                 {'a', 'b', 'd', 'l'})
             cp.terminate()
             cp.wait(timeout=3)
