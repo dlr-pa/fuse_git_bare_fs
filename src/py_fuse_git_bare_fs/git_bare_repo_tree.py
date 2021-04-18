@@ -10,6 +10,8 @@ import fusepy  # https://github.com/fusepy/fusepy
 import os
 import os.path
 import re
+import threading
+import time
 
 from .empty_attr_mixin import _empty_attr_mixin
 from .repo_class import repo_class
@@ -28,10 +30,31 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     def __init__(self, src_dir, root_object):
         self.src_dir = src_dir
         self.root_object = root_object
-        # list
+        self.repos = dict()
         self.lock = read_write_lock()
+        t0 = time.time()
         with self.lock.write_locked():
             self.repos = self._get_repos()
+        self._update_repos_time = time.time()
+        self._update_repos_dt = max(6, (self._update_repos_time - t0) * 100)
+
+    def _del_(self):
+        self.lock.acquire_write()
+
+    def _update_repos(self):
+        if time.time() - self._update_repos_time > self._update_repos_dt:
+            t0 = time.time()
+            repos = self._get_repos()
+            with self.lock.write_locked():
+                for reponame in repos:  # add new found repos
+                    if reponame not in self.repos:
+                        self.repos[reponame] = repos[reponame]
+                for reponame in list(self.repos.keys()):  # remove obsolete repos
+                    if reponame not in repos:
+                        del self.repos[reponame]
+            self._update_repos_time = time.time()
+            self._update_repos_dt = max(
+                6, (self._update_repos_time - t0) * 100)
 
     def _get_repos(self):
         """
@@ -81,6 +104,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     def getattr(self, path, fh=None):
         if path == '/':
             return self._empty_dir_attr
+        self._update_repos()
         self.lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # check if path is part of repo path
@@ -106,6 +130,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         return ret
 
     def read(self, path, size, offset, fh):
+        self._update_repos()
         self.lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # no such file or directory
@@ -124,6 +149,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
 
     def readdir(self, path, fh):
         # /foo/bar.git/baz
+        self._update_repos()
         self.lock.acquire_read()
         if path == '/':
             retlist = []
@@ -156,6 +182,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         return ret
 
     def readlink(self, path):
+        self._update_repos()
         self.lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # no such file or directory
