@@ -262,6 +262,7 @@ required_modules = ['argparse',
                     'os.path',
                     're',
                     'subprocess',
+                    'threading',
                     'time',
                     'warnings']
 # optional modules for python3 setup.py check_modules
