@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-18 (last change).
+:Date: 2021-04-19 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -11,19 +11,22 @@ import warnings
 
 from .repo_class import repo_class
 from .read_write_lock import read_write_lock
+from .simple_file_cache import simple_file_cache
 
 
 class user_repos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-18
+    :Date: 2021-04-19
     """
 
-    def __init__(self, repopath, root_object, gitolite_cmd='gitolite'):
+    def __init__(self, repopath, root_object,
+                 gitolite_cmd='gitolite', max_cache_size=1073741824):
         self.repopath = repopath
         self.root_object = root_object  # not used for gitolite-admin
         self.gitolite_cmd = gitolite_cmd
         self.adminrepo = os.path.join(self.repopath, 'gitolite-admin.git')
+        self.cache = simple_file_cache(max_cache_size=max_cache_size)
         self.lock = read_write_lock()
         with self.lock.write_locked():
             self.commit_hash = None
@@ -107,13 +110,13 @@ class user_repos():
                     for reponame in repos:
                         self.repos[reponame] = repo_class(
                             os.path.join(self.repopath, reponame) + '.git',
-                            self.root_object)
+                            root_object=self.root_object, cache=self.cache)
                 else:
                     for reponame in repos:
                         if reponame not in self.repos.keys():
                             self.repos[reponame] = repo_class(
                                 os.path.join(self.repopath, reponame) + '.git',
-                                self.root_object)
+                                root_object=self.root_object, cache=self.cache)
                     for reponame in list(self.repos.keys()):
                         if reponame not in repos:
                             del self.repos[reponame]

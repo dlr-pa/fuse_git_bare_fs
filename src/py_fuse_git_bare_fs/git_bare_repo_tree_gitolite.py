@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-16 (last change).
+:Date: 2021-04-19 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -17,17 +17,18 @@ from .user_repos import user_repos
 class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-16
+    :Date: 2021-04-19
 
     read only access to working trees of git bare repositories
     """
 
     def __init__(self, src_dir, root_object, provide_htaccess,
-                 gitolite_cmd='gitolite'):
+                 gitolite_cmd='gitolite', max_cache_size=1073741824):
         self.src_dir = src_dir
         self.root_object = root_object
         self.provide_htaccess = provide_htaccess
-        self.repos = user_repos(src_dir, self.root_object, gitolite_cmd)
+        self.repos = user_repos(src_dir, self.root_object,
+                                gitolite_cmd, max_cache_size)
 
     def _extract_user_from_path(self, path):
         actual_user = None

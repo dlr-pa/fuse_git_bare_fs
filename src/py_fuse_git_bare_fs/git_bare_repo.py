@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-13 (last change).
+:Date: 2021-04-19 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -13,16 +13,17 @@ from .repo_class import repo_class
 class _git_bare_repo_mixin():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-08
+    :Date: 2021-04-19
 
     read only access to the working tree of a git bare repository
     """
     # /usr/lib/python3/dist-packages/fusepy.py
 
-    def __init__(self, src_dir, root_object):
+    def __init__(self, src_dir, root_object, max_cache_size):
         self.src_dir = src_dir
         self.root_object = root_object
-        self.repo = repo_class(self.src_dir, self.root_object)
+        self.repo = repo_class(
+            self.src_dir, self.root_object, max_cache_size=max_cache_size)
 
     def getattr(self, path, fh=None):
         return self.repo.getattr(path)

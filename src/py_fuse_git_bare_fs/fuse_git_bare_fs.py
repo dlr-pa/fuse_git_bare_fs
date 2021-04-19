@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-15 (last change).
+:Date: 2021-04-19 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,7 +14,7 @@ def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-15 (last change).
+    :Date: 2021-04-19 (last change).
     """
     operations_instance = None
     if args.daemon:  # running in foreground
@@ -23,12 +23,14 @@ def fuse_git_bare_fs_repo(args):
         logging.basicConfig(level=logging.DEBUG)
         operations_instance = git_bare_repo_logging(
             os.path.abspath(args.src_dir),
-            args.root_object[0].encode())
+            args.root_object[0].encode(),
+            args.max_cache_size[0])
     else:
         from .git_bare_repo import git_bare_repo
         operations_instance = git_bare_repo(
             os.path.abspath(args.src_dir),
-            args.root_object[0].encode())
+            args.root_object[0].encode(),
+            args.max_cache_size[0])
     fuse = fusepy.FUSE(
         operations_instance,
         args.target_dir,
@@ -42,7 +44,7 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-15 (last change).
+    :Date: 2021-04-19 (last change).
     """
     operations_instance = None
     if args.daemon:  # running in foreground
@@ -54,13 +56,15 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
-                args.gitolite_cmd[0])
+                args.gitolite_cmd[0],
+                args.max_cache_size[0])
         else:
             from .git_bare_repo_tree import git_bare_repo_tree_logging
             logging.basicConfig(level=logging.DEBUG)
             operations_instance = git_bare_repo_tree_logging(
                 os.path.abspath(args.src_dir),
-                args.root_object[0].encode())
+                args.root_object[0].encode(),
+                args.max_cache_size[0])
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite
@@ -68,12 +72,14 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
-                args.gitolite_cmd[0])
+                args.gitolite_cmd[0],
+                args.max_cache_size[0])
         else:
             from .git_bare_repo_tree import git_bare_repo_tree
             operations_instance = git_bare_repo_tree(
                 os.path.abspath(args.src_dir),
-                args.root_object[0].encode())
+                args.root_object[0].encode(),
+                args.max_cache_size[0])
     fuse = fusepy.FUSE(
         operations_instance,
         args.target_dir,
@@ -123,6 +129,15 @@ def my_argument_parser():
         'hence you can look in the relevant man page of "git cat-file" '
         'to understand how to specify the branch and or revision. '
         'default: master')
+    common_parser.add_argument(
+        '-cache_size',
+        nargs=1,
+        type=int,
+        required=False,
+        default=[1073741824],
+        dest='max_cache_size',
+        help='Defines the maximal used cache size. '
+        'default: 1073741824 (1 GB)')
     common_parser.add_argument(
         '-daemon',
         action='store_false',

@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-18 (last change).
+:Date: 2021-04-19 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -21,7 +21,7 @@ from .simple_file_cache import simple_file_cache
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-18
+    :Date: 2021-04-19
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -32,7 +32,8 @@ class repo_class():
     gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
     st_uid_st_gid = (os.geteuid(), os.getegid())
 
-    def __init__(self, src_dir, root_object=b'master'):
+    def __init__(self, src_dir, root_object=b'master',
+                 max_cache_size=1073741824, cache=None):
         self.src_dir = src_dir
         self.root_object = root_object
         self.tree = None
@@ -40,7 +41,10 @@ class repo_class():
         self.tree_hash = None
         # we use the last commit time for everything, could be enhanced
         self.time = None
-        self.cache = simple_file_cache()
+        if cache is None:
+            self.cache = simple_file_cache(max_cache_size=max_cache_size)
+        else:
+            self.cache = cache
         self.content_cache = dict()
         self.content_cache_size = 0
         self.lock = read_write_lock()
