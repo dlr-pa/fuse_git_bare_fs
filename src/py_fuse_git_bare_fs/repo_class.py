@@ -210,6 +210,9 @@ class repo_class():
         return ret
 
     def read(self, path, size, offset):
+        ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.1)
+        if ret is not None:
+            return ret
         updated_cache = False
         if not self._cache_up_to_date():
             updated_cache = True
