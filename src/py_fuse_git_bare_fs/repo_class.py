@@ -214,7 +214,7 @@ class repo_class():
         return ret
 
     def read(self, path, size, offset):
-        ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.1)
+        ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.5)
         if ret is not None:
             return ret
         updated_cache = False
