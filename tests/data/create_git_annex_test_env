@@ -1,0 +1,32 @@
+#!/bin/bash
+# fuse_git_bare_fs.py tree -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd /full_path/gitolite server mountpoint
+mkdir server
+cd server
+git init --bare repo1.git
+git init --bare repo2.git
+git init --bare repo3.git
+cd ..
+mkdir client
+cd client
+git clone ../server/repo1
+git clone ../server/repo2
+git clone ../server/repo3
+cd repo1
+echo f1 > f1; git add f1; git commit -m f1; git push
+cd ..
+cd repo2
+git annex init
+echo f1 > f1; git add f1; git commit -m f1; git push
+echo f2 > f2; git annex add f2; git commit -m f2
+git annex sync; git annex sync --content
+cd ..
+cd repo3
+git annex init
+echo f1 > f1; git add f1; git commit -m f1; git push
+echo f2 > f2; git annex add f2; git commit -m f2
+git annex sync; git annex sync --content
+echo f3 > f3; git annex add f3; git commit -m f3;
+git annex sync
+cd ..
+cd ..
+mkdir mountpoint

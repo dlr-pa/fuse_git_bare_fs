@@ -97,3 +97,9 @@ def scripts(suite):
     # fuse_git_bare_fs.py tree
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_tree'))
+    # fuse_git_bare_fs.py tree -get_user_list_from_gitolite
+    suite.addTest(loader.loadTestsFromName(
+        'tests.script_fuse_git_bare_fs_tree_gitolite'))
+    # with git-annex: fuse_git_bare_fs.py tree
+    suite.addTest(loader.loadTestsFromName(
+        'tests.script_fuse_git_bare_fs_tree_annex'))

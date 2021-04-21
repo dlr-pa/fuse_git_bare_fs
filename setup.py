@@ -55,7 +55,7 @@ class TestWithPytest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-14
+        :Date: 2021-04-21
         """
         # env python3 setup.py run_pytest
         import sys
@@ -108,6 +108,8 @@ class TestWithPytest(Command):
         pyargs += ['tests/py_fuse_git_bare_fs_repo_class.py']
         pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
         pyargs += ['tests/script_fuse_git_bare_fs_tree.py']
+        pyargs += ['tests/script_fuse_git_bare_fs_tree_gitolite.py']
+        pyargs += ['tests/script_fuse_git_bare_fs_tree_annex.py']
         if self.src == 'installed':
             pyargs += ['tests/main.py']
         pyplugins = []
@@ -273,7 +275,7 @@ required_modules += ['modulefinder']
 # modules to build doc
 required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
 # modules to run tests with unittest
-required_modules += ['unittest', 'shutil']
+required_modules += ['shutil', 'sys', 'tempfile', 'unittest']
 # modules to run tests with pytest
 required_modules += ['pytest']
 # optional modules to run tests with pytest in parallel
