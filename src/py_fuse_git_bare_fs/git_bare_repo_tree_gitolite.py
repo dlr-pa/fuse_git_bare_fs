@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-19 (last change).
+:Date: 2021-04-21 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -17,7 +17,7 @@ from .user_repos import user_repos
 class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-19
+    :Date: 2021-04-21
 
     read only access to working trees of git bare repositories
     """
@@ -110,12 +110,12 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
 
     def readdir(self, path, fh):
         if path == '/':
-            return self.repos.get_users()
+            return ['.', '..'] + self.repos.get_users()
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         elif path == '/' + actual_user:
-            retlist = []
+            retlist = ['.', '..']
             for repo in self.repos.get_repos(user=actual_user):
                 retlist.append(repo.split('/')[0])
             if self.provide_htaccess:
@@ -131,7 +131,7 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
                 if res:
                     repos.append(res[0])
             if len(repos) > 0:  # path is part of repo path
-                return list(set(repos))
+                return ['.', '..'] + list(set(repos))
             else:  # no such file or directory
                 raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].readdir(

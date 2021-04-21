@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-14
+:Date: 2021-04-21
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the class repo_class in the module py_fuse_git_bare_fs
@@ -25,13 +25,13 @@ import unittest
 class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-03-14
+    :Date: 2021-03-21
     """
 
     def test_repo_class(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-14
+        :Date: 2021-04-21
 
         This test creates a repo, put some files in and 
         check how it is handled by py_fuse_git_bare_fs.repo_class.
@@ -67,7 +67,8 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
             # run tests
             repo = repo_class(
                 os.path.join(tmpdir, serverdir, reponame), b'master')
-            self.assertEqual(set(repo.readdir('/')), {'a', 'b', 'd', 'l'})
+            self.assertEqual(set(repo.readdir('/')),
+                             {'.', '..', 'a', 'b', 'd', 'l'})
             file_status = dict()
             for filename in ['/a', '/b', '/l', '/d', '/d/c']:
                 file_status[filename] = repo.getattr(filename)
@@ -108,7 +109,7 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
                 timeout=3, check=True)
             # further tests: readdir
             self.assertEqual(set(repo.readdir('/')),
-                             {'a', 'b', 'd', 'l', 'foo'})
+                             {'.', '..', 'a', 'b', 'd', 'l', 'foo'})
             # adapt data
             cp = subprocess.run(
                 ['ln -s d/c bar; git add bar; git commit -m bar; git push'],

@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-19 (last change).
+:Date: 2021-04-21 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,7 +22,7 @@ from .simple_file_cache import simple_file_cache
 class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-19
+    :Date: 2021-04-21
 
     read only access to working trees of git bare repositories
     """
@@ -154,14 +154,14 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         self._update_repos()
         self._lock.acquire_read()
         if path == '/':
-            retlist = []
+            retlist = ['.', '..']
             for repo in self.repos.keys():
                 retlist.append(repo.split('/')[0])
             self._lock.release_read()
             return list(set(retlist))
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # check if path is part of repo path
-            repos = []
+            repos = ['.', '..']
             for repo in self.repos.keys():
                 res = re.findall(
                     '^' + path + '$|^' + path + '\/([^\/]+)', '/' + repo)
