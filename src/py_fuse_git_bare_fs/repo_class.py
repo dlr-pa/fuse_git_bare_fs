@@ -1,12 +1,13 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-19 (last change).
+:Date: 2021-04-21 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import errno
 import fusepy  # https://github.com/fusepy/fusepy
+import hashlib
 import os
 import os.path
 import re
@@ -21,7 +22,7 @@ from .simple_file_cache import simple_file_cache
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-19
+    :Date: 2021-04-21
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -29,6 +30,10 @@ class repo_class():
     time_regpat = re.compile(r' ([0-9]+) [+\-0-9]+$')
     tree_content_regpat = re.compile(
         r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
+    # https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
+    # 100644 normal file
+    # 100755 executable file
+    # 120000 symbolic link
     gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
     st_uid_st_gid = (os.geteuid(), os.getegid())
 
@@ -155,11 +160,36 @@ class repo_class():
         self.lock.acquire_read()
         ret = None
         if (self.tree is None) or (not path in self.tree):
-            ret = []
+            ret = ['.', '..']
         else:
-            ret = self.tree[path]['listdir']
+            ret = ['.', '..'] + self.tree[path]['listdir']
         self.lock.release_read()
         return ret
+
+    def _get_annex_path_bare_repo(self, path):
+        # https://git-annex.branchable.com/internals/hashing/
+        _, tail = os.path.split(path)  # tail is the hash
+        md5hash = hashlib.new('md5',
+                              os.path.split(path)[1].encode()).hexdigest()
+        return os.path.join(
+            self.src_dir, 'annex/objects',
+            md5hash[:3], md5hash[3:6], tail, tail)
+
+    def _get_annex_path_non_bare_repo(self, path):
+        # https://git-annex.branchable.com/internals/hashing/
+        return os.path.join(self.src_dir, path)
+
+    def _get_annex_path(self, link_path):
+        apath = None
+        apath_bare = self._get_annex_path_bare_repo(link_path)
+        if os.path.isfile(apath_bare):
+            apath = apath_bare
+        else:
+            apath_non_bare = self._get_annex_path_non_bare_repo(
+                link_path)
+            if os.path.isfile(apath_non_bare):
+                apath = apath_non_bare
+        return apath
 
     def getattr(self, path):
         updated_cache = False
@@ -206,16 +236,54 @@ class repo_class():
                 # no such file or directory
                 self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
-            ret['st_mode'] = self.gitmode2st_mode[
+            st_mode = self.gitmode2st_mode[
                 self.tree[head]['blobs'][tail]['mode']]
             self._get_size_of_blob(head, tail)
-            ret['st_size'] = self.tree[head]['blobs'][tail]['st_size']
+            st_size = self.tree[head]['blobs'][tail]['st_size']
+            if st_mode == 41471:  # 120000 symbolic link
+                # check if it is an accessable git-annex file
+                blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
+                link_path = self.cache.get(
+                    self.src_dir, path, blob_hash, st_size, st_size, 0).decode()
+                #      self._get_annex_path_bare_repo(link_path))
+                #      self._get_annex_path_non_bare_repo(link_path))
+                if link_path.startswith('.git/annex/objects'):
+                    apath = self._get_annex_path(link_path)
+                    if apath is not None:
+                        # git annex file stored locally
+                        stat = os.lstat(apath)
+                        st_mode = stat.st_mode
+                        st_size = stat.st_size
+            ret['st_mode'] = st_mode
+            ret['st_size'] = st_size
         self.lock.release_read()
         return ret
 
     def read(self, path, size, offset):
+        isannex = 0
         ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.5)
+        # check if it is an accessable git-annex file
+        head, tail = os.path.split(path)
+        st_mode = None
+        with self.lock.read_locked():
+            try:
+                st_mode = self.gitmode2st_mode[
+                    self.tree[head]['blobs'][tail]['mode']]
+            except:
+                pass
+        if st_mode == 41471:  # 120000 symbolic link
+            isannex = 1
         if ret is not None:
+            if isannex == 1:  # could be git-annex file
+                link_path = ret.decode()
+                if link_path.startswith('.git/annex/objects'):
+                    apath = self._get_annex_path(link_path)
+                    if apath is not None:
+                        # git-annex file, return content of linked file
+                        with open(apath) as fd:
+                            fd.seek(offset, 0)
+                            buf = fd.read(size)
+                        return buf.encode()
             return ret
         updated_cache = False
         if not self._cache_up_to_date():
@@ -240,11 +308,23 @@ class repo_class():
             # no such file or directory
             self.lock.release_read()
             raise fusepy.FuseOSError(errno.ENOENT)
+        blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
+        self._get_size_of_blob(head, tail)
+        st_size = self.tree[head]['blobs'][tail]['st_size']
+        if isannex == 1:  # could be git-annex file
+            link_path = self.cache.get(
+                self.src_dir, path, blob_hash, st_size, size, offset).decode()
+            if link_path.startswith('.git/annex/objects'):
+                apath = self._get_annex_path(link_path)
+                if apath is not None:
+                    # git-annex file, return content of linked file
+                    with open(apath) as fd:
+                        fd.seek(offset, 0)
+                        buf = fd.read(size)
+                    self.lock.release_read()
+                    return buf.encode()
         # we read the complete file instead of the required part,
         # this should be enhanced! (at least for unpacked objects)
-        self._get_size_of_blob(head, tail)
-        blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
-        st_size = self.tree[head]['blobs'][tail]['st_size']
         self.lock.release_read()
         return self.cache.get(
             self.src_dir, path, blob_hash, st_size, size, offset)

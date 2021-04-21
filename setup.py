@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-19
+:Date: 2021-04-21
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -257,6 +257,7 @@ class CheckModulesModulefinder(Command):
 required_modules = ['argparse',
                     'errno',
                     'fusepy',
+                    'hashlib',
                     'logging',
                     'os',
                     'os.path',
@@ -280,7 +281,7 @@ required_modules += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-04-19',
+    version='2021-04-21',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
