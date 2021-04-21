@@ -260,7 +260,7 @@ class repo_class():
         return ret
 
     def read(self, path, size, offset):
-        isannex = 0
+        is_maybe_annex = False  # no git-annex file
         ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.5)
         # check if it is an accessable git-annex file
         head, tail = os.path.split(path)
@@ -272,9 +272,9 @@ class repo_class():
             except:
                 pass
         if st_mode == 41471:  # 120000 symbolic link
-            isannex = 1
+            is_maybe_annex = True  # maybe git-annex file
         if ret is not None:
-            if isannex == 1:  # could be git-annex file
+            if is_maybe_annex:  # could be git-annex file
                 link_path = ret.decode()
                 if link_path.startswith('.git/annex/objects'):
                     apath = self._get_annex_path(link_path)
@@ -311,7 +311,7 @@ class repo_class():
         blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
         self._get_size_of_blob(head, tail)
         st_size = self.tree[head]['blobs'][tail]['st_size']
-        if isannex == 1:  # could be git-annex file
+        if is_maybe_annex:  # could be git-annex file
             link_path = self.cache.get(
                 self.src_dir, path, blob_hash, st_size, size, offset).decode()
             if link_path.startswith('.git/annex/objects'):
