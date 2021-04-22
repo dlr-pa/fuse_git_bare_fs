@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-21
+:Date: 2021-04-22
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs.py tree -get_user_list_from_annex'
@@ -31,13 +31,13 @@ import unittest
 class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-21
+    :Date: 2021-04-22
     """
 
     def test_fuse_git_bare_fs_tree_annex(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-21
+        :Date: 2021-04-22
         """
         serverdir = 'server'
         mountpointdir = 'mountpoint'
@@ -72,18 +72,32 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir))),
                 {'repo1', 'repo2', 'repo3'})
-            repo3 = os.path.join(tmpdir, mountpointdir, 'repo3')
-            self.assertEqual(set(os.listdir(repo3)), {'f1', 'f2', 'f3'})
-            with open(os.path.join(repo3, 'f1')) as fd:
+            # test content of repo1:
+            repo1 = os.path.join(tmpdir, mountpointdir, 'repo1')
+            self.assertEqual(set(os.listdir(repo1)), {'f1', 'f2', 'f3'})
+            for filename in ['f1', 'f2']:
+                with open(os.path.join(repo1, filename)) as fd:
+                    data = fd.read()
+                self.assertEqual(data, filename + '\n')
+            with self.assertRaises(FileNotFoundError):
+                with open(os.path.join(repo1, 'f3')) as fd:
+                    data = fd.read()
+            # test content of repo2:
+            repo2 = os.path.join(tmpdir, mountpointdir, 'repo2', 'repo2')
+            self.assertEqual(set(os.listdir(repo2)), {'f1', 'f2', 'f3'})
+            # check f1 is link:
+            self.assertEqual(os.lstat(os.path.join(repo2, 'f1')).st_mode, 16893)
+            # check git annex file in subdirectory,
+            # e. g.: f1 -> ../.git/annex/objects/...
+            with open(os.path.join(repo2, 'f1', 'f1')) as fd:
                 data = fd.read()
             self.assertEqual(data, 'f1\n')
-            with open(os.path.join(repo3, 'f2')) as fd:
-                data = fd.read()
-            self.assertEqual(data, 'f2\n')
-            with self.assertRaises(FileNotFoundError):
-                with open(os.path.join(repo3, 'f3')) as fd:
-                    data = fd.read()
-            # clean up
+            # check f2 is executable:
+            self.assertEqual(os.lstat(os.path.join(repo2, 'f2')).st_mode,
+                             33133)
+            # check f3 is symbolic link:
+            self.assertEqual(os.lstat(os.path.join(repo2, 'f3')).st_mode, 41471)
+            # clean up:
             cp.terminate()
             cp.wait(timeout=3)
             cp.kill()

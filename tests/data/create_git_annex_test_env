@@ -1,32 +1,48 @@
 #!/bin/bash
-# fuse_git_bare_fs.py tree -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd /full_path/gitolite server mountpoint
+# fuse_git_bare_fs.py tree server mountpoint
 mkdir server
+mkdir server/repo2
+mkdir client
+mkdir mountpoint
+
 cd server
 git init --bare repo1.git
-git init --bare repo2.git
+git init --bare repo2/repo2.git
 git init --bare repo3.git
 cd ..
-mkdir client
+
 cd client
 git clone ../server/repo1
-git clone ../server/repo2
+git clone ../server/repo2/repo2
 git clone ../server/repo3
+
 cd repo1
-echo f1 > f1; git add f1; git commit -m f1; git push
-cd ..
-cd repo2
-git annex init
-echo f1 > f1; git add f1; git commit -m f1; git push
+echo f1 > f1; git add f1; git commit -m f1
+git push # init master repository on remote
+git annex init # init git-annex locally
 echo f2 > f2; git annex add f2; git commit -m f2
-git annex sync; git annex sync --content
-cd ..
-cd repo3
-git annex init
-echo f1 > f1; git add f1; git commit -m f1; git push
-echo f2 > f2; git annex add f2; git commit -m f2
-git annex sync; git annex sync --content
+git annex sync # init git-annex on remote
+git annex sync --content # sync content to remote
 echo f3 > f3; git annex add f3; git commit -m f3;
 git annex sync
 cd ..
+
+cd repo2
+git annex init # init git-annex locally
+mkdir f1
+echo f1 > f1/f1
+git annex add f1/f1; git commit -m f1
+git push # init master repository on remote
+echo f2 > f2; chmod +x f2; git annex add f2; git commit -m f2
+git annex sync # init git-annex on remote
+git annex sync # init git-annex on remote
+git annex sync --content # sync content to remote
+ln -s f2 f3
+git annex add f3; git commit -m f3;
+git annex sync
 cd ..
-mkdir mountpoint
+
+cd repo3
+git annex init
+echo f1 > f1; git add f1; git commit -m f1; git push
+cd ..

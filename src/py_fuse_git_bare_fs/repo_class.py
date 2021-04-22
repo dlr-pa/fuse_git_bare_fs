@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-21 (last change).
+:Date: 2021-04-22 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,7 +22,7 @@ from .simple_file_cache import simple_file_cache
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-21
+    :Date: 2021-04-22
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -30,6 +30,8 @@ class repo_class():
     time_regpat = re.compile(r' ([0-9]+) [+\-0-9]+$')
     tree_content_regpat = re.compile(
         r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
+    annex_object_regpat = re.compile(
+        r'([.\/]*.git/annex/objects/)(.*)$')
     # https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
     # 100644 normal file
     # 100755 executable file
@@ -247,7 +249,8 @@ class repo_class():
                     self.src_dir, path, blob_hash, st_size, st_size, 0).decode()
                 #      self._get_annex_path_bare_repo(link_path))
                 #      self._get_annex_path_non_bare_repo(link_path))
-                if link_path.startswith('.git/annex/objects'):
+                annex_object = self.annex_object_regpat.findall(link_path)
+                if annex_object:
                     apath = self._get_annex_path(link_path)
                     if apath is not None:
                         # git annex file stored locally
@@ -276,7 +279,8 @@ class repo_class():
         if ret is not None:
             if is_maybe_annex:  # could be git-annex file
                 link_path = ret.decode()
-                if link_path.startswith('.git/annex/objects'):
+                annex_object = self.annex_object_regpat.findall(link_path)
+                if annex_object:
                     apath = self._get_annex_path(link_path)
                     if apath is not None:
                         # git-annex file, return content of linked file
@@ -314,7 +318,8 @@ class repo_class():
         if is_maybe_annex:  # could be git-annex file
             link_path = self.cache.get(
                 self.src_dir, path, blob_hash, st_size, size, offset).decode()
-            if link_path.startswith('.git/annex/objects'):
+            annex_object = self.annex_object_regpat.findall(link_path)
+            if annex_object:
                 apath = self._get_annex_path(link_path)
                 if apath is not None:
                     # git-annex file, return content of linked file
