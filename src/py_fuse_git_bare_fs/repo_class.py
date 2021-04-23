@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-22 (last change).
+:Date: 2021-04-23 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,7 +22,7 @@ from .simple_file_cache import simple_file_cache
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-22
+    :Date: 2021-04-23
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -274,20 +274,29 @@ class repo_class():
                     self.tree[head]['blobs'][tail]['mode']]
             except:
                 pass
+        link_buf = None
         if st_mode == 41471:  # 120000 symbolic link
-            is_maybe_annex = True  # maybe git-annex file
-        if ret is not None:
-            if is_maybe_annex:  # could be git-annex file
-                link_path = ret.decode()
+            # ret is only the complete link path, if size is None
+            # therefor we do our own check
+            # read file is link, but it is not completly read
+            link_buf = self.cache.get_cached(
+                self.src_dir, path, None, 0, 0.5)
+            if link_buf is not None:
+                is_maybe_annex = True  # maybe git-annex file
+                link_path = link_buf.decode()
                 annex_object = self.annex_object_regpat.findall(link_path)
                 if annex_object:
                     apath = self._get_annex_path(link_path)
                     if apath is not None:
                         # git-annex file, return content of linked file
-                        with open(apath) as fd:
+                        # normally a git annex file should be found here;
+                        # the annex if clause some lines below is normally
+                        # needless
+                        with open(apath, 'rb') as fd:
                             fd.seek(offset, 0)
                             buf = fd.read(size)
-                        return buf.encode()
+                        return buf
+        if ret is not None:
             return ret
         updated_cache = False
         if not self._cache_up_to_date():
@@ -315,19 +324,24 @@ class repo_class():
         blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
         self._get_size_of_blob(head, tail)
         st_size = self.tree[head]['blobs'][tail]['st_size']
-        if is_maybe_annex:  # could be git-annex file
-            link_path = self.cache.get(
-                self.src_dir, path, blob_hash, st_size, size, offset).decode()
+        if st_mode is None:
+            st_mode = self.gitmode2st_mode[
+                self.tree[head]['blobs'][tail]['mode']]
+        if (is_maybe_annex) or (st_mode == 41471):  # could be git-annex file
+            if link_buf is None:
+                link_buf = self.cache.get(
+                    self.src_dir, path, blob_hash, st_size, None, 0)
+            link_path = link_buf.decode()
             annex_object = self.annex_object_regpat.findall(link_path)
             if annex_object:
                 apath = self._get_annex_path(link_path)
                 if apath is not None:
                     # git-annex file, return content of linked file
-                    with open(apath) as fd:
+                    with open(apath, 'rb') as fd:
                         fd.seek(offset, 0)
                         buf = fd.read(size)
                     self.lock.release_read()
-                    return buf.encode()
+                    return buf
         # we read the complete file instead of the required part,
         # this should be enhanced! (at least for unpacked objects)
         self.lock.release_read()
