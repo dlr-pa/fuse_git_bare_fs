@@ -59,6 +59,7 @@ class repo_class():
             self._read_tree()
 
     def __del__(self):
+        self.cache.clear_repo_old(self.src_dir)
         self.lock.acquire_write()
 
     def _cache_up_to_date(self):
@@ -78,6 +79,7 @@ class repo_class():
             self.tree_hash = None
             self.time = None
             self.content_cache = dict()
+            self.cache.clear_repo_old(self.src_dir)
             cp = subprocess.run(
                 ["git cat-file --batch"], input=self.root_object,
                 stdout=subprocess.PIPE,
