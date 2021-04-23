@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-19 (last change).
+:Date: 2021-04-23 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,7 +14,7 @@ from .read_write_lock import read_write_lock
 class simple_file_cache():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-19
+    :Date: 2021-04-23
     """
 
     def __init__(self,
@@ -72,7 +72,7 @@ class simple_file_cache():
                 stdout=subprocess.PIPE,
                 cwd=repopath, shell=True, timeout=3, check=True)
             lcp = len(cp.stdout)
-            if st_size <= self.min_file_size:
+            if self.min_file_size <= st_size:
                 self.lock.acquire_read()
                 if self.actual_cache_size + lcp < self.max_cache_size:
                     self.lock.release_read()
@@ -90,8 +90,9 @@ class simple_file_cache():
             stopindex = lcp - 1
             if size is not None:
                 stopindex = min(startindex + size, len(cp.stdout) - 1)
-            ret = cp.stdout[startindex:stopindex]
-        return ret
+            return cp.stdout[startindex:stopindex]
+        else:
+            return ret
 
     def _clear_repo_old(self, repopath):
         """
