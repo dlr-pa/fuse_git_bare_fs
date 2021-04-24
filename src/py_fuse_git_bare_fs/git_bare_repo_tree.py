@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-21 (last change).
+:Date: 2021-04-24 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -17,21 +17,27 @@ from .empty_attr_mixin import _empty_attr_mixin
 from .repo_class import repo_class
 from .read_write_lock import read_write_lock
 from .simple_file_cache import simple_file_cache
+from .simple_file_handler import simple_file_handler_class
 
 
 class _git_bare_repo_tree_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-21
+    :Date: 2021-04-24
 
     read only access to working trees of git bare repositories
     """
     # /usr/lib/python3/dist-packages/fusepy.py
 
-    def __init__(self, src_dir, root_object, max_cache_size):
+    def __init__(self, src_dir, root_object, max_cache_size,
+                 simple_file_handler=None):
         self.src_dir = src_dir
         self.root_object = root_object
         self.cache = simple_file_cache(max_cache_size=max_cache_size)
+        if simple_file_handler is None:
+            self.simple_file_handler = simple_file_handler_class()
+        else:
+            self.simple_file_handler = simple_file_handler
         self.repos = dict()
         self._lock = read_write_lock()
         t0 = time.time()
@@ -42,6 +48,7 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
 
     def _del_(self):
         self._lock.acquire_write()
+        del self.repos
 
     def _update_repos(self):
         if time.time() - self._update_repos_time > self._update_repos_dt:
@@ -126,7 +133,8 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
-                root_object=self.root_object, cache=self.cache)
+                root_object=self.root_object, cache=self.cache,
+                simple_file_handler=self.simple_file_handler)
         ret = actual_repo_list[1].getattr(
             self._extract_repopath_from_path(actual_repo, path))
         return ret
@@ -143,10 +151,11 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
-                root_object=self.root_object, cache=self.cache)
+                root_object=self.root_object, cache=self.cache,
+                simple_file_handler=self.simple_file_handler)
         ret = actual_repo_list[1].read(
             self._extract_repopath_from_path(actual_repo, path),
-            size, offset)
+            size, offset, fh)
         return ret
 
     def readdir(self, path, fh):
@@ -178,7 +187,8 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
-                root_object=self.root_object, cache=self.cache)
+                root_object=self.root_object, cache=self.cache,
+                simple_file_handler=self.simple_file_handler)
         ret = actual_repo_list[1].readdir(
             self._extract_repopath_from_path(actual_repo, path))
         return ret
@@ -195,11 +205,51 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
         if actual_repo_list[1] is None:
             actual_repo_list[1] = repo_class(
                 os.path.join(self.src_dir, actual_repo_list[0]),
-                root_object=self.root_object, cache=self.cache)
+                root_object=self.root_object, cache=self.cache,
+                simple_file_handler=self.simple_file_handler)
+        fh = self.open(path, 'r')
         ret = actual_repo_list[1].read(
             self._extract_repopath_from_path(actual_repo, path),
-            None, 0).decode()
+            None, 0, fh).decode()
+        self.release(path, fh)
         return ret
+
+    def open(self, path, flags):
+        self._update_repos()
+        self._lock.acquire_read()
+        actual_repo = self._extract_repo_from_path(path)
+        if actual_repo is None:  # no such file or directory
+            self._lock.release_read()
+            raise fusepy.FuseOSError(errno.ENOENT)
+        actual_repo_list = self.repos[actual_repo]
+        self._lock.release_read()
+        if actual_repo_list[1] is None:
+            actual_repo_list[1] = repo_class(
+                os.path.join(self.src_dir, actual_repo_list[0]),
+                root_object=self.root_object, cache=self.cache,
+                simple_file_handler=self.simple_file_handler)
+        return actual_repo_list[1].open(
+            self._extract_repopath_from_path(actual_repo, path), flags)
+
+    def release(self, path, fh):
+        self._update_repos()
+        self._lock.acquire_read()
+        actual_repo = self._extract_repo_from_path(path)
+        if actual_repo is None:  # no such file or directory
+            self._lock.release_read()
+            raise fusepy.FuseOSError(errno.ENOENT)
+        actual_repo_list = self.repos[actual_repo]
+        self._lock.release_read()
+        if actual_repo_list[1] is None:
+            actual_repo_list[1] = repo_class(
+                os.path.join(self.src_dir, actual_repo_list[0]),
+                root_object=self.root_object, cache=self.cache,
+                simple_file_handler=self.simple_file_handler)
+        actual_repo_list[1].release(
+            self._extract_repopath_from_path(actual_repo, path), fh)
+
+    def utimens(self, path, times=None):
+        raise fusepy.FuseOSError(errno.EROFS)
 
 
 class git_bare_repo_tree(

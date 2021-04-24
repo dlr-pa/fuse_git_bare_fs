@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-21
+:Date: 2021-04-24
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the class repo_class in the module py_fuse_git_bare_fs
@@ -25,13 +25,13 @@ import unittest
 class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-03-21
+    :Date: 2021-03-24
     """
 
     def test_repo_class(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-21
+        :Date: 2021-04-24
 
         This test creates a repo, put some files in and 
         check how it is handled by py_fuse_git_bare_fs.repo_class.
@@ -88,15 +88,23 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
                 self.assertEqual(file_status[filename]['st_uid'], os.geteuid())
                 self.assertEqual(file_status[filename]['st_gid'], os.getegid())
             for filename in ['/a', '/b']:
-                data = repo.read(filename, None, 0)
+                fh = repo.open(filename, 'r')
+                data = repo.read(filename, None, 0, fh)
+                repo.release(filename, fh)
                 self.assertEqual('/' + data.decode(), filename + '\n')
             for filename in ['/l']:
-                data = repo.read(filename, None, 0)
+                fh = repo.open(filename, 'r')
+                data = repo.read(filename, None, 0, fh)
+                repo.release(filename, fh)
                 self.assertEqual(data, b'a')  # link target
-                data = repo.read('/' + data.decode(), None, 0)
+                fh = repo.open(filename, 'r')
+                data = repo.read('/' + data.decode(), None, 0, fh)
+                repo.release(filename, fh)
                 self.assertEqual(data, b'a\n')
             for filename in ['/d/c']:
-                data = repo.read(filename, None, 0)
+                fh = repo.open(filename, 'r')
+                data = repo.read(filename, None, 0, fh)
+                repo.release(filename, fh)
                 self.assertEqual(data, b'abc\n')
             import fusepy
             with self.assertRaises(fusepy.FuseOSError):
@@ -122,9 +130,11 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
             self.assertEqual(file_status['st_size'], 3)
             self.assertEqual(file_status['st_uid'], os.geteuid())
             self.assertEqual(file_status['st_gid'], os.getegid())
-            data = repo.read('/bar', None, 0)
+            fh = repo.open(filename, 'r')
+            data = repo.read('/bar', None, 0, fh)
             self.assertEqual(data, b'd/c')  # link target
-            data = repo.read('/' + data.decode(), None, 0)
+            data = repo.read('/' + data.decode(), None, 0, fh)
+            repo.release(filename, fh)
             self.assertEqual(data, b'abc\n')
             # adapt data
             cp = subprocess.run(
@@ -133,7 +143,9 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # further tests:
-            data = repo.read('/baz', None, 0)
+            fh = repo.open(filename, 'r')
+            data = repo.read('/baz', None, 0, fh)
+            repo.release(filename, fh)
             self.assertEqual(data, b'abc..xyz\n')
 
 

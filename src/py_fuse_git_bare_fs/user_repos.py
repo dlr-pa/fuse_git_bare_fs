@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-19 (last change).
+:Date: 2021-04-24 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -12,27 +12,37 @@ import warnings
 from .repo_class import repo_class
 from .read_write_lock import read_write_lock
 from .simple_file_cache import simple_file_cache
+from .simple_file_handler import simple_file_handler_class
 
 
 class user_repos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-19
+    :Date: 2021-04-24
     """
 
     def __init__(self, repopath, root_object,
-                 gitolite_cmd='gitolite', max_cache_size=1073741824):
+                 gitolite_cmd='gitolite', max_cache_size=1073741824,
+                 simple_file_handler=None):
         self.repopath = repopath
         self.root_object = root_object  # not used for gitolite-admin
         self.gitolite_cmd = gitolite_cmd
         self.adminrepo = os.path.join(self.repopath, 'gitolite-admin.git')
         self.cache = simple_file_cache(max_cache_size=max_cache_size)
+        if simple_file_handler is None:
+            self.simple_file_handler = simple_file_handler_class()
+        else:
+            self.simple_file_handler = simple_file_handler
         self.lock = read_write_lock()
         with self.lock.write_locked():
             self.commit_hash = None
             self.users = None
             self.repos = None
             self.userrepoaccess = None
+
+    def _del_(self):
+        self._lock.acquire_write()
+        del self.repos
 
     def _cache_up_to_date(self):
         with self.lock.read_locked():
@@ -110,13 +120,15 @@ class user_repos():
                     for reponame in repos:
                         self.repos[reponame] = repo_class(
                             os.path.join(self.repopath, reponame) + '.git',
-                            root_object=self.root_object, cache=self.cache)
+                            root_object=self.root_object, cache=self.cache,
+                            simple_file_handler=self.simple_file_handler)
                 else:
                     for reponame in repos:
                         if reponame not in self.repos.keys():
                             self.repos[reponame] = repo_class(
                                 os.path.join(self.repopath, reponame) + '.git',
-                                root_object=self.root_object, cache=self.cache)
+                                root_object=self.root_object, cache=self.cache,
+                                simple_file_handler=self.simple_file_handler)
                     for reponame in list(self.repos.keys()):
                         if reponame not in repos:
                             del self.repos[reponame]

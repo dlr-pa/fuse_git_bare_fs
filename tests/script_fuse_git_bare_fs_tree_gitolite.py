@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-21
+:Date: 2021-04-24
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs.py tree -get_user_list_from_gitolite'
@@ -31,7 +31,7 @@ import unittest
 class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-21
+    :Date: 2021-04-24
     """
 
     def test_fuse_git_bare_fs_tree_gitolite(self):
@@ -81,7 +81,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-18
+        :Date: 2021-04-24
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -107,6 +107,12 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+            t0 = time.time()
+            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+                # typical it needs less than 0.4 seconds
+                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                    break
+            time.sleep(0.1)
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir))),

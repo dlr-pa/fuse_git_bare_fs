@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-23 (last change).
+:Date: 2021-04-24 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -17,12 +17,13 @@ import warnings
 
 from .read_write_lock import read_write_lock
 from .simple_file_cache import simple_file_cache
+from .simple_file_handler import simple_file_handler_class
 
 
 class repo_class():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-23
+    :Date: 2021-04-24
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -40,7 +41,8 @@ class repo_class():
     st_uid_st_gid = (os.geteuid(), os.getegid())
 
     def __init__(self, src_dir, root_object=b'master',
-                 max_cache_size=1073741824, cache=None):
+                 max_cache_size=1073741824, cache=None,
+                 simple_file_handler=None):
         self.src_dir = src_dir
         self.root_object = root_object
         self.tree = None
@@ -54,11 +56,16 @@ class repo_class():
             self.cache = cache
         self.content_cache = dict()
         self.content_cache_size = 0
+        if simple_file_handler is None:
+            self.simple_file_handler = simple_file_handler_class()
+        else:
+            self.simple_file_handler = simple_file_handler
         self.lock = read_write_lock()
         with self.lock.write_locked():
             self._read_tree()
 
     def __del__(self):
+        self.simple_file_handler.remove_repo(self.src_dir)
         self.cache.clear_repo_old(self.src_dir)
         self.lock.acquire_write()
 
@@ -70,6 +77,7 @@ class repo_class():
             cwd=self.src_dir, shell=True, timeout=3, check=True)
         if cp.stdout.decode().strip() == self.commit_hash:
             return True
+        self.simple_file_handler.remove_repo(self.src_dir)
         return False
 
     def _update_cache(self, update_cache=None):
@@ -264,7 +272,9 @@ class repo_class():
         self.lock.release_read()
         return ret
 
-    def read(self, path, size, offset):
+    def read(self, path, size, offset, fh):
+        if not self.simple_file_handler.is_file_handler(self.src_dir, fh):
+            raise fusepy.FuseOSError(errno.EBADF)
         is_maybe_annex = False  # no git-annex file
         ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.5)
         # check if it is an accessable git-annex file
@@ -349,3 +359,16 @@ class repo_class():
         self.lock.release_read()
         return self.cache.get(
             self.src_dir, path, blob_hash, st_size, size, offset)
+
+    def open(self, path, flags):
+        if not self._cache_up_to_date():
+            updated_cache = True
+            with self.lock.write_locked():
+                self._read_tree(update_cache=True)
+        return self.simple_file_handler.get(self.src_dir)
+
+    def release(self, path, fh):
+        self.simple_file_handler.remove(self.src_dir, fh)
+
+    def utimens(self, path, times=None):
+        raise fusepy.FuseOSError(errno.EROFS)

@@ -14,6 +14,7 @@ class read_write_lock():
     :Author: Daniel Mohr
     :Date: 2021-04-17
     """
+
     def __init__(self):
         self.write_lock = threading.Lock()
         self.read_lock = threading.Lock()
