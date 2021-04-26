@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-23
+:Date: 2021-04-26
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -259,12 +259,15 @@ class CheckModulesModulefinder(Command):
 required_modules = ['argparse',
                     'errno',
                     'fusepy',
+                    'grp',
                     'hashlib',
                     'logging',
                     'os',
                     'os.path',
+                    'pwd',
                     're',
                     'subprocess',
+                    'sys',
                     'threading',
                     'time',
                     'warnings']
@@ -275,7 +278,7 @@ required_modules += ['modulefinder']
 # modules to build doc
 required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
 # modules to run tests with unittest
-required_modules += ['shutil', 'sys', 'tempfile', 'unittest']
+required_modules += ['shutil', 'tempfile', 'unittest']
 # modules to run tests with pytest
 required_modules += ['pytest']
 # optional modules to run tests with pytest in parallel
@@ -283,7 +286,7 @@ required_modules += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-04-23',
+    version='2021-04-26',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
@@ -301,7 +304,7 @@ setup(
     download_url='',
     package_dir={'': 'src'},
     packages=['py_fuse_git_bare_fs'],
-    scripts=['src/scripts/fuse_git_bare_fs.py'],
+    scripts=['src/scripts/fuse_git_bare_fs'],
     license='GNU GENERAL PUBLIC LICENSE, Version 2, June 1991',
     classifiers=[
         'Development Status :: 3 - Alpha',

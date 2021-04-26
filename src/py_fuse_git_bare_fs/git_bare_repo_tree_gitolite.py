@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-24 (last change).
+:Date: 2021-04-26 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ from .simple_file_handler import simple_file_handler_class
 class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-24
+    :Date: 2021-04-26
 
     read only access to working trees of git bare repositories
     """
@@ -148,9 +148,12 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        return self.repos.repos[actual_repo].read(
+        fh = self.open(path, 'r')
+        ret = self.repos.repos[actual_repo].read(
             self._extract_repopath_from_path(actual_user, actual_repo, path),
-            None, 0).decode()
+            None, 0, fh).decode()
+        self.release(path, fh)
+        return ret
 
     def open(self, path, flags):
         actual_user = self._extract_user_from_path(path)

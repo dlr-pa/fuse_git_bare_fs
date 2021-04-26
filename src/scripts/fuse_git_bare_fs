@@ -10,8 +10,8 @@ import py_fuse_git_bare_fs
 
 # for ubuntu 18.04
 #  apt install python3-fusepy
-# ./fuse_git_bare_fs.py a b
-# sudo -u www-data ./fuse_git_bare_fs.py a b
+# ./fuse_git_bare_fs a b
+# sudo -u www-data ./fuse_git_bare_fs a b
 
 
 if __name__ == '__main__':
