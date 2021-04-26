@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-15
+:Date: 2021-04-26
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 aggregation of tests
@@ -36,17 +36,17 @@ class test_module_import(unittest.TestCase):
 class test_scripts_executable(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-14
+    :Date: 2021-04-26
     """
 
     def test_script_fuse_git_bare_fs_executable(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-14
+        :Date: 2021-04-26
         """
         import subprocess
-        for cmd in ["fuse_git_bare_fs.py -h", "fuse_git_bare_fs.py repo -h",
-                    "fuse_git_bare_fs.py tree -h"]:
+        for cmd in ["fuse_git_bare_fs -h", "fuse_git_bare_fs repo -h",
+                    "fuse_git_bare_fs tree -h"]:
             cp = subprocess.run(
                 [cmd],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -55,7 +55,7 @@ class test_scripts_executable(unittest.TestCase):
             self.assertTrue(len(cp.stdout) >= 775)
             # check begin of help output
             self.assertTrue(cp.stdout.startswith(
-                b'usage: fuse_git_bare_fs.py'))
+                b'usage: fuse_git_bare_fs'))
             # check end of help output
             self.assertTrue(cp.stdout.endswith(
                 b'License: ' +
@@ -83,7 +83,7 @@ def scripts(suite):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-15
+    :Date: 2021-04-26
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     add tests for the scripts
@@ -91,15 +91,15 @@ def scripts(suite):
     print('add tests for the scripts')
     loader = unittest.defaultTestLoader
     suite.addTest(loader.loadTestsFromTestCase(test_scripts_executable))
-    # fuse_git_bare_fs.py repo
+    # fuse_git_bare_fs repo
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_repo'))
-    # fuse_git_bare_fs.py tree
+    # fuse_git_bare_fs tree
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_tree'))
-    # fuse_git_bare_fs.py tree -get_user_list_from_gitolite
+    # fuse_git_bare_fs tree -get_user_list_from_gitolite
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_tree_gitolite'))
-    # with git-annex: fuse_git_bare_fs.py tree
+    # with git-annex: fuse_git_bare_fs tree
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_tree_annex'))

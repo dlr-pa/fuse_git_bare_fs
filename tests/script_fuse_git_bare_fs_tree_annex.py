@@ -1,10 +1,10 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-22
+:Date: 2021-04-26
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
-tests the script 'fuse_git_bare_fs.py tree -get_user_list_from_annex'
+tests the script 'fuse_git_bare_fs tree' regarding git-annex files
 
 You can run this file directly::
 
@@ -37,7 +37,7 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_annex(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-22
+        :Date: 2021-04-26
         """
         serverdir = 'server'
         mountpointdir = 'mountpoint'
@@ -58,7 +58,7 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.Popen(
-                ['exec ' + 'fuse_git_bare_fs.py tree ' + serverdir + ' ' +
+                ['exec ' + 'fuse_git_bare_fs tree ' + serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
@@ -86,7 +86,8 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
             repo2 = os.path.join(tmpdir, mountpointdir, 'repo2', 'repo2')
             self.assertEqual(set(os.listdir(repo2)), {'f1', 'f2', 'f3'})
             # check f1 is link:
-            self.assertEqual(os.lstat(os.path.join(repo2, 'f1')).st_mode, 16893)
+            self.assertEqual(
+                os.lstat(os.path.join(repo2, 'f1')).st_mode, 16893)
             # check git annex file in subdirectory,
             # e. g.: f1 -> ../.git/annex/objects/...
             with open(os.path.join(repo2, 'f1', 'f1')) as fd:
@@ -96,7 +97,8 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
             self.assertEqual(os.lstat(os.path.join(repo2, 'f2')).st_mode,
                              33133)
             # check f3 is symbolic link:
-            self.assertEqual(os.lstat(os.path.join(repo2, 'f3')).st_mode, 41471)
+            self.assertEqual(
+                os.lstat(os.path.join(repo2, 'f3')).st_mode, 41471)
             # clean up:
             cp.terminate()
             cp.wait(timeout=3)

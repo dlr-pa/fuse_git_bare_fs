@@ -1,10 +1,10 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-18
+:Date: 2021-04-26
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
-tests the script 'fuse_git_bare_fs.py repo'
+tests the script 'fuse_git_bare_fs repo'
 
 You can run this file directly::
 
@@ -29,13 +29,13 @@ import unittest
 class script_fuse_git_bare_fs_repo(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-18
+    :Date: 2021-04-26
     """
 
     def test_fuse_git_bare_fs_repo(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-14
+        :Date: 2021-04-26
 
         This test creates a repo, put some files in and 
         mount it, check for files.
@@ -66,7 +66,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.Popen(
-                ['exec ' + 'fuse_git_bare_fs.py repo ' +
+                ['exec ' + 'fuse_git_bare_fs repo ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -88,7 +88,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-18
+        :Date: 2021-04-26
 
         This test creates a repo, put some files in and 
         mount it, check for fiels.
@@ -119,7 +119,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.run(
-                ['fuse_git_bare_fs.py repo -daemon ' +
+                ['fuse_git_bare_fs repo -daemon ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -215,7 +215,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-18
+        :Date: 2021-04-26
 
         This test creates a repo, put some files in and 
         mount it, check for files.
@@ -246,7 +246,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.run(
-                ['fuse_git_bare_fs.py repo -root_object foo -daemon ' +
+                ['fuse_git_bare_fs repo -root_object foo -daemon ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,

@@ -1,10 +1,10 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-24
+:Date: 2021-04-26
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
-tests the script 'fuse_git_bare_fs.py tree -get_user_list_from_gitolite'
+tests the script 'fuse_git_bare_fs tree -get_user_list_from_gitolite'
 
 You can run this file directly::
 
@@ -37,7 +37,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-18
+        :Date: 2021-04-26
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -57,7 +57,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.Popen(
-                ['exec ' + 'fuse_git_bare_fs.py tree -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite') + ' ' +
+                ['exec ' + 'fuse_git_bare_fs tree -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite') + ' ' +
                  serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -81,7 +81,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-24
+        :Date: 2021-04-26
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -101,7 +101,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.run(
-                ['fuse_git_bare_fs.py tree -daemon -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite') + ' ' +
+                ['fuse_git_bare_fs tree -daemon -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite') + ' ' +
                  serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,

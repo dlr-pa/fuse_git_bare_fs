@@ -1,10 +1,10 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-21
+:Date: 2021-04-26
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
-tests the script 'fuse_git_bare_fs.py tree'
+tests the script 'fuse_git_bare_fs tree'
 
 You can run this file directly::
 
@@ -31,13 +31,13 @@ import unittest
 class script_fuse_git_bare_fs_tree(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-21
+    :Date: 2021-04-26
     """
 
     def test_fuse_git_bare_fs_tree(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-18
+        :Date: 2021-04-26
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -84,7 +84,7 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                 timeout=3, check=True)
             # run tests (bare repositories)
             cp = subprocess.Popen(
-                ['exec ' + 'fuse_git_bare_fs.py tree ' +
+                ['exec ' + 'fuse_git_bare_fs tree ' +
                  serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -109,7 +109,7 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
             cp.stderr.close()
             # run tests (non bare repositories)
             cp = subprocess.Popen(
-                ['exec ' + 'fuse_git_bare_fs.py tree ' +
+                ['exec ' + 'fuse_git_bare_fs tree ' +
                  clientdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -132,7 +132,7 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_daemon(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-18
+        :Date: 2021-04-26
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -160,7 +160,7 @@ class script_fuse_git_bare_fs_tree(unittest.TestCase):
                 timeout=3, check=True)
             # run tests
             cp = subprocess.run(
-                ['fuse_git_bare_fs.py tree -daemon ' +
+                ['fuse_git_bare_fs tree -daemon ' +
                  serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
