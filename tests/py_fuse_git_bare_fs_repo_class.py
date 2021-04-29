@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-24
+:Date: 2021-04-29
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the class repo_class in the module py_fuse_git_bare_fs
@@ -25,13 +25,13 @@ import unittest
 class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-03-24
+    :Date: 2021-03-29
     """
 
     def test_repo_class(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-24
+        :Date: 2021-04-29
 
         This test creates a repo, put some files in and 
         check how it is handled by py_fuse_git_bare_fs.repo_class.
@@ -106,7 +106,10 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
                 data = repo.read(filename, None, 0, fh)
                 repo.release(filename, fh)
                 self.assertEqual(data, b'abc\n')
-            import fusepy
+            try:
+                import fusepy
+            except ModuleNotFoundError:
+                import fuse as fusepy
             with self.assertRaises(fusepy.FuseOSError):
                 file_status = repo.getattr('/foo')
             # adapt data

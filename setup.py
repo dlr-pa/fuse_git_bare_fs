@@ -178,7 +178,13 @@ class TestWithUnittest(Command):
             def test_required_module_import(self):
                 import importlib
                 for module in setup_self.distribution.metadata.get_requires():
-                    importlib.import_module(module)
+                    if module == 'fusepy':
+                        try:
+                            importlib.import_module(module)
+                        except ModuleNotFoundError:
+                            import fuse as fusepy
+                    else:
+                        importlib.import_module(module)
         loader = unittest.defaultTestLoader
         suite.addTest(loader.loadTestsFromTestCase(
             test_required_module_import))
