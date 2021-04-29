@@ -1,12 +1,15 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-24 (last change).
+:Date: 2021-04-29 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import errno
-import fusepy  # https://github.com/fusepy/fusepy
+try:
+    import fusepy  # https://github.com/fusepy/fusepy
+except ModuleNotFoundError:
+    import fuse as fusepy
 import hashlib
 import os
 import os.path
