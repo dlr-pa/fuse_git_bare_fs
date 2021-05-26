@@ -6,7 +6,7 @@
 
 ## install
 
-see [INSTALL](INSTALL)
+see [INSTALL](INSTALL.txt)
 
 ## copyright + license
 
