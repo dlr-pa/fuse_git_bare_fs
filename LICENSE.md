@@ -18,7 +18,7 @@ Copyright (C) 2021 Daniel Mohr and Deutsches Zentrum fuer Luft- und Raumfahrt e.
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
- You should have received a copy (see :doc:`gpl` and gpl-2.0.txt) of the
+ You should have received a copy (see [gpl](gpl-2.0.txt)) of the
  GNU General Public License along with this program.
  If not, see <http://www.gnu.org/licenses/>.
 
