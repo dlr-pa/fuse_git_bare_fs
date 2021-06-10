@@ -18,7 +18,7 @@ def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-19 (last change).
+    :Date: 2021-06-10 (last change).
     """
     operations_instance = None
     if args.daemon:  # running in foreground
@@ -40,8 +40,7 @@ def fuse_git_bare_fs_repo(args):
         args.target_dir,
         foreground=args.daemon,
         nothreads=args.threads,
-        allow_other=args.allow_other,
-        raw_fi=args.raw_fi)
+        allow_other=args.allow_other)
 
 
 def fuse_git_bare_fs_tree(args):
@@ -91,8 +90,7 @@ def fuse_git_bare_fs_tree(args):
         args.target_dir,
         foreground=args.daemon,
         nothreads=args.threads,
-        allow_other=args.allow_other,
-        raw_fi=args.raw_fi)
+        allow_other=args.allow_other)
 
 
 def my_argument_parser():
@@ -172,11 +170,6 @@ def my_argument_parser():
         help='If given, allows other users to use the fuse mount point. '
         'Therefore you have to allow this in /etc/fuse.conf by '
         'uncommenting "user_allow_other" there.')
-    common_parser.add_argument(
-        '-raw_fi',
-        action='store_true',
-        help='If given, use fuse_file_info instead of fh filed in fusepy. '
-        'This is not useful.')
     common_parser.add_argument(
         '-uid',
         nargs=1,
