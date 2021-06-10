@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-29 (last change).
+:Date: 2021-06-10 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -21,13 +21,14 @@ from .simple_file_handler import simple_file_handler_class
 class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-26
+    :Date: 2021-06-10
 
     read only access to working trees of git bare repositories
     """
 
     def __init__(self, src_dir, root_object, provide_htaccess,
-                 gitolite_cmd='gitolite', max_cache_size=1073741824,
+                 gitolite_cmd='gitolite', gitolite_user_file=None,
+                 max_cache_size=1073741824,
                  simple_file_handler=None):
         self.src_dir = src_dir
         self.root_object = root_object
@@ -37,7 +38,8 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         else:
             self.simple_file_handler = simple_file_handler
         self.repos = user_repos(src_dir, self.root_object,
-                                gitolite_cmd, max_cache_size)
+                                gitolite_cmd, gitolite_user_file,
+                                max_cache_size)
 
     def _extract_user_from_path(self, path):
         actual_user = None

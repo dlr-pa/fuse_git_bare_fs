@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-24 (last change).
+:Date: 2021-06-10 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,15 +18,17 @@ from .simple_file_handler import simple_file_handler_class
 class user_repos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-24
+    :Date: 2021-06-10
     """
 
     def __init__(self, repopath, root_object,
-                 gitolite_cmd='gitolite', max_cache_size=1073741824,
+                 gitolite_cmd='gitolite', gitolite_user_file=None,
+                 max_cache_size=1073741824,
                  simple_file_handler=None):
         self.repopath = repopath
         self.root_object = root_object  # not used for gitolite-admin
         self.gitolite_cmd = gitolite_cmd
+        self.gitolite_user_file = gitolite_user_file
         self.adminrepo = os.path.join(self.repopath, 'gitolite-admin.git')
         self.cache = simple_file_cache(max_cache_size=max_cache_size)
         if simple_file_handler is None:
@@ -36,6 +38,8 @@ class user_repos():
         self.lock = read_write_lock()
         with self.lock.write_locked():
             self.commit_hash = None
+            self.mtime_gitolite_user_file = None
+            self.users_from_file = None
             self.users = None
             self.repos = None
             self.userrepoaccess = None
@@ -47,6 +51,20 @@ class user_repos():
     def _cache_up_to_date(self):
         with self.lock.read_locked():
             commit_hash = self.commit_hash
+            mtime_gitolite_user_file = self.mtime_gitolite_user_file
+        if not commit_hash:
+            return False
+        if ((self.gitolite_user_file is not None) and
+            os.path.isfile(self.gitolite_user_file)):
+                # if self.gitolite_user_file does not exist, we ignore it
+                if ((mtime_gitolite_user_file is None) or
+                    (mtime_gitolite_user_file <
+                     os.path.getmtime(self.gitolite_user_file))):
+                    return False
+        elif self.gitolite_user_file is not None:
+            # self.gitolite_user_file is not a file anymore
+            # (maybe it is deleted)
+            return False
         cp = subprocess.run(
             ["git cat-file --batch-check='%(objectname)'"],
             input=b"master",
@@ -66,9 +84,17 @@ class user_repos():
         """
         if (update_cache) or (not self._cache_up_to_date()):
             self.commit_hash = None
+            self.mtime_gitolite_user_file = None
             self.users = None
+            self.users_from_file = None
             #self.repos = None
             self.userrepoaccess = dict()
+            if ((self.gitolite_user_file is not None) and
+                os.path.isfile(self.gitolite_user_file)):
+                self.mtime_gitolite_user_file = \
+                  os.path.getmtime(self.gitolite_user_file)
+                with open(self.gitolite_user_file, 'r') as fd:
+                    self.users_from_file = set(fd.read().splitlines())
             cp = subprocess.run(
                 ["git cat-file --batch"], input=b"master",
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -97,6 +123,8 @@ class user_repos():
                     if ((username != 'admin') and (len(username) > 0) and
                             (not username.startswith('@'))):
                         self.users.append(username)
+                if self.users_from_file is not None:
+                    self.users = list(self.users_from_file.union(self.users))
         with self.lock.read_locked():
             ret = self.users
         return ret

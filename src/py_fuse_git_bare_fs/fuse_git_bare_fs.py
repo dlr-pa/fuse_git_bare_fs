@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-29 (last change).
+:Date: 2021-06-10 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -48,7 +48,7 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-19 (last change).
+    :Date: 2021-06-10 (last change).
     """
     operations_instance = None
     if args.daemon:  # running in foreground
@@ -61,6 +61,7 @@ def fuse_git_bare_fs_tree(args):
                 args.root_object[0].encode(),
                 args.provide_htaccess,
                 args.gitolite_cmd[0],
+                args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
             from .git_bare_repo_tree import git_bare_repo_tree_logging
@@ -77,6 +78,7 @@ def fuse_git_bare_fs_tree(args):
                 args.root_object[0].encode(),
                 args.provide_htaccess,
                 args.gitolite_cmd[0],
+                args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
             from .git_bare_repo_tree import git_bare_repo_tree
@@ -97,11 +99,11 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-26 (last change).
+    :Date: 2021-06-10 (last change).
     """
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-04-26\n'
+    epilog += 'Date: 2021-06-10\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     description = '"fuse_git_bare_fs" is a tool to mount the working '
@@ -128,7 +130,11 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='opt',
-        help='These options are splitted at "," and used as seperated options. The sub-commands are extracted as well. The flag "-daemon" is used in any case. This allows to use this program as mount program e. g. in /etc/fstab. Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will become "tree -a -b c"')
+        help='These options are splitted at "," and used as seperated options. '
+        'The sub-commands are extracted as well. The flag "-daemon" is used in '
+        'any case. This allows to use this program as mount program e. g. in '
+        '/etc/fstab. Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will '
+        'become "tree -a -b c"')
     common_parser.add_argument(
         '-root_object',
         nargs=1,
@@ -169,7 +175,8 @@ def my_argument_parser():
     common_parser.add_argument(
         '-raw_fi',
         action='store_true',
-        help='If given, use fuse_file_info instead of fh filed in fusepy. this is not useful.')
+        help='If given, use fuse_file_info instead of fh filed in fusepy. '
+        'This is not useful.')
     common_parser.add_argument(
         '-uid',
         nargs=1,
@@ -177,7 +184,10 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='uid',
-        help='The program is run under this uid. The current direcotry and the home directory are set appropriate. This allows to use this program as mount program e. g. in /etc/fstab. On default nothing is done (the calling user is used).')
+        help='The program is run under this uid. The current direcotry and '
+        'the home directory are set appropriate. This allows to use this '
+        'program as mount program e. g. in /etc/fstab. '
+        'On default nothing is done (the calling user is used).')
     common_parser.add_argument(
         '-gid',
         nargs=1,
@@ -185,19 +195,23 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='gid',
-        help='The program is run under this gid. On default nothing is done. This allows to use this program as mount program e. g. in /etc/fstab.')
+        help='The program is run under this gid. On default nothing is done. '
+        'This allows to use this program as mount program e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-ro',
         action='store_true',
-        help='Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.')
+        help='Make a read only mountpoint. This is always the case! '
+        'This allows to use this program as mount program e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-dev',
         action='store_true',
-        help='This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.')
+        help='This is ignored. '
+        'This allows to use this program as mount program e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-suid',
         action='store_true',
-        help='This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.')
+        help='This is ignored. '
+        'This allows to use this program as mount program e. g. in /etc/fstab.')
     # subparser repo
     description = '"fuse_git_bare_fs repo" is a tool to mount the working '
     description += 'tree of a git bare repository '
@@ -243,12 +257,20 @@ def my_argument_parser():
     description += '"fusermount -u target_dir".'
     epilog = 'Examples:\n\n'
     epilog += 'fuse_git_bare_fs tree a b\n\n'
-    epilog += 'sudo -u gitolite fuse_git_bare_fs tree -daemon -allow_other -get_user_list_from_gitolite -provide_htaccess /var/lib/gitolite/repositories /var/www/gitolite/webdav\n\n'
-    epilog += 'mount -t fuse.fuse_git_bare_fs -o uid=gitolite,gid=gitolite,tree,allow_other,get_user_list_from_gitolite,provide_htaccess,root_object=master,ro /var/lib/gitolite/repositories /var/www/gitolite/webdav\n\n'
+    epilog += 'sudo -u gitolite fuse_git_bare_fs tree -daemon -allow_other '
+    epilog += '-get_user_list_from_gitolite -provide_htaccess '
+    epilog += '/var/lib/gitolite/repositories /var/www/gitolite/webdav\n\n'
+    epilog += 'mount -t fuse.fuse_git_bare_fs -o uid=gitolite,gid=gitolite,'
+    epilog += 'tree,allow_other,get_user_list_from_gitolite,provide_htaccess,'
+    epilog += 'root_object=master,ro /var/lib/gitolite/repositories '
+    epilog += '/var/www/gitolite/webdav\n\n'
     epilog += 'Example (put the following line to /etc/fstab):\n\n'
-    epilog += '/var/lib/gitolite/repositories /var/www/gitolite/webdav fuse.fuse_git_bare_fs uid=gitolite,gid=gitolite,tree,allow_other,get_user_list_from_gitolite,provide_htaccess,root_object=master,ro 0 0\n\n'
+    epilog += '/var/lib/gitolite/repositories /var/www/gitolite/webdav '
+    epilog += 'fuse.fuse_git_bare_fs uid=gitolite,gid=gitolite,tree,'
+    epilog += 'allow_other,get_user_list_from_gitolite,provide_htaccess,'
+    epilog += 'root_object=master,ro 0 0\n\n'
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-04-26\n'
+    epilog += 'Date: 2021-06-10\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     tree_parser = argparse.ArgumentParser(add_help=False)
@@ -269,11 +291,18 @@ def my_argument_parser():
     parser_tree.add_argument(
         '-get_user_list_from_gitolite',
         action='store_true',
-        help='This creates subdirectories for each user. The users are extracted from the gitolite-admin repository included in the given src_dir. In every use directory only the repositories are mounted, which are accessable for the appropriate user. It is suposed that the command "gitolite" is available and that the gitolite-admin repository is called "gitolite-admin".')
+        help='This creates subdirectories for each user. The users are '
+        'extracted from the gitolite-admin repository included in the given '
+        'src_dir. In every user directory only the repositories are mounted, '
+        'which are accessable for the appropriate user. It is suposed that '
+        'the command "gitolite" is available and that the gitolite-admin '
+        'repository is called "gitolite-admin". Additional configuration can '
+        'be given with the flags "-gitolite_cmd" and "-gitolite_user_file".')
     parser_tree.add_argument(
         '-provide_htaccess',
         action='store_true',
-        help='This creates ".htaccess" files in the user directories. This only appears if the flag "-get_user_list_from_gitolite" is given.')
+        help='This creates ".htaccess" files in the user directories. This '
+        'only appears if the flag "-get_user_list_from_gitolite" is given.')
     parser_tree.add_argument(
         '-gitolite_cmd',
         nargs=1,
@@ -281,8 +310,26 @@ def my_argument_parser():
         required=False,
         default=['gitolite'],
         dest='gitolite_cmd',
-        help='Defines the gitolite command. You can give an absolute path.'
+        help='Defines the gitolite command. You can give an absolute path. '
         'default: gitolite')
+    parser_tree.add_argument(
+        '-gitolite_user_file',
+        nargs=1,
+        type=str,
+        required=False,
+        default=[None],
+        dest='gitolite_user_file',
+        help='If given, the list of users is created from the content of this '
+        'file and the gitolite command "list-users". You can give an absolute '
+        'path. If not given (default) only the gitolite command "list-users" '
+        'is used to create the list of users. If the file does not exist, '
+        'it is ignored until it is available. This is useful if gitolite only '
+        'knows groups and the users are defined elsewhere (e. g. LDAP '
+        'configuration of gitolite). You should update the given file '
+        'regularly (e. g. by a cron job) from the source (e. g. directory '
+        'service). Further you could overwrite the default gitolite command '
+        'by a command, which return nothing for "list-users" and otherwise '
+        'uses the normal gitolite command.')
     return parser
 
 
@@ -341,7 +388,7 @@ def fuse_git_bare_fs():
             os.chdir(pw_dir)
             if not 'PATH' in os.environ:
                 os.environ['PATH'] = '/usr/local/sbin:/usr/local/bin:' + \
-                  '/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
+                    '/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         args.func(args)  # call the programs
     else:  # no sub command given
         parser.print_help()
