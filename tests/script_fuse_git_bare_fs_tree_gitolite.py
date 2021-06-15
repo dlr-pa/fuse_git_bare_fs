@@ -288,7 +288,6 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
             src_file_name = os.path.join('data', 'gitolite')
@@ -371,6 +370,60 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+    def test_fuse_git_bare_fs_tree_gitolite_daemon4(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-06-15
+
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
+        """
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for file_name in ['gitolite', 'gitolite2']:
+                src_file_name = os.path.join('data', file_name)
+                if not os.path.isfile(src_file_name):
+                    src_file_name = os.path.join(os.path.dirname(
+                        sys.modules['tests'].__file__), 'data', file_name)
+                shutil.copy(src_file_name, os.path.join(tmpdir, file_name))
+            cp = subprocess.run(
+                [os.path.join(tmpdir, 'gitolite') + ' createenv'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            # run tests
+            # repo1 not known by simulated gitolite command
+            shutil.copy(os.path.join(tmpdir, 'gitolite2'),
+                        os.path.join(tmpdir, 'gitolite1'))
+            call_cmd = 'fuse_git_bare_fs tree -daemon'
+            call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
+            call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite1')
+            call_cmd += ' ' + serverdir + ' ' + mountpointdir
+            cp = subprocess.run(
+                call_cmd,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            t0 = time.time()
+            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+                # typical it needs less than 0.4 seconds
+                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                    break
+            time.sleep(0.1)
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user1'))),
+                {'.htaccess', 'repo2', 'repo3'})
+            # repo1 now known by simulated gitolite command
+            shutil.copy(os.path.join(tmpdir, 'gitolite'),
+                        os.path.join(tmpdir, 'gitolite1'))
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user1'))),
+                {'.htaccess', 'repo1', 'repo2', 'repo3'})
+
 
 
 if __name__ == '__main__':
