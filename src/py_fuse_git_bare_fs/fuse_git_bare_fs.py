@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-10 (last change).
+:Date: 2021-06-15 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -47,7 +47,7 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-10 (last change).
+    :Date: 2021-06-15 (last change).
     """
     operations_instance = None
     if args.daemon:  # running in foreground
@@ -59,6 +59,7 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
+                args.htaccess_template[0],
                 args.gitolite_cmd[0],
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
@@ -76,6 +77,7 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
+                args.htaccess_template[0],
                 args.gitolite_cmd[0],
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
@@ -97,11 +99,11 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-10 (last change).
+    :Date: 2021-06-15 (last change).
     """
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-06-10\n'
+    epilog += 'Date: 2021-06-15\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     description = '"fuse_git_bare_fs" is a tool to mount the working '
@@ -263,7 +265,7 @@ def my_argument_parser():
     epilog += 'allow_other,get_user_list_from_gitolite,provide_htaccess,'
     epilog += 'root_object=master,ro 0 0\n\n'
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-06-10\n'
+    epilog += 'Date: 2021-06-15\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     tree_parser = argparse.ArgumentParser(add_help=False)
@@ -296,6 +298,15 @@ def my_argument_parser():
         action='store_true',
         help='This creates ".htaccess" files in the user directories. This '
         'only appears if the flag "-get_user_list_from_gitolite" is given.')
+    parser_tree.add_argument(
+        '-htaccess_template',
+        nargs=1,
+        type=str,
+        required=False,
+        default=[None],
+        dest='htaccess_template',
+        help='A htaccess template can be given. It is "Require user [username]"'
+        ' added. On default only "Require user [username]" is used.')
     parser_tree.add_argument(
         '-gitolite_cmd',
         nargs=1,

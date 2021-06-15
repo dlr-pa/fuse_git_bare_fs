@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-10 (last change).
+:Date: 2021-06-15 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -21,18 +21,23 @@ from .simple_file_handler import simple_file_handler_class
 class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-06-10
+    :Date: 2021-06-15
 
     read only access to working trees of git bare repositories
     """
 
     def __init__(self, src_dir, root_object, provide_htaccess,
+                 htaccess_template=None,
                  gitolite_cmd='gitolite', gitolite_user_file=None,
                  max_cache_size=1073741824,
                  simple_file_handler=None):
         self.src_dir = src_dir
         self.root_object = root_object
         self.provide_htaccess = provide_htaccess
+        self.htaccess_template = b''
+        if htaccess_template is not None:
+            with open(htaccess_template, 'rb') as fd:
+                self.htaccess_template = fd.read()
         if simple_file_handler is None:
             self.simple_file_handler = simple_file_handler_class()
         else:
@@ -69,7 +74,8 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
     def _get_htaccess_content(self, username):
         # this restricts access to the user username
         # for webdav on apache
-        content = b'Require user ' + username.encode() + b'\n'
+        content = self.htaccess_template
+        content += b'Require user ' + username.encode() + b'\n'
         return content
 
     def getattr(self, path, fh=None):
