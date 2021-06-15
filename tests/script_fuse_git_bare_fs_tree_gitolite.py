@@ -370,6 +370,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+
     def test_fuse_git_bare_fs_tree_gitolite_daemon4(self):
         """
         :Author: Daniel Mohr
@@ -419,11 +420,24 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             # repo1 now known by simulated gitolite command
             shutil.copy(os.path.join(tmpdir, 'gitolite'),
                         os.path.join(tmpdir, 'gitolite1'))
+            # update hash of gitolite-admin repo
+            cmd = 'git commit -m foo --allow-empty ; git push'
+            cp = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True,
+                cwd=os.path.join(tmpdir, clientdir, 'gitolite-admin'),
+                timeout=3, check=False)
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
                 {'.htaccess', 'repo1', 'repo2', 'repo3'})
-
+            # remove mount
+            cp = subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
 
 
 if __name__ == '__main__':
