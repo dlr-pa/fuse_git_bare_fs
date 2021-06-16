@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-15 (last change).
+:Date: 2021-06-16 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ from .simple_file_handler import simple_file_handler_class
 class user_repos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-06-15
+    :Date: 2021-06-16
     """
 
     def __init__(self, repopath, root_object,
@@ -52,7 +52,7 @@ class user_repos():
         with self.lock.read_locked():
             commit_hash = self.commit_hash
             mtime_gitolite_user_file = self.mtime_gitolite_user_file
-        if not commit_hash:
+        if commit_hash is None:
             return False
         if ((self.gitolite_user_file is not None) and
             os.path.isfile(self.gitolite_user_file)):
