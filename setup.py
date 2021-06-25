@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-17
+:Date: 2021-06-25
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,7 +14,7 @@ class TestWithPytest(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-14
+    :Date: 2021-06-25
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with pytest
@@ -55,7 +55,7 @@ class TestWithPytest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-21
+        :Date: 2021-06-25
         """
         # env python3 setup.py run_pytest
         import sys
@@ -106,11 +106,11 @@ class TestWithPytest(Command):
         if self.pytestverbose:
             pyargs += ['--verbose']
         pyargs += ['tests/py_fuse_git_bare_fs_repo_class.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_tree.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_tree_gitolite.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_tree_annex.py']
         if self.src == 'installed':
+            pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
+            pyargs += ['tests/script_fuse_git_bare_fs_tree.py']
+            pyargs += ['tests/script_fuse_git_bare_fs_tree_gitolite.py']
+            pyargs += ['tests/script_fuse_git_bare_fs_tree_annex.py']
             pyargs += ['tests/main.py']
         pyplugins = []
         print('call: pytest', ' '.join(pyargs))
@@ -292,7 +292,7 @@ required_modules += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-06-17',
+    version='2021-06-25',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
