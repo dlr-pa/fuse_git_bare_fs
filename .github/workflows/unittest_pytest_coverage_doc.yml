@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install dependencies (ubuntu packages)
-      run: sudo apt install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex
+      run: sudo apt install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
     - name: setup author identity for git commits
       run: |
         test -n "$(git config user.name)" || git config --global user.name $USER
@@ -36,6 +36,17 @@ jobs:
       run: env python3 setup.py run_unittest
     - name: pytest
       run: env python3 setup.py run_pytest --parallel --coverage
+    - name: build doc
+      run: ./create_doc
+    - name: adapt doc fo jekyll
+      if: ${{ github.event_name == 'push' }}
+      run: touch manual_fuse_git_bare_fs_html/.nojekyll
+    - name: deploy pages
+      if: ${{ github.event_name == 'push' }}
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: documentation
+        folder: manual_fuse_git_bare_fs_html
 
   ubuntu-2004_test_doc:
 #    runs-on: ubuntu-latest
@@ -43,7 +54,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install dependencies (ubuntu packages)
-      run: sudo apt install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex
+      run: sudo apt install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
     - name: setup author identity for git commits
       run: |
         test -n "$(git config user.name)" || git config --global user.name $USER
@@ -60,3 +71,5 @@ jobs:
       run: env python3 setup.py run_unittest
     - name: pytest
       run: env python3 setup.py run_pytest --parallel --coverage
+    - name: build doc
+      run: ./create_doc

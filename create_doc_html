@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+set -e
+d="manual_fuse_git_bare_fs_html"
+if [ ! -d $d ]; then
+    mkdir $d
+fi
+
+skipcp='false'
+if [ ! $# -eq 0 ]; then
+    if [ 'skipcp' = $1 ]; then
+	skipcp='true'
+    fi
+fi
+if [ $skipcp != "true" ]; then
+    cp -p README.md doc/source/
+fi
+
+if [ -f doc/source/test_coverage_report/index.html ]; then
+    rm doc/source/test_coverage_report/index.html
+fi
+if [ -d coverage_report ]; then
+    cp -p coverage_report/index.html doc/source/test_coverage_report/
+fi
+
+cd doc
+make html
+rsp="--archive --one-file-system --links --hard-links --sparse --checksum"
+bhp="build/html"
+dd="$d/test_coverage_report"
+rsync --delete-after $rsp $bhp/ ../$d/
+cp -p ../LICENSE.txt ../$d/
+if [ -d ../coverage_report ]; then
+    rsync --delete-after $rsp  ../coverage_report/ ../$dd/
+    cp -p $bhp/test_coverage_report/index.html ../$dd/index.html
+fi
+cd ..
