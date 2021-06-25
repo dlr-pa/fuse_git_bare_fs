@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+set -e
+
+skipcp='false'
+if [ ! $# -eq 0 ]; then
+    if [ 'skipcp' = $1 ]; then
+	skipcp='true'
+    fi
+fi
+if [ $skipcp != "true" ]; then
+    cp -p README.md doc/source/
+fi
+
+cd doc
+make latexpdf && make latexpdf && cp -p build/latex/fuse_git_bare_fs.pdf ../manual_fuse_git_bare_fs.pdf || exit $?
+cd ..

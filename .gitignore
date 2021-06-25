@@ -8,4 +8,8 @@ installed_files.txt
 .cache/
 .coverage
 coverage_report/
-
+manual_fuse_git_bare_fs_html/
+doc/source/test_coverage_report/index.html
+doc/source/README.md
+.cache/
+manual_fuse_git_bare_fs.pdf
