@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-17
+:Date: 2021-06-25
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,7 +14,7 @@ class TestWithPytest(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-14
+    :Date: 2021-06-25
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with pytest
@@ -55,7 +55,7 @@ class TestWithPytest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-21
+        :Date: 2021-06-25
         """
         # env python3 setup.py run_pytest
         import sys
@@ -84,9 +84,9 @@ class TestWithPytest(Command):
                     nthreads = int(os.cpu_count() - os.getloadavg()[0])
                     # since we have only a few tests, limit overhead:
                     nthreads = min(4, nthreads)
-                    nthreads = max(1, nthreads)  # at least one thread
+                    nthreads = max(2, nthreads)  # at least two threads
                 else:
-                    nthreads = max(1, int(0.5 * os.cpu_count()))
+                    nthreads = max(2, int(0.5 * os.cpu_count()))
                 pyargs += ['-n %i' % nthreads]
             except:
                 pass
@@ -106,22 +106,22 @@ class TestWithPytest(Command):
         if self.pytestverbose:
             pyargs += ['--verbose']
         pyargs += ['tests/py_fuse_git_bare_fs_repo_class.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_tree.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_tree_gitolite.py']
-        pyargs += ['tests/script_fuse_git_bare_fs_tree_annex.py']
         if self.src == 'installed':
+            pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
+            pyargs += ['tests/script_fuse_git_bare_fs_tree.py']
+            pyargs += ['tests/script_fuse_git_bare_fs_tree_gitolite.py']
+            pyargs += ['tests/script_fuse_git_bare_fs_tree_annex.py']
             pyargs += ['tests/main.py']
         pyplugins = []
         print('call: pytest', ' '.join(pyargs))
-        pytest.main(pyargs, pyplugins)
+        sys.exit(pytest.main(pyargs, pyplugins))
 
 
 class TestWithUnittest(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-14
+    :Date: 2021-06-25
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with unittest
@@ -154,7 +154,7 @@ class TestWithUnittest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-14
+        :Date: 2021-06-25
         """
         # env python3 setup.py run_unittest
         import sys
@@ -190,7 +190,11 @@ class TestWithUnittest(Command):
             test_required_module_import))
         if self.src == 'installed':
             tests.scripts(suite)
-        unittest.TextTestRunner(verbosity=2).run(suite)
+        status = unittest.TextTestRunner(verbosity=2).run(suite)
+        if status.wasSuccessful():
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
 
 class CheckModules(Command):
@@ -282,7 +286,7 @@ required_modules += ['importlib']
 # optional modules for python3 setup.py check_modules_modulefinder
 required_modules += ['modulefinder']
 # modules to build doc
-required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
+#required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
 # modules to run tests with unittest
 required_modules += ['shutil', 'tempfile', 'unittest']
 # modules to run tests with pytest
@@ -292,7 +296,7 @@ required_modules += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-06-17',
+    version='2021-06-25',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
