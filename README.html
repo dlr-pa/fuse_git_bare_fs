@@ -1,0 +1,208 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>README: fuse_git_bare_fs &#8212; fuse_git_bare_fs 2021-06-25 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2021-06-25',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Search within fuse_git_bare_fs 2021-06-25 documentation"
+          href="_static/opensearch.xml"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="INSTALL: fuse_git_bare_fs" href="INSTALL.html" />
+    <link rel="prev" title="Welcome to fuse_git_bare_fs’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="INSTALL.html" title="INSTALL: fuse_git_bare_fs"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to fuse_git_bare_fs’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2021-06-25 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="readme-fuse-git-bare-fs">
+<span id="readme-fuse-git-bare-fs"></span><h1>README: fuse_git_bare_fs<a class="headerlink" href="#readme-fuse-git-bare-fs" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="intro">
+<span id="intro"></span><h2>intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h2>
+<p>‘fuse_git_bare_fs.py’ is a tool to mount the working tree of a git bare repository as a filesystem in user space (fuse).</p>
+<p>You can find more information on the web:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/dlr-pa/fuse_git_bare_fs">source code of fuse_git_bare_fs</a></li>
+<li><a class="reference external" href="https://dlr-pa.github.io/fuse_git_bare_fs">documentation of fuse_git_bare_fs</a></li>
+</ul>
+</div>
+<div class="section" id="install">
+<span id="install"></span><h2>install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="doc/source/INSTALL.txt">INSTALL.txt</a> or [INSTALL: fuse_git_bare_fs (web)]
+(https://dlr-pa.github.io/ fuse_git_bare_fs/INSTALL.html) for full install
+manual. You can find a very short overview in the next lines.</p>
+<p>fuse_git_bare_fs needs some Python modules and you can also ask the installation
+routine/script for the required Python modules:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">help</span>
+<span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">requires</span>
+</pre></div>
+</div>
+<p>To install this software global to / the following step is to perform:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">record</span> <span class="n">installed_files</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>To install this software to your $HOME the following steps are to perform:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">home</span><span class="o">=~</span> <span class="o">--</span><span class="n">record</span> <span class="n">installed_files</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>You can also use pip to install:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>For older versions of pip you need to choose explicit a home install:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span> <span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="copyright-license">
+<span id="copyright-license"></span><h2>copyright + license<a class="headerlink" href="#copyright-license" title="Permalink to this headline">¶</a></h2>
+<p>Author: Daniel Mohr.</p>
+<p>Date: 2021-06-25 (last change).</p>
+<p>License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
+<p>Copyright (C) 2021 Daniel Mohr and Deutsches Zentrum fuer Luft- und Raumfahrt e. V., D-51170 Koeln</p>
+<p>This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.</p>
+<p>This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</p>
+<p>You should have received a copy (see <a class="reference external" href="gpl-2.0.txt">gpl</a>) of the
+GNU General Public License along with this program.
+If not, see <a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>.</p>
+</div>
+<div class="section" id="contact-informations">
+<span id="contact-informations"></span><h2>Contact Informations<a class="headerlink" href="#contact-informations" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Daniel Mohr, daniel.mohr&#64;dlr.de</li>
+</ul>
+</div>
+<div class="section" id="territory">
+<span id="territory"></span><h2>Territory<a class="headerlink" href="#territory" title="Permalink to this headline">¶</a></h2>
+<p>This license applies to all components/files of the software.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to fuse_git_bare_fs’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="INSTALL.html"
+                        title="next chapter">INSTALL: fuse_git_bare_fs</a></p>
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Welcome to fuse_git_bare_fs’s documentation!</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#content">Content</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">README: fuse_git_bare_fs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="INSTALL.html">INSTALL: fuse_git_bare_fs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="module_py_fuse_git_bare_fs.html">python module: <code class="docutils literal"><span class="pre">py_fuse_git_bare_fs</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_coverage_report/index.html">test coverage report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gpl.html">GPL</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#indices-and-tables">Indices and tables</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">README: fuse_git_bare_fs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intro">intro</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install">install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#copyright-license">copyright + license</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contact-informations">Contact Informations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#territory">Territory</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="INSTALL.html">INSTALL: fuse_git_bare_fs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_py_fuse_git_bare_fs.html">python module: <code class="docutils literal"><span class="pre">py_fuse_git_bare_fs</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_coverage_report/index.html">test coverage report</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpl.html">GPL</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/README.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="INSTALL.html" title="INSTALL: fuse_git_bare_fs"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to fuse_git_bare_fs’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2021-06-25 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Daniel Mohr.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+    </div>
+  </body>
+</html>

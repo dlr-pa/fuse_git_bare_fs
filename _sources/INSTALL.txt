@@ -1,0 +1,224 @@
+=========================
+INSTALL: fuse_git_bare_fs
+=========================
+
+:Version: 2021-04-09
+:Author: Daniel Mohr
+:Email: daniel.mohr@dlr.de
+
+.. contents::
+
+.. footer::
+
+   ###Page### / ###Total###
+
+
+INSTALL: fuse_git_bare_fs
++++++++++++++++++++++++++
+
+
+info
+====
+
+
+before you install
+==================
+
+
+Modules
+-------
+
+fuse_git_bare_fs needs the following python modules
+(most of them are standard and already in your python installation
+from a package management):
+
+ * fusepy
+
+You can also asked the installation routine/script for the python modules::
+
+  env python3 setup.py --help
+  env python3 setup.py --requires
+
+There is also a small extra command to check for availability of
+necessary python modules::
+
+  env python3 setup.py check_modules
+
+If you want to use this complete software you should have no modules
+which are not available.
+
+Much more information you get from the following small extra command
+by using the modulefinder::
+
+  env python3 setup.py check_modules_modulefinder
+
+It is normal that there are many missing modules reported. Please look
+at the details.
+
+
+unittests
+---------
+
+You can run a few unittests::
+
+  env python3 setup.py run_unittest --src local
+
+But the scripts are not tested before installing.
+After installation you can run unittests on the scripts as well
+(see :ref:`after you install.unittests`).
+
+pytest
+------
+
+Instead of the standard module unittest you can also use pytest to run
+all available unittests (including scripts)::
+
+  env python3 setup.py run_pytest
+
+But the scripts are not tested before installing.
+After installation you can run these tests on the scripts as well
+(see :ref:`after you install.pytest`).
+
+
+install by setup.py with distutils
+==================================
+
+global-install
+--------------
+To install this software global to / the following steps are to perform::
+
+  tar xzf fuse_git_bare_fs-*.tar.*
+  cd fuse_git_bare_fs-*/
+  env python3 setup.py install
+
+You can also store the installed files, e. g.::
+
+  env python3 setup.py install --record installed_files.txt
+
+Then you can uninstall with this information.
+
+
+home-install
+------------
+To install this software to your $HOME the following steps are to perform::
+
+  tar xzf fuse_git_bare_fs-*.tar.*
+  cd fuse_git_bare_fs-*/
+  env python3 setup.py install --home=~
+
+You can also store the installed files, e. g.::
+
+  env python3 setup.py install --home=~ --record installed_files.txt
+
+Then you can uninstall with this information.
+
+
+uninstall (distutils)
+---------------------
+
+If you have done the above installation and recorded the installed files,
+you can just remove them to uninstall, e. g.::
+
+  cat installed_files.txt | xargs rm -rf
+
+In principle there is a problem with extraordinary file names, e. g. if
+spaces are part of. This should not be the case here.
+
+
+hints (distutils)
+-----------------
+
+Keep in mind to have the right paths.
+
+  For the above installation to $HOME the software installs in::
+
+    ~/bin
+    ~/lib/python
+
+  Please make sure to have these paths in $PATH and $PYTHONPATH, respectively.
+  For example::
+
+    export PATH=$PATH:~/bin
+    export PYTHONPATH=~/lib/python
+
+
+install with pip
+================
+
+You can also use the python package manager system pip. This allows you to
+handle dependencies, too.
+
+
+install (pip)
+-------------
+
+You can use pip to install::
+
+  pip3 install .
+
+For older versions of pip you need to choose explicit a home install::
+
+  pip3 install --user .
+
+
+uninstall (pip)
+---------------
+
+You can use pip to uninstall::
+
+  pip3 uninstall fuse_git_bare_fs
+
+
+hints (pip)
+-----------
+
+Keep in mind to have the right paths.
+
+  For the above installation to $HOME the software installs in::
+
+    ~/.local/bin
+    ~/.local/lib/python*
+
+  Please make sure to have these paths in $PATH and $PYTHONPATH, respectively.
+  For example::
+
+    export PATH=$PATH:~/.local/bin
+    export PYTHONPATH=~/.local/lib/python3.6
+
+
+after you install
+=================
+
+.. _after you install.unittests:
+
+unittests (after installation)
+------------------------------
+
+Now you can run all available unittests (including scripts)::
+
+  env python3 setup.py run_unittest
+
+.. _after you install.pytest:
+
+pytest (after installation)
+---------------------------
+
+Instead of the standard module unittest you can also use pytest to run
+all available unittests (including scripts)::
+
+  env python3 setup.py run_pytest
+
+This command has a few interesting parameters, e. g.::
+
+  env python3 setup.py run_pytest --coverage
+
+
+hints
+=====
+
+Ubuntu 18.04
+------------
+
+You can find most necessary modules in the package management of Ubuntu 18.04, e. g. ::
+
+    sudo app install python3-fusepy
