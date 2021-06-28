@@ -6,8 +6,14 @@
 Welcome to fuse_git_bare_fs's documentation!
 ============================================
 
-'fuse_git_bare_fs.py' is a tool to mount the working tree of a git bare
-repository as a filesystem in user space (fuse).
+:program:`fuse_git_bare_fs.py` is a tool to mount the working tree of a
+[git]_ bare repository as a filesystem in user space ([FUSE]_).
+
+You can find more information on the web and in the following:
+
+  * `source code of fuse_git_bare_fs <https://github.com/dlr-pa/fuse_git_bare_fs>`_
+  * `documentation of fuse_git_bare_fs <https://dlr-pa.github.io/fuse_git_bare_fs>`_
+
 
 .. only:: html
 
@@ -17,9 +23,9 @@ repository as a filesystem in user space (fuse).
 .. toctree::
    :maxdepth: 2
 
-   index
    README.md
    INSTALL.txt
+   script_fuse_git_bare_fs
    module_py_fuse_git_bare_fs
    test_coverage_report/index
    gpl
