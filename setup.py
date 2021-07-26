@@ -96,8 +96,8 @@ class TestWithPytest(Command):
             # first we need to clean the target directory
             if os.path.isdir(coverage_dir):
                 files = os.listdir(coverage_dir)
-                for f in files:
-                    os.remove(os.path.join(coverage_dir, f))
+                for filename in files:
+                    os.remove(os.path.join(coverage_dir, filename))
             pyargs += ['--cov=py_fuse_git_bare_fs', '--no-cov-on-fail',
                        '--cov-report=html:' + coverage_dir,
                        '--cov-report=term:skip-covered']
@@ -174,7 +174,7 @@ class TestWithUnittest(Command):
         tests.module(suite)
         setup_self = self
 
-        class test_required_module_import(unittest.TestCase):
+        class TestRequiredModuleImport(unittest.TestCase):
             def test_required_module_import(self):
                 import importlib
                 for module in setup_self.distribution.metadata.get_requires():
@@ -187,7 +187,7 @@ class TestWithUnittest(Command):
                         importlib.import_module(module)
         loader = unittest.defaultTestLoader
         suite.addTest(loader.loadTestsFromTestCase(
-            test_required_module_import))
+            TestRequiredModuleImport))
         if self.src == 'installed':
             tests.scripts(suite)
         status = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -319,7 +319,7 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Natural Language :: English',
         'Operating System :: POSIX',
         'Operating System :: POSIX :: BSD :: FreeBSD',
@@ -328,7 +328,8 @@ setup(
         'Operating System :: Unix',
         'Operating System :: MacOS',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3'],
+        'Programming Language :: Python :: 3',
+        'Topic :: System :: Filesystems'],
     # cat $(find | grep "py$") | egrep -i "^[ \t]*import .*$" | egrep -i --only-matching "import .*$" | sort -u
     requires=required_modules
 )
