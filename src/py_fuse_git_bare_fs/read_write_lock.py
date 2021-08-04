@@ -9,19 +9,38 @@ from contextlib import contextmanager
 import threading
 
 
-class read_write_lock():
+class ReadWriteLock():
     """
     :Author: Daniel Mohr
     :Date: 2021-04-17
     """
 
     def __init__(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-17
+
+        ReadWriteLock is a class to provide combined lock mechanism for
+        a read and a write.
+
+        The write is only possible for one thread and only if no read is
+        locked.
+
+        The read is only possible, when no write is locked. It is possbile
+        to read from many threads parallel.
+        """
         self.write_lock = threading.Lock()
         self.read_lock = threading.Lock()
         self.block_read_lock = threading.Lock()
         self.value = 0
 
     def acquire_read(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-17
+
+        Locks a read.
+        """
         self.block_read_lock.acquire()
         self.read_lock.acquire()
         self.value += 1
@@ -31,6 +50,12 @@ class read_write_lock():
         self.block_read_lock.release()
 
     def release_read(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-17
+
+        Release a read.
+        """
         assert self.value > 0
         self.read_lock.acquire()
         self.value -= 1
@@ -43,8 +68,8 @@ class read_write_lock():
         """
         Example::
 
-          from .read_write_lock import read_write_lock
-          lock = read_write_lock()
+          from .read_write_lock import ReadWriteLock
+          lock = ReadWriteLock()
           locked_data = 'foo'
           with self.lock.read_locked():
               print(locked_data)
@@ -56,11 +81,23 @@ class read_write_lock():
             self.release_read()
 
     def acquire_write(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-17
+
+        Locks a write.
+        """
         self.block_read_lock.acquire()
         self.write_lock.acquire()
         self.block_read_lock.release()
 
     def release_write(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-17
+
+        Release a write.
+        """
         self.write_lock.release()
 
     @contextmanager
@@ -68,8 +105,8 @@ class read_write_lock():
         """
         Example::
 
-          from .read_write_lock import read_write_lock
-          lock = read_write_lock()
+          from .read_write_lock import ReadWriteLock
+          lock = ReadWriteLock()
           locked_data = 'foo'
           with self.lock.write_locked():
               locked_data = 'bar'

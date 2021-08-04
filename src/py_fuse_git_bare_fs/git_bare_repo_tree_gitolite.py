@@ -14,7 +14,7 @@ import os.path
 import re
 
 from .empty_attr_mixin import _empty_attr_mixin
-from .user_repos import user_repos
+from .user_repos import UserRepos
 from .simple_file_handler import simple_file_handler_class
 
 
@@ -42,9 +42,9 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
             self.simple_file_handler = simple_file_handler_class()
         else:
             self.simple_file_handler = simple_file_handler
-        self.repos = user_repos(src_dir, self.root_object,
-                                gitolite_cmd, gitolite_user_file,
-                                max_cache_size)
+        self.repos = UserRepos(src_dir, self.root_object,
+                               gitolite_cmd, gitolite_user_file,
+                               max_cache_size)
 
     def _extract_user_from_path(self, path):
         actual_user = None

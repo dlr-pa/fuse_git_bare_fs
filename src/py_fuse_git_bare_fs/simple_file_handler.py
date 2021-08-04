@@ -11,7 +11,7 @@ try:
 except ModuleNotFoundError:
     import fuse as fusepy
 
-from .read_write_lock import read_write_lock
+from .read_write_lock import ReadWriteLock
 
 
 class simple_file_handler_class():
@@ -27,7 +27,7 @@ class simple_file_handler_class():
         if max_file_handlers >= 2147483647:
             raise ValueError
         self.max_file_handlers = max_file_handlers
-        self.lock = read_write_lock()
+        self.lock = ReadWriteLock()
         with self.lock.write_locked():
             self.next_file_handler_number = 0
             self.file_handler = []

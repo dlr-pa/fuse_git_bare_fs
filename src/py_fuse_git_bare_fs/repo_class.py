@@ -18,8 +18,8 @@ import subprocess
 import time
 import warnings
 
-from .read_write_lock import read_write_lock
-from .simple_file_cache import simple_file_cache
+from .read_write_lock import ReadWriteLock
+from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import simple_file_handler_class
 
 
@@ -54,7 +54,7 @@ class repo_class():
         # we use the last commit time for everything, could be enhanced
         self.time = None
         if cache is None:
-            self.cache = simple_file_cache(max_cache_size=max_cache_size)
+            self.cache = SimpleFileCache(max_cache_size=max_cache_size)
         else:
             self.cache = cache
         self.content_cache = dict()
@@ -63,7 +63,7 @@ class repo_class():
             self.simple_file_handler = simple_file_handler_class()
         else:
             self.simple_file_handler = simple_file_handler
-        self.lock = read_write_lock()
+        self.lock = ReadWriteLock()
         with self.lock.write_locked():
             self._read_tree()
 

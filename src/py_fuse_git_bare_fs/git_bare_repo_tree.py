@@ -18,8 +18,8 @@ import time
 
 from .empty_attr_mixin import _empty_attr_mixin
 from .repo_class import repo_class
-from .read_write_lock import read_write_lock
-from .simple_file_cache import simple_file_cache
+from .read_write_lock import ReadWriteLock
+from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import simple_file_handler_class
 
 
@@ -36,13 +36,13 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
                  simple_file_handler=None):
         self.src_dir = src_dir
         self.root_object = root_object
-        self.cache = simple_file_cache(max_cache_size=max_cache_size)
+        self.cache = SimpleFileCache(max_cache_size=max_cache_size)
         if simple_file_handler is None:
             self.simple_file_handler = simple_file_handler_class()
         else:
             self.simple_file_handler = simple_file_handler
         self.repos = dict()
-        self._lock = read_write_lock()
+        self._lock = ReadWriteLock()
         t0 = time.time()
         with self._lock.write_locked():
             self.repos = self._get_repos()
