@@ -88,7 +88,7 @@ class TestWithPytest(Command):
                 else:
                     nthreads = max(2, int(0.5 * os.cpu_count()))
                 pyargs += ['-n %i' % nthreads]
-            except:
+            except (ModuleNotFoundError, ImportError):
                 pass
         if self.coverage:
             # env python3 setup.py run_pytest --coverage
@@ -286,7 +286,7 @@ required_modules += ['importlib']
 # optional modules for python3 setup.py check_modules_modulefinder
 required_modules += ['modulefinder']
 # modules to build doc
-#required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
+# required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
 # modules to run tests with unittest
 required_modules += ['shutil', 'tempfile', 'unittest']
 # modules to run tests with pytest
@@ -330,6 +330,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Topic :: System :: Filesystems'],
-    # cat $(find | grep "py$") | egrep -i "^[ \t]*import .*$" | egrep -i --only-matching "import .*$" | sort -u
+    # cat $(find | grep "py$") | egrep -i "^[ \t]*import .*$" | \
+    #   egrep -i --only-matching "import .*$" | sort -u
     requires=required_modules
 )

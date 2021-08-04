@@ -14,9 +14,11 @@ You can run this file directly::
 
 Or you can run only one test, e. g.::
 
-  env python3 script_fuse_git_bare_fs_tree_annex.py script_fuse_git_bare_fs_tree_annex.test_fuse_git_bare_fs_tree_annex
+  env python3 script_fuse_git_bare_fs_tree_annex.py \
+    script_fuse_git_bare_fs_tree_annex.test_fuse_git_bare_fs_tree_annex
 
-  pytest-3 -k test_fuse_git_bare_fs_tree_annex script_fuse_git_bare_fs_tree_annex.py
+  pytest-3 -k test_fuse_git_bare_fs_tree_annex \
+    script_fuse_git_bare_fs_tree_annex.py
 """
 
 import os

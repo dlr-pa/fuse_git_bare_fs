@@ -115,7 +115,8 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
             stopindex = 1024  # assume no usename is longer than 1011
             if size is not None:
                 stopindex = startindex + size
-            return self._get_htaccess_content(actual_user)[startindex:stopindex]
+            return \
+                self._get_htaccess_content(actual_user)[startindex:stopindex]
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)

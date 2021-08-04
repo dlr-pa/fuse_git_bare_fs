@@ -14,9 +14,11 @@ You can run this file directly::
 
 Or you can run only one test, e. g.::
 
-  env python3 script_fuse_git_bare_fs_tree_gitolite.py script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite1
+  env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+    script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite1
 
-  pytest-3 -k test_fuse_git_bare_fs_tree_gitolite script_fuse_git_bare_fs_tree_gitolite.py
+  pytest-3 -k test_fuse_git_bare_fs_tree_gitolite \
+    script_fuse_git_bare_fs_tree_gitolite.py
 """
 
 import os
@@ -146,7 +148,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        env python3 script_fuse_git_bare_fs_tree_gitolite.py script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -283,7 +286,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-06-15
 
-        env python3 script_fuse_git_bare_fs_tree_gitolite.py script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon3
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon3
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -334,7 +338,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
             # run tests
-            with open(os.path.join(tmpdir, 'htaccess_template.txt'), 'w') as fd:
+            with open(os.path.join(tmpdir,
+                                   'htaccess_template.txt'), 'w') as fd:
                 fd.write('# comment\n')
             call_cmd = 'fuse_git_bare_fs tree -daemon'
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
@@ -376,7 +381,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-06-15
 
-        env python3 script_fuse_git_bare_fs_tree_gitolite.py script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -444,7 +450,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-06-15
 
-        env python3 script_fuse_git_bare_fs_tree_gitolite.py script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon5
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon5
         """
         serverdir = 'server'
         clientdir = 'client'

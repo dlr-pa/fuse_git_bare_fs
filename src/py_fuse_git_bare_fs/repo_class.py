@@ -154,7 +154,7 @@ class repo_class():
                         self.tree[obj_path] = dict()
 
     def _get_size_of_blob(self, head, tail):
-        if not 'st_size' in self.tree[head]['blobs'][tail]:
+        if 'st_size' not in self.tree[head]['blobs'][tail]:
             cp = subprocess.run(
                 ["git cat-file --batch-check='%(objectsize)'"],
                 input=self.tree[head]['blobs'][tail]['hash'].encode(),
@@ -174,7 +174,7 @@ class repo_class():
             self.cache.clear_repo_old(self.src_dir)
         self.lock.acquire_read()
         ret = None
-        if (self.tree is None) or (not path in self.tree):
+        if (self.tree is None) or (path not in self.tree):
             ret = ['.', '..']
         else:
             ret = ['.', '..'] + self.tree[path]['listdir']
@@ -215,11 +215,11 @@ class repo_class():
         head, tail = os.path.split(path)
         self.lock.acquire_read()
         if ((updated_cache) or
-                (self.tree is None) or (not head in self.tree)):
+                (self.tree is None) or (head not in self.tree)):
             if not updated_cache:
                 with self.lock.write_locked():
                     self._read_tree()
-            if (self.tree is None) or (not head in self.tree):
+            if (self.tree is None) or (head not in self.tree):
                 # file:///usr/share/doc/python3/html/library/errno.html
                 # no such file or directory
                 if (tail == '') and (head == '/'):
@@ -247,7 +247,7 @@ class repo_class():
             # 100644 normal file
             # 100755 executable file
             # 120000 symbolic link
-            if not tail in self.tree[head]['blobs']:
+            if tail not in self.tree[head]['blobs']:
                 # no such file or directory
                 self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
@@ -259,7 +259,8 @@ class repo_class():
                 # check if it is an accessable git-annex file
                 blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
                 link_path = self.cache.get(
-                    self.src_dir, path, blob_hash, st_size, st_size, 0).decode()
+                    self.src_dir, path,
+                    blob_hash, st_size, st_size, 0).decode()
                 #      self._get_annex_path_bare_repo(link_path))
                 #      self._get_annex_path_non_bare_repo(link_path))
                 annex_object = self.annex_object_regpat.findall(link_path)
@@ -287,7 +288,7 @@ class repo_class():
             try:
                 st_mode = self.gitmode2st_mode[
                     self.tree[head]['blobs'][tail]['mode']]
-            except:
+            except (KeyError, TypeError):
                 pass
         link_buf = None
         if st_mode == 41471:  # 120000 symbolic link
@@ -324,15 +325,15 @@ class repo_class():
         head, tail = os.path.split(path)
         self.lock.acquire_read()
         if ((updated_cache) or
-                (self.tree is None) or (not head in self.tree)):
+                (self.tree is None) or (head not in self.tree)):
             if not updated_cache:
                 with self.lock.write_locked():
                     self._read_tree()
-            if (self.tree is None) or (not head in self.tree):
+            if (self.tree is None) or (head not in self.tree):
                 # no such file or directory
                 self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
-        if not tail in self.tree[head]['blobs']:
+        if tail not in self.tree[head]['blobs']:
             # no such file or directory
             self.lock.release_read()
             raise fusepy.FuseOSError(errno.ENOENT)

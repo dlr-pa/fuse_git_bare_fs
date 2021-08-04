@@ -21,6 +21,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from recommonmark.parser import CommonMarkParser
 
 # -- General configuration ------------------------------------------------
 
@@ -46,7 +47,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-#source_suffix = '.rst'
+# source_suffix = '.rst'
 
 # use README.md in markdown here:
 #
@@ -59,7 +60,6 @@ templates_path = ['_templates']
 #
 # for sphinx 1.6.7, we need to do:
 source_suffix = ['.rst', '.txt', '.md']
-from recommonmark.parser import CommonMarkParser
 source_parsers = {
     '.md': CommonMarkParser,
 }
@@ -105,7 +105,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'alabaster'
+# html_theme = 'alabaster'
 html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -117,7 +117,7 @@ html_theme = 'nature'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -161,14 +161,15 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
-    'maxlistdepth' : '5',
+    'maxlistdepth': '5',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'fuse_git_bare_fs.tex', 'fuse\\_git\\_bare\\_fs Documentation',
+    (master_doc,
+     'fuse_git_bare_fs.tex', 'fuse\\_git\\_bare\\_fs Documentation',
      'Daniel Mohr', 'manual'),
 ]
 

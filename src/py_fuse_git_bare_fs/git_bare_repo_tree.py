@@ -61,7 +61,8 @@ class _git_bare_repo_tree_mixin(_empty_attr_mixin):
                 for reponame in repos:  # add new found repos
                     if reponame not in self.repos:
                         self.repos[reponame] = repos[reponame]
-                for reponame in list(self.repos.keys()):  # remove obsolete repos
+                for reponame in list(self.repos.keys()):
+                    # remove obsolete repos
                     if reponame not in repos:
                         del self.repos[reponame]
             self._update_repos_time = time.time()

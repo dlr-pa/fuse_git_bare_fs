@@ -14,7 +14,8 @@ You can run this file directly::
 
 Or you can run only one test, e. g.::
 
-  env python3 script_fuse_git_bare_fs_repo.py script_fuse_git_bare_fs_repo.test_fuse_git_bare_fs_repo
+  env python3 script_fuse_git_bare_fs_repo.py \
+    script_fuse_git_bare_fs_repo.test_fuse_git_bare_fs_repo
 
   pytest-3 -k test_fuse_git_bare_fs_repo script_fuse_git_bare_fs_repo.py
 """
@@ -37,7 +38,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         mount it, check for files.
         """
         serverdir = 'server'
@@ -90,7 +91,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         mount it, check for fiels.
         """
         serverdir = 'server'
@@ -196,7 +197,8 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
             self.assertEqual(data, 'abc\n')
             # adapt data
             cp = subprocess.run(
-                ['echo abc..xyz>baz; git add baz; git commit -m baz; git push'],
+                ['echo abc..xyz>baz; '
+                 'git add baz; git commit -m baz; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
@@ -217,7 +219,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         mount it, check for files.
         """
         serverdir = 'server'

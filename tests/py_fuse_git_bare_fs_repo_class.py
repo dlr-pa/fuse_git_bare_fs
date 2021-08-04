@@ -12,7 +12,8 @@ You can run this file directly:
 
 Or you can run only one test, e. g.:
 
-  env python3 py_fuse_git_bare_fs_repo_class.py py_fuse_git_bare_fs_repo_class.test_repo_class
+  env python3 py_fuse_git_bare_fs_repo_class.py \
+    py_fuse_git_bare_fs_repo_class.test_repo_class
 """
 
 
@@ -33,7 +34,7 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-29
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         check how it is handled by py_fuse_git_bare_fs.repo_class.
         """
         from py_fuse_git_bare_fs.repo_class import repo_class
@@ -141,7 +142,8 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
             self.assertEqual(data, b'abc\n')
             # adapt data
             cp = subprocess.run(
-                ['echo abc..xyz>baz; git add baz; git commit -m baz; git push'],
+                ['echo abc..xyz>baz; '
+                 'git add baz; git commit -m baz; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)

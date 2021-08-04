@@ -53,7 +53,8 @@ def fuse_git_bare_fs_tree(args):
     if args.daemon:  # running in foreground
         import logging
         if args.get_user_list_from_gitolite:
-            from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite_logging
+            from .git_bare_repo_tree_gitolite import \
+                git_bare_repo_tree_gitolite_logging
             logging.basicConfig(level=logging.DEBUG)
             operations_instance = git_bare_repo_tree_gitolite_logging(
                 os.path.abspath(args.src_dir),
@@ -72,7 +73,8 @@ def fuse_git_bare_fs_tree(args):
                 args.max_cache_size[0])
     else:
         if args.get_user_list_from_gitolite:
-            from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite
+            from .git_bare_repo_tree_gitolite \
+                import git_bare_repo_tree_gitolite
             operations_instance = git_bare_repo_tree_gitolite(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
@@ -110,7 +112,7 @@ def my_argument_parser():
     description += 'tree(s) of git bare repositories '
     description += 'as a filesystem in user space (fuse). '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
+    description += 'For a write access you should do a git commit and use git.'
     parser = argparse.ArgumentParser(
         description=description,
         epilog=epilog,
@@ -130,11 +132,12 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='opt',
-        help='These options are splitted at "," and used as seperated options. '
-        'The sub-commands are extracted as well. The flag "-daemon" is used in '
-        'any case. This allows to use this program as mount program e. g. in '
-        '/etc/fstab. Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will '
-        'become "tree -a -b c"')
+        help='These options are splitted at "," and used as seperated options.'
+        ' The sub-commands are extracted as well. '
+        'The flag "-daemon" is used in any case. '
+        'This allows to use this program as mount program e. g. in /etc/fstab.'
+        ' Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will'
+        ' become "tree -a -b c"')
     common_parser.add_argument(
         '-root_object',
         nargs=1,
@@ -191,29 +194,33 @@ def my_argument_parser():
         default=[None],
         dest='gid',
         help='The program is run under this gid. On default nothing is done. '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-ro',
         action='store_true',
         help='Make a read only mountpoint. This is always the case! '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-dev',
         action='store_true',
         help='This is ignored. '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-suid',
         action='store_true',
         help='This is ignored. '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     # subparser repo
     description = '"fuse_git_bare_fs repo" is a tool to mount the working '
     description += 'tree of a git bare repository '
     description += 'as a filesystem in user space (fuse). '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
-    description += 'This script needs about 7.6 MB of memory to run. '
+    description += 'For a write access you should do a git commit and use git.'
+    description += ' This script needs about 7.6 MB of memory to run. '
     description += 'More memory is necessary for large working trees or '
     description += 'to provide file content.'
     epilog = 'Examples:\n\n'
@@ -247,8 +254,8 @@ def my_argument_parser():
     description += 'purpose are available. It is assumed that the bare '
     description += 'repositories are named like "*.git". '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
-    description += 'For unmount just press ctrl-c, kill the program or do '
+    description += 'For a write access you should do a git commit and use git.'
+    description += ' For unmount just press ctrl-c, kill the program or do '
     description += '"fusermount -u target_dir".'
     epilog = 'Examples:\n\n'
     epilog += 'fuse_git_bare_fs tree a b\n\n'
@@ -271,8 +278,8 @@ def my_argument_parser():
     tree_parser = argparse.ArgumentParser(add_help=False)
     tree_parser.add_argument(
         'src_dir',
-        help='This is the path to the directory tree of git bare repositories. '
-        'The working trees of their root_object (e. g. master) will be '
+        help='This is the path to the directory tree of git bare repositories.'
+        ' The working trees of their root_object (e. g. master) will be '
         'transparent available in the target_dir.')
     parser_tree = subparsers.add_parser(
         'tree',
@@ -305,8 +312,9 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='htaccess_template',
-        help='A htaccess template can be given. It is "Require user [username]"'
-        ' added. On default only "Require user [username]" is used.')
+        help='A htaccess template can be given. '
+        'It is "Require user [username]" '
+        'added. On default only "Require user [username]" is used.')
     parser_tree.add_argument(
         '-gitolite_cmd',
         nargs=1,
@@ -390,7 +398,7 @@ def fuse_git_bare_fs():
             pw_dir = pwd.getpwuid(uid).pw_dir
             os.environ['HOME'] = pw_dir
             os.chdir(pw_dir)
-            if not 'PATH' in os.environ:
+            if 'PATH' not in os.environ:
                 os.environ['PATH'] = '/usr/local/sbin:/usr/local/bin:' + \
                     '/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         args.func(args)  # call the programs

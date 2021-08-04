@@ -77,7 +77,7 @@ class simple_file_cache():
                 if self.actual_cache_size + lcp < self.max_cache_size:
                     self.lock.release_read()
                     with self.lock.write_locked():
-                        if not repopath in self.cache:
+                        if repopath not in self.cache:
                             self.cache[repopath] = dict()
                         self.cache[repopath][path] = [time.time(),
                                                       cp.stdout,

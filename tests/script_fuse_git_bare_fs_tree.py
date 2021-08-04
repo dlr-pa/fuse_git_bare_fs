@@ -14,7 +14,8 @@ You can run this file directly::
 
 Or you can run only one test, e. g.::
 
-  env python3 script_fuse_git_bare_fs_tree.py script_fuse_git_bare_fs_tree.test_fuse_git_bare_fs_tree
+  env python3 script_fuse_git_bare_fs_tree.py \
+    script_fuse_git_bare_fs_tree.test_fuse_git_bare_fs_tree
 
   pytest-3 -k test_fuse_git_bare_fs_tree script_fuse_git_bare_fs_tree.py
 """

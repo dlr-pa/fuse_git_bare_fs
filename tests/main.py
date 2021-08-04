@@ -29,6 +29,8 @@ class test_module_import(unittest.TestCase):
         """
         :Author: Daniel Mohr
         :Date: 2021-04-14
+
+        env python3 main.py test_module_import.test_module_import
         """
         import py_fuse_git_bare_fs
 
@@ -103,3 +105,7 @@ def scripts(suite):
     # with git-annex: fuse_git_bare_fs tree
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_tree_annex'))
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

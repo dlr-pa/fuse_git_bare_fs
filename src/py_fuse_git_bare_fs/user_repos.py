@@ -55,12 +55,12 @@ class user_repos():
         if commit_hash is None:
             return False
         if ((self.gitolite_user_file is not None) and
-            os.path.isfile(self.gitolite_user_file)):
-                # if self.gitolite_user_file does not exist, we ignore it
-                if ((mtime_gitolite_user_file is None) or
-                    (mtime_gitolite_user_file <
-                     os.path.getmtime(self.gitolite_user_file))):
-                    return False
+                os.path.isfile(self.gitolite_user_file)):
+            # if self.gitolite_user_file does not exist, we ignore it
+            if ((mtime_gitolite_user_file is None) or
+                (mtime_gitolite_user_file <
+                 os.path.getmtime(self.gitolite_user_file))):
+                return False
         elif self.gitolite_user_file is not None:
             # self.gitolite_user_file is not a file anymore
             # (maybe it is deleted)
@@ -90,9 +90,9 @@ class user_repos():
             self.repos = None
             self.userrepoaccess = dict()
             if ((self.gitolite_user_file is not None) and
-                os.path.isfile(self.gitolite_user_file)):
+                    os.path.isfile(self.gitolite_user_file)):
                 self.mtime_gitolite_user_file = \
-                  os.path.getmtime(self.gitolite_user_file)
+                    os.path.getmtime(self.gitolite_user_file)
                 with open(self.gitolite_user_file, 'r') as fd:
                     self.users_from_file = set(fd.read().splitlines())
             cp = subprocess.run(
@@ -166,7 +166,7 @@ class user_repos():
             return ret
         else:  # return repos with access for the given user
             with self.lock.read_locked():
-                if not user in self.userrepoaccess:
+                if user not in self.userrepoaccess:
                     self.userrepoaccess[user] = []
                     for reponame in self.repos:
                         cp = subprocess.run(
