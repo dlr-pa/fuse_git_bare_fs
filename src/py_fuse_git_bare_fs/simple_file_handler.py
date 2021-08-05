@@ -14,7 +14,7 @@ except ModuleNotFoundError:
 from .read_write_lock import ReadWriteLock
 
 
-class simple_file_handler_class():
+class SimpleFileHandlerClass():
     """
     :Author: Daniel Mohr
     :Date: 2021-04-24
@@ -34,6 +34,11 @@ class simple_file_handler_class():
             self.file_handler_repo = dict()
 
     def get(self, repo):
+        """
+        Use this method to get a file handler.
+
+        It is used in an open command.
+        """
         if len(self.file_handler) >= self.max_file_handlers:
             raise fusepy.FuseOSError(errno.EMFILE)
         i = None
@@ -53,6 +58,11 @@ class simple_file_handler_class():
         return i
 
     def remove(self, repo, i):
+        """
+        Use this method to remove a file handler.
+
+        It is used in a release/close command.
+        """
         with self.lock.write_locked():
             if ((repo in self.file_handler_repo) and
                     (i in self.file_handler_repo[repo])):
@@ -65,6 +75,9 @@ class simple_file_handler_class():
                 raise fusepy.FuseOSError(errno.EBADF)
 
     def is_file_handler(self, repo, i):
+        """
+        This method allows to check if the file handler i is still valid.
+        """
         ret = False
         with self.lock.read_locked():
             if ((repo in self.file_handler_repo) and
@@ -73,6 +86,9 @@ class simple_file_handler_class():
         return ret
 
     def remove_repo(self, repo):
+        """
+        This method removes all file handlers belonging to the repository repo.
+        """
         with self.lock.write_locked():
             if repo in self.file_handler_repo:
                 for i in self.file_handler_repo[repo]:

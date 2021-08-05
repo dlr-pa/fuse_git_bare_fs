@@ -20,7 +20,7 @@ import warnings
 
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
-from .simple_file_handler import simple_file_handler_class
+from .simple_file_handler import SimpleFileHandlerClass
 
 
 class RepoClass():
@@ -62,7 +62,7 @@ class RepoClass():
         self.content_cache = dict()
         self.content_cache_size = 0
         if simple_file_handler is None:
-            self.simple_file_handler = simple_file_handler_class()
+            self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
         self.lock = ReadWriteLock()

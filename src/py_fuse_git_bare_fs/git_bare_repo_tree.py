@@ -19,7 +19,7 @@ from .empty_attr_mixin import _empty_attr_mixin
 from .repo_class import RepoClass
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
-from .simple_file_handler import simple_file_handler_class
+from .simple_file_handler import SimpleFileHandlerClass
 
 
 def _extract_repopath_from_path(actual_repo, path):
@@ -45,7 +45,7 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
         self.root_object = root_object
         self.cache = SimpleFileCache(max_cache_size=max_cache_size)
         if simple_file_handler is None:
-            self.simple_file_handler = simple_file_handler_class()
+            self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
         self.repos = dict()

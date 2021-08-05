@@ -54,9 +54,9 @@ def fuse_git_bare_fs_tree(args):
         import logging
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import \
-                git_bare_repo_tree_gitolite_logging
+                GitBareRepoTreeGitoliteLogging
             logging.basicConfig(level=logging.DEBUG)
-            operations_instance = git_bare_repo_tree_gitolite_logging(
+            operations_instance = GitBareRepoTreeGitoliteLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
@@ -74,8 +74,8 @@ def fuse_git_bare_fs_tree(args):
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite \
-                import git_bare_repo_tree_gitolite
-            operations_instance = git_bare_repo_tree_gitolite(
+                import GitBareRepoTreeGitolite
+            operations_instance = GitBareRepoTreeGitolite(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,

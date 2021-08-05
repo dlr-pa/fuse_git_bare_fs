@@ -15,10 +15,17 @@ import re
 
 from .empty_attr_mixin import _empty_attr_mixin
 from .user_repos import UserRepos
-from .simple_file_handler import simple_file_handler_class
+from .simple_file_handler import SimpleFileHandlerClass
 
 
-class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
+def _extract_repopath_from_path(actual_user, actual_repo, path):
+    repopath = path[2+len(actual_user)+len(actual_repo):]
+    if not bool(repopath):
+        repopath = '/'
+    return repopath
+
+
+class _GitBareRepoTreeGitoliteMixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
     :Date: 2021-06-17
@@ -31,6 +38,7 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
                  gitolite_cmd='gitolite', gitolite_user_file=None,
                  max_cache_size=1073741824,
                  simple_file_handler=None):
+        # pylint: disable=too-many-arguments
         self.src_dir = src_dir
         self.root_object = root_object
         self.provide_htaccess = provide_htaccess
@@ -39,7 +47,7 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
             with open(htaccess_template, 'rb') as fd:
                 self.htaccess_template = fd.read()
         if simple_file_handler is None:
-            self.simple_file_handler = simple_file_handler_class()
+            self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
         self.repos = UserRepos(src_dir, self.root_object,
@@ -58,18 +66,12 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         actual_repo = None
         for repo in self.repos.get_repos():
             repopath = os.path.join(actual_user, repo)
-            res = re.findall('^\/' + repopath + '$|^\/' +
-                             repopath + '\/', path)
+            res = re.findall(r'^\/' + repopath + r'$|^\/' +
+                             repopath + r'\/', path)
             if res:
                 actual_repo = repo
                 break
         return actual_repo
-
-    def _extract_repopath_from_path(self, actual_user, actual_repo, path):
-        repopath = path[2+len(actual_user)+len(actual_repo):]
-        if len(repopath) == 0:
-            repopath = '/'
-        return repopath
 
     def _get_htaccess_content(self, username):
         # this restricts access to the user username
@@ -78,7 +80,14 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         content += b'Require user ' + username.encode() + b'\n'
         return content
 
-    def getattr(self, path, fh=None):
+    def getattr(self, path, file_handler=None):
+        """
+        get attributes of the path
+
+        The argument file_handler is not used, but can be given to be
+        compatible to typical getattr functions.
+        """
+        # pylint: disable=unused-argument
         if path == '/':
             return self._empty_dir_attr
         actual_user = self._extract_user_from_path(path)
@@ -103,9 +112,12 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
             else:  # no such file or directory
                 raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].getattr(
-            self._extract_repopath_from_path(actual_user, actual_repo, path))
+            _extract_repopath_from_path(actual_user, actual_repo, path))
 
-    def read(self, path, size, offset, fh):
+    def read(self, path, size, offset, file_handler):
+        """
+        read parts of path
+        """
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
@@ -121,10 +133,17 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].read(
-            self._extract_repopath_from_path(actual_user, actual_repo, path),
-            size, offset, fh)
+            _extract_repopath_from_path(actual_user, actual_repo, path),
+            size, offset, file_handler)
 
-    def readdir(self, path, fh):
+    def readdir(self, path, file_handler):
+        """
+        read the directory path
+
+        The argument file_handler is not used, but can be given to be
+        compatible to typical readdir functions.
+        """
+        # pylint: disable=unused-argument
         if path == '/':
             return ['.', '..'] + self.repos.get_users()
         actual_user = self._extract_user_from_path(path)
@@ -143,31 +162,41 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
             for repo in self.repos.get_repos():
                 mypath = path[2+len(actual_user):]
                 res = re.findall(
-                    '^' + mypath + '$|^' + mypath + '\/([^\/]+)', repo)
+                    r'^' + mypath + r'$|^' + mypath + r'\/([^\/]+)', repo)
                 if res:
                     repos.append(res[0])
-            if len(repos) > 0:  # path is part of repo path
+            if bool(repos):  # path is part of repo path
                 return ['.', '..'] + list(set(repos))
             else:  # no such file or directory
                 raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].readdir(
-            self._extract_repopath_from_path(actual_user, actual_repo, path))
+            _extract_repopath_from_path(actual_user, actual_repo, path))
 
     def readlink(self, path):
+        """
+        read the symbolic link path
+        """
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        fh = self.open(path, 'r')
+        file_handler = self.open(path, 'r')
         ret = self.repos.repos[actual_repo].read(
-            self._extract_repopath_from_path(actual_user, actual_repo, path),
-            None, 0, fh).decode()
-        self.release(path, fh)
+            _extract_repopath_from_path(actual_user, actual_repo, path),
+            None, 0, file_handler).decode()
+        self.release(path, file_handler)
         return ret
 
     def open(self, path, flags):
+        """
+        Creates a lock on path and return it as a file handler.
+        Only open as read is supported, but this is not checked.
+
+        This lock will be destroyed, if the repository is changed or it is
+        released.
+        """
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
@@ -178,26 +207,29 @@ class _git_bare_repo_tree_gitolite_mixin(_empty_attr_mixin):
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].open(
-            self._extract_repopath_from_path(actual_user, actual_repo, path),
+            _extract_repopath_from_path(actual_user, actual_repo, path),
             flags)
 
-    def release(self, path, fh):
+    def release(self, path, file_handler):
+        """
+        Releases the lock file_fandler on path.
+        """
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         elif (self.provide_htaccess and
               (path == '/' + actual_user + '/.htaccess')):
-            return self.simple_file_handler.remove(self.src_dir, fh)
+            return self.simple_file_handler.remove(self.src_dir, file_handler)
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].release(
-            self._extract_repopath_from_path(actual_user, actual_repo, path),
-            fh)
+            _extract_repopath_from_path(actual_user, actual_repo, path),
+            file_handler)
 
 
-class git_bare_repo_tree_gitolite(
-        _git_bare_repo_tree_gitolite_mixin, fusepy.Operations):
+class GitBareRepoTreeGitolite(
+        _GitBareRepoTreeGitoliteMixin, fusepy.Operations):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-13
@@ -206,8 +238,8 @@ class git_bare_repo_tree_gitolite(
     """
 
 
-class git_bare_repo_tree_gitolite_logging(
-        _git_bare_repo_tree_gitolite_mixin,
+class GitBareRepoTreeGitoliteLogging(
+        _GitBareRepoTreeGitoliteMixin,
         fusepy.LoggingMixIn, fusepy.Operations):
     """
     :Author: Daniel Mohr

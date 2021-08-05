@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     import fuse as fusepy
 
 from .repo_class import RepoClass
-from .simple_file_handler import simple_file_handler_class
+from .simple_file_handler import SimpleFileHandlerClass
 
 
 class _GitBareRepoMixin():
@@ -29,7 +29,7 @@ class _GitBareRepoMixin():
         self.src_dir = src_dir
         self.root_object = root_object
         if simple_file_handler is None:
-            self.simple_file_handler = simple_file_handler_class()
+            self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
         self.repo = RepoClass(
