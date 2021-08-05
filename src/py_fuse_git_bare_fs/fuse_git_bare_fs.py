@@ -23,19 +23,19 @@ def fuse_git_bare_fs_repo(args):
     operations_instance = None
     if args.daemon:  # running in foreground
         import logging
-        from .git_bare_repo import git_bare_repo_logging
+        from .git_bare_repo import GitBareRepoLogging
         logging.basicConfig(level=logging.DEBUG)
-        operations_instance = git_bare_repo_logging(
+        operations_instance = GitBareRepoLogging(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0])
     else:
-        from .git_bare_repo import git_bare_repo
-        operations_instance = git_bare_repo(
+        from .git_bare_repo import GitBareRepo
+        operations_instance = GitBareRepo(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0])
-    fuse = fusepy.FUSE(
+    fusepy.FUSE(
         operations_instance,
         args.target_dir,
         foreground=args.daemon,
@@ -89,7 +89,7 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0])
-    fuse = fusepy.FUSE(
+    fusepy.FUSE(
         operations_instance,
         args.target_dir,
         foreground=args.daemon,
@@ -103,6 +103,7 @@ def my_argument_parser():
     :Email: daniel.mohr@dlr.de
     :Date: 2021-06-15 (last change).
     """
+    # pylint: disable=too-many-statements
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
     epilog += 'Date: 2021-06-15\n'
@@ -346,6 +347,12 @@ def my_argument_parser():
 
 
 def fuse_git_bare_fs():
+    """
+    :Author: Daniel Mohr
+    :Email: daniel.mohr@dlr.de
+    :Date: 2021-06-10 (last change).
+    """
+    # pylint: disable=too-many-branches,too-many-statements
     # command line arguments:
     parser = my_argument_parser()
     # parse arguments
@@ -355,16 +362,16 @@ def fuse_git_bare_fs():
         found_positional_params = 0
         for i in range(1, len(sys.argv)):
             if sys.argv[i] == '-o':
-                opt = sys.argv[i + 1].split(',')
-                for o in opt:
-                    if '=' in o:
-                        par, val = o.split('=')
+                options = sys.argv[i + 1].split(',')
+                for opt in options:
+                    if '=' in opt:
+                        par, val = opt.split('=')
                         param.append('-' + par)
                         param.append(val)
-                    elif o in ['repo', 'tree']:
-                        param = [o] + param
+                    elif opt in ['repo', 'tree']:
+                        param = [opt] + param
                     else:
-                        param.append('-' + o)
+                        param.append('-' + opt)
             elif sys.argv[i] in ['repo', 'tree']:
                 param = [sys.argv[i]] + param
             else:

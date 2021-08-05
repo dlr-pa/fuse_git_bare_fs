@@ -4,7 +4,7 @@
 :Date: 2021-04-29
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
-tests the class repo_class in the module py_fuse_git_bare_fs
+tests the class RepoClass in the module py_fuse_git_bare_fs
 
 You can run this file directly:
 
@@ -37,14 +37,14 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
         This test creates a repo, put some files in and
         check how it is handled by py_fuse_git_bare_fs.repo_class.
         """
-        from py_fuse_git_bare_fs.repo_class import repo_class
+        from py_fuse_git_bare_fs.repo_class import RepoClass
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             with self.assertRaises(FileNotFoundError):
-                repo = repo_class(
+                repo = RepoClass(
                     os.path.join(tmpdir, serverdir, reponame), b'master')
             # prepare test environment
             for dirpath in [serverdir, clientdir, mountpointdir]:
@@ -66,7 +66,7 @@ class py_fuse_git_bare_fs_repo_class(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run tests
-            repo = repo_class(
+            repo = RepoClass(
                 os.path.join(tmpdir, serverdir, reponame), b'master')
             self.assertEqual(set(repo.readdir('/')),
                              {'.', '..', 'a', 'b', 'd', 'l'})

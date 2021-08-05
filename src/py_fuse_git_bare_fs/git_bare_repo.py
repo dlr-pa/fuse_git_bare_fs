@@ -11,11 +11,11 @@ try:
 except ModuleNotFoundError:
     import fuse as fusepy
 
-from .repo_class import repo_class
+from .repo_class import RepoClass
 from .simple_file_handler import simple_file_handler_class
 
 
-class _git_bare_repo_mixin():
+class _GitBareRepoMixin():
     """
     :Author: Daniel Mohr
     :Date: 2021-04-24
@@ -32,7 +32,7 @@ class _git_bare_repo_mixin():
             self.simple_file_handler = simple_file_handler_class()
         else:
             self.simple_file_handler = simple_file_handler
-        self.repo = repo_class(
+        self.repo = RepoClass(
             self.src_dir, self.root_object, max_cache_size=max_cache_size,
             simple_file_handler=self.simple_file_handler)
 
@@ -40,35 +40,102 @@ class _git_bare_repo_mixin():
         if hasattr(self, 'simple_file_handler'):
             self.simple_file_handler.remove_repo(self.src_dir)
 
-    def getattr(self, path, fh=None):
+    def getattr(self, path, file_handler=None):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        get attributes of the path
+
+        The argument file_handler is not used, but can be given to be
+        compatible to typical getattr functions.
+        """
+        # pylint: disable=unused-argument
         return self.repo.getattr(path)
 
-    def read(self, path, size, offset, fh):
-        if not self.simple_file_handler.is_file_handler(self.src_dir, fh):
-            raise fusepy.FuseOSError(errno.EBADF)
-        return self.repo.read(path, size, offset, fh)
+    def read(self, path, size, offset, file_handler):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
 
-    def readdir(self, path, fh):
+        read parts of path
+        """
+        if not self.simple_file_handler.is_file_handler(self.src_dir,
+                                                        file_handler):
+            raise fusepy.FuseOSError(errno.EBADF)
+        return self.repo.read(path, size, offset, file_handler)
+
+    def readdir(self, path, file_handler):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        read the directory path
+
+        The argument file_handler is not used, but can be given to be
+        compatible to typical readdir functions.
+        """
+        # pylint: disable=unused-argument
         return self.repo.readdir(path)
 
     def readlink(self, path):
-        fh = self.open(path, 'r')
-        ret = self.repo.read(path, None, 0, fh).decode()
-        self.release(path, fh)
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        read the symbolic link path
+        """
+        file_handler = self.open(path, 'r')
+        ret = self.repo.read(path, None, 0, file_handler).decode()
+        self.release(path, file_handler)
         return ret
 
     def open(self, path, flags):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        Creates a lock on path and return it as a file handler.
+        Only open as read is supported, but this is not checked.
+
+        This lock will be destroyed, if the repository is changed or it is
+        released.
+
+        The arguments are not used, but can be given to be compatible to
+        typical open functions.
+        """
+        # pylint: disable=unused-argument
         return self.simple_file_handler.get(self.src_dir)
 
-    def release(self, path, fh):
-        self.simple_file_handler.remove(self.src_dir, fh)
+    def release(self, path, file_handler):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        Releases the lock file_fandler on path.
+
+        The argument path is not used, but can be given to be compatible to
+        typical release functions.
+        """
+        # pylint: disable=unused-argument
+        self.simple_file_handler.remove(self.src_dir, file_handler)
 
     def utimens(self, path, times=None):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        This is not implemented at the moment.
+
+        The arguments are not used, but can be given to be compatible to
+        typical open functions.
+        """
+        # pylint: disable=unused-argument,no-self-use
         raise fusepy.FuseOSError(errno.EROFS)
 
 
-class git_bare_repo(
-        _git_bare_repo_mixin, fusepy.Operations):
+class GitBareRepo(
+        _GitBareRepoMixin, fusepy.Operations):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-13
@@ -77,11 +144,13 @@ class git_bare_repo(
     """
 
 
-class git_bare_repo_logging(
-        _git_bare_repo_mixin, fusepy.LoggingMixIn, fusepy.Operations):
+class GitBareRepoLogging(
+        _GitBareRepoMixin, fusepy.LoggingMixIn, fusepy.Operations):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-13
 
     read only access to the working tree of a git bare repository
+
+    The fusepy.LoggingMixIn is used to provide verbose output.
     """

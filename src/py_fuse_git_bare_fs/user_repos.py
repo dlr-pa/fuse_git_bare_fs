@@ -9,7 +9,7 @@ import os.path
 import subprocess
 import warnings
 
-from .repo_class import repo_class
+from .repo_class import RepoClass
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import simple_file_handler_class
@@ -157,14 +157,14 @@ class UserRepos():
                 if self.repos is None:
                     self.repos = dict()
                     for reponame in repos:
-                        self.repos[reponame] = repo_class(
+                        self.repos[reponame] = RepoClass(
                             os.path.join(self.repopath, reponame) + '.git',
                             root_object=self.root_object, cache=self.cache,
                             simple_file_handler=self.simple_file_handler)
                 else:
                     for reponame in repos:
                         if reponame not in self.repos.keys():
-                            self.repos[reponame] = repo_class(
+                            self.repos[reponame] = RepoClass(
                                 os.path.join(self.repopath, reponame) + '.git',
                                 root_object=self.root_object, cache=self.cache,
                                 simple_file_handler=self.simple_file_handler)
