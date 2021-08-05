@@ -107,16 +107,26 @@ class SimpleFileCache():
                 del self.cache[repopath][key]
 
     def clear_old(self):
+        """
+        This method removes the cache for old data/repositories.
+        """
         with self.lock.write_locked():
             for repopath in list(self.cache.keys()):
                 self._clear_repo_old(repopath)
 
     def clear_repo_old(self, repopath):
+        """
+        This method removes the cache for the given data/repositories,
+        if the cache is not up to date.
+        """
         with self.lock.write_locked():
             if repopath in self.cache:
                 self._clear_repo_old(repopath)
 
     def clear_repo_all(self, repopath):
+        """
+        This method removes the complete cache.
+        """
         with self.lock.write_locked():
             if repopath in self.cache:
                 del self.cache[repopath]
