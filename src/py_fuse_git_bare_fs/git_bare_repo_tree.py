@@ -24,6 +24,12 @@ from .simple_file_handler import simple_file_handler_class
 
 
 
+def _extract_repopath_from_path(actual_repo, path):
+    repopath = path[1+len(actual_repo):]
+    if not bool(repopath):
+        repopath = '/'
+    return repopath
+
 class _GitBareRepoTreeMixin(_empty_attr_mixin):
     """
     :Author: Daniel Mohr
@@ -110,13 +116,14 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 break
         return actual_repo
 
-    def _extract_repopath_from_path(self, actual_repo, path):
-        repopath = path[1+len(actual_repo):]
-        if not bool(repopath):
-            repopath = '/'
-        return repopath
+    def getattr(self, path, file_handler=None):
+        """
+        get attributes of the path
 
-    def getattr(self, path, fh=None):
+        The argument file_handler is not used, but can be given to be
+        compatible to typical getattr functions.
+        """
+        # pylint: disable=unused-argument
         if path == '/':
             return self._empty_dir_attr
         self._update_repos()
@@ -124,7 +131,7 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # check if path is part of repo path
             part_of_repo_path = False
-            for repo in self.repos.keys():
+            for repo in self.repos:
                 if repo.startswith(path[1:]):
                     part_of_repo_path = True
                     break
@@ -142,10 +149,13 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 root_object=self.root_object, cache=self.cache,
                 simple_file_handler=self.simple_file_handler)
         ret = actual_repo_list[1].getattr(
-            self._extract_repopath_from_path(actual_repo, path))
+            _extract_repopath_from_path(actual_repo, path))
         return ret
 
-    def read(self, path, size, offset, fh):
+    def read(self, path, size, offset, file_handler):
+        """
+        read parts of path
+        """
         self._update_repos()
         self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
@@ -160,29 +170,36 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 root_object=self.root_object, cache=self.cache,
                 simple_file_handler=self.simple_file_handler)
         ret = actual_repo_list[1].read(
-            self._extract_repopath_from_path(actual_repo, path),
-            size, offset, fh)
+            _extract_repopath_from_path(actual_repo, path),
+            size, offset, file_handler)
         return ret
 
-    def readdir(self, path, fh):
+    def readdir(self, path, file_handler):
+        """
+        read the directory path
+
+        The argument file_handler is not used, but can be given to be
+        compatible to typical readdir functions.
+        """
+        # pylint: disable=unused-argument
         # /foo/bar.git/baz
         self._update_repos()
         self._lock.acquire_read()
         if path == '/':
             retlist = ['.', '..']
-            for repo in self.repos.keys():
+            for repo in self.repos:
                 retlist.append(repo.split('/')[0])
             self._lock.release_read()
             return list(set(retlist))
         actual_repo = self._extract_repo_from_path(path)
         if actual_repo is None:  # check if path is part of repo path
             repos = ['.', '..']
-            for repo in self.repos.keys():
+            for repo in self.repos:
                 res = re.findall(
                     r'^' + path + r'$|^' + path + r'\/([^\/]+)', '/' + repo)
                 if res:
                     repos.append(res[0])
-            if len(repos) > 0:  # path is part of repo path
+            if bool(repos):  # path is part of repo path
                 self._lock.release_read()
                 return list(set(repos))
             else:  # no such file or directory
@@ -196,10 +213,13 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 root_object=self.root_object, cache=self.cache,
                 simple_file_handler=self.simple_file_handler)
         ret = actual_repo_list[1].readdir(
-            self._extract_repopath_from_path(actual_repo, path))
+            _extract_repopath_from_path(actual_repo, path))
         return ret
 
     def readlink(self, path):
+        """
+        read the symbolic link path
+        """
         self._update_repos()
         self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
@@ -213,14 +233,21 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
                 simple_file_handler=self.simple_file_handler)
-        fh = self.open(path, 'r')
+        file_handler = self.open(path, 'r')
         ret = actual_repo_list[1].read(
-            self._extract_repopath_from_path(actual_repo, path),
-            None, 0, fh).decode()
-        self.release(path, fh)
+            _extract_repopath_from_path(actual_repo, path),
+            None, 0, file_handler).decode()
+        self.release(path, file_handler)
         return ret
 
     def open(self, path, flags):
+        """
+        Creates a lock on path and return it as a file handler.
+        Only open as read is supported, but this is not checked.
+
+        This lock will be destroyed, if the repository is changed or it is
+        released.
+        """
         self._update_repos()
         self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
@@ -235,9 +262,12 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 root_object=self.root_object, cache=self.cache,
                 simple_file_handler=self.simple_file_handler)
         return actual_repo_list[1].open(
-            self._extract_repopath_from_path(actual_repo, path), flags)
+            _extract_repopath_from_path(actual_repo, path), flags)
 
-    def release(self, path, fh):
+    def release(self, path, file_handler):
+        """
+        Releases the lock file_fandler on path.
+        """
         self._update_repos()
         self._lock.acquire_read()
         actual_repo = self._extract_repo_from_path(path)
@@ -252,9 +282,16 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
                 root_object=self.root_object, cache=self.cache,
                 simple_file_handler=self.simple_file_handler)
         actual_repo_list[1].release(
-            self._extract_repopath_from_path(actual_repo, path), fh)
+            _extract_repopath_from_path(actual_repo, path), file_handler)
 
     def utimens(self, path, times=None):
+        """
+        This is not implemented at the moment.
+
+        The arguments are not used, but can be given to be compatible to
+        typical open functions.
+        """
+        # pylint: disable=unused-argument,no-self-use
         raise fusepy.FuseOSError(errno.EROFS)
 
 
