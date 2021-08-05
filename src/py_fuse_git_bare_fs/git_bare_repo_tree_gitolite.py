@@ -96,7 +96,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         if path == '/' + actual_user:
             return self._empty_dir_attr
         if (self.provide_htaccess and
-              (path == '/' + actual_user + '/.htaccess')):
+                (path == '/' + actual_user + '/.htaccess')):
             file_attr = self._empty_file_attr.copy()
             file_attr['st_size'] = len(self._get_htaccess_content(actual_user))
             return file_attr
