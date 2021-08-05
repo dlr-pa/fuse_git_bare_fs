@@ -165,7 +165,7 @@ class TestWithUnittest(Command):
                 "error in command line: " +
                 "value for option 'src' is not 'installed' or 'local'")
         sys.path.append(os.path.abspath('.'))
-        # pylint: disable = bad-option-value, import-outside-toplevel
+        # pylint: disable=bad-option-value,import-outside-toplevel
         import unittest
         suite = unittest.TestSuite()
         import tests
@@ -183,6 +183,7 @@ class TestWithUnittest(Command):
                             importlib.import_module(module)
                         except ModuleNotFoundError:
                             # pylint: disable=import-error,unused-variable
+                            # pylint: disable=unused-variable,unused-import
                             import fuse as fusepy
                     else:
                         importlib.import_module(module)
@@ -259,6 +260,7 @@ class CheckModulesModulefinder(Command):
         pass
 
     def run(self):
+        # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
             print("\nchecking for modules used in '%s':" % script)

@@ -49,6 +49,7 @@ class TestScriptsExecutable(unittest.TestCase):
         :Date: 2021-04-26
         """
         # pylint: disable = invalid-name
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import subprocess
         for cmd in ["fuse_git_bare_fs -h", "fuse_git_bare_fs repo -h",
                     "fuse_git_bare_fs tree -h"]:
