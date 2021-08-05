@@ -15,7 +15,7 @@ You can run this file directly::
 Or you can run only one test, e. g.::
 
   env python3 script_fuse_git_bare_fs_tree_annex.py \
-    script_fuse_git_bare_fs_tree_annex.test_fuse_git_bare_fs_tree_annex
+    ScriptFuseGitBareFsTreeAnnex.test_fuse_git_bare_fs_tree_annex
 
   pytest-3 -k test_fuse_git_bare_fs_tree_annex \
     script_fuse_git_bare_fs_tree_annex.py
@@ -30,7 +30,7 @@ import time
 import unittest
 
 
-class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
+class ScriptFuseGitBareFsTreeAnnex(unittest.TestCase):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-22
@@ -41,16 +41,17 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
             src_file_name = os.path.join('data', 'create_git_annex_test_env')
             if not os.path.isfile(src_file_name):
-                src_file_name = os.path.join(os.path.dirname(
-                    sys.modules['tests'].__file__), 'data',
-                    'create_git_annex_test_env')
+                src_file_name = os.path.join(
+                    os.path.dirname(
+                        sys.modules['tests'].__file__),
+                    'data', 'create_git_annex_test_env')
             shutil.copy(src_file_name,
                         os.path.join(tmpdir, 'create_git_annex_test_env'))
             cp = subprocess.run(
@@ -67,7 +68,7 @@ class script_fuse_git_bare_fs_tree_annex(unittest.TestCase):
             t0 = time.time()
             while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
                 time.sleep(0.1)
             self.assertEqual(

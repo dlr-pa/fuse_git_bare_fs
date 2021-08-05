@@ -30,7 +30,7 @@ import time
 import unittest
 
 
-class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
+class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     """
     :Author: Daniel Mohr
     :Date: 2021-06-15
@@ -41,10 +41,9 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
-        clientdir = 'client'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
             src_file_name = os.path.join('data', 'gitolite')
@@ -52,7 +51,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 src_file_name = os.path.join(os.path.dirname(
                     sys.modules['tests'].__file__), 'data', 'gitolite')
             shutil.copy(src_file_name, os.path.join(tmpdir, 'gitolite'))
-            cp = subprocess.run(
+            subprocess.run(
                 [os.path.join(tmpdir, 'gitolite') + ' createenv'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -62,35 +61,34 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess '
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.Popen(
+            cpi = subprocess.Popen(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
                 time.sleep(0.1)
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2'})
-            cp.terminate()
-            cp.wait(timeout=3)
-            cp.kill()
-            cp.stdout.close()
-            cp.stderr.close()
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpi.stdout.close()
+            cpi.stderr.close()
 
     def test_fuse_git_bare_fs_tree_gitolite2(self):
         """
         :Author: Daniel Mohr
         :Date: 2021-06-10
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
-        clientdir = 'client'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
             src_file_name = os.path.join('data', 'gitolite')
@@ -98,7 +96,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 src_file_name = os.path.join(os.path.dirname(
                     sys.modules['tests'].__file__), 'data', 'gitolite')
             shutil.copy(src_file_name, os.path.join(tmpdir, 'gitolite'))
-            cp = subprocess.run(
+            subprocess.run(
                 os.path.join(tmpdir, 'gitolite') + ' createenv',
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -110,14 +108,14 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' -gitolite_user_file ' + os.path.join(tmpdir, 'users')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.Popen(
+            cpi = subprocess.Popen(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
                 time.sleep(0.1)
             self.assertEqual(
@@ -137,11 +135,11 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2'})
-            cp.terminate()
-            cp.wait(timeout=3)
-            cp.kill()
-            cp.stdout.close()
-            cp.stderr.close()
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpi.stdout.close()
+            cpi.stderr.close()
 
     def test_fuse_git_bare_fs_tree_gitolite_daemon1(self):
         """
@@ -151,10 +149,9 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
-        clientdir = 'client'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
             src_file_name = os.path.join('data', 'gitolite')
@@ -162,7 +159,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 src_file_name = os.path.join(os.path.dirname(
                     sys.modules['tests'].__file__), 'data', 'gitolite')
             shutil.copy(src_file_name, os.path.join(tmpdir, 'gitolite'))
-            cp = subprocess.run(
+            subprocess.run(
                 [os.path.join(tmpdir, 'gitolite') + ' createenv'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -172,15 +169,15 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.run(
+            subprocess.run(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             time.sleep(0.1)
             self.assertEqual(
@@ -196,7 +193,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir, 'user2'))),
                 {'.htaccess', 'repo3'})
             for username in ['user1', 'user2']:
-                with open(os.path.join(
+                with open(
+                    os.path.join(
                         tmpdir,
                         mountpointdir,
                         username,
@@ -212,7 +210,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir, 'user1', 'repo2'))),
                 {'c', })
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -223,10 +221,9 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-06-10
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
-        clientdir = 'client'
         mountpointdir = 'mountpoint'
-        reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
             src_file_name = os.path.join('data', 'gitolite')
@@ -234,7 +231,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 src_file_name = os.path.join(os.path.dirname(
                     sys.modules['tests'].__file__), 'data', 'gitolite')
             shutil.copy(src_file_name, os.path.join(tmpdir, 'gitolite'))
-            cp = subprocess.run(
+            subprocess.run(
                 os.path.join(tmpdir, 'gitolite') + ' createenv',
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -246,15 +243,15 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' -gitolite_user_file ' + os.path.join(tmpdir, 'users')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.run(
+            subprocess.run(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
                 time.sleep(0.1)
             self.assertEqual(
@@ -275,7 +272,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2'})
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -289,8 +286,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon3
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
-        clientdir = 'client'
         mountpointdir = 'mountpoint'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
@@ -299,7 +296,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 src_file_name = os.path.join(os.path.dirname(
                     sys.modules['tests'].__file__), 'data', 'gitolite')
             shutil.copy(src_file_name, os.path.join(tmpdir, 'gitolite'))
-            cp = subprocess.run(
+            subprocess.run(
                 [os.path.join(tmpdir, 'gitolite') + ' createenv'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -309,15 +306,15 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.run(
+            subprocess.run(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             time.sleep(0.1)
             self.assertEqual(
@@ -332,7 +329,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 self.assertEqual(htaccess_content[0],
                                  'Require user ' + username)
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -346,15 +343,15 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -htaccess_template htaccess_template.txt'
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.run(
+            subprocess.run(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             time.sleep(0.1)
             self.assertEqual(
@@ -370,7 +367,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                 self.assertEqual(htaccess_content[1],
                                  'Require user ' + username)
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -384,6 +381,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
@@ -395,7 +393,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                     src_file_name = os.path.join(os.path.dirname(
                         sys.modules['tests'].__file__), 'data', file_name)
                 shutil.copy(src_file_name, os.path.join(tmpdir, file_name))
-            cp = subprocess.run(
+            subprocess.run(
                 [os.path.join(tmpdir, 'gitolite') + ' createenv'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -408,15 +406,15 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite1')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.run(
+            subprocess.run(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             time.sleep(0.1)
             self.assertEqual(
@@ -428,7 +426,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                         os.path.join(tmpdir, 'gitolite1'))
             # update hash of gitolite-admin repo
             cmd = 'git commit -m foo --allow-empty ; git push'
-            cp = subprocess.run(
+            subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True,
@@ -439,7 +437,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
                 {'.htaccess', 'repo1', 'repo2', 'repo3'})
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -453,8 +451,8 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon5
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
-        clientdir = 'client'
         mountpointdir = 'mountpoint'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
@@ -464,7 +462,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                     src_file_name = os.path.join(os.path.dirname(
                         sys.modules['tests'].__file__), 'data', file_name)
                 shutil.copy(src_file_name, os.path.join(tmpdir, file_name))
-            cp = subprocess.run(
+            subprocess.run(
                 [os.path.join(tmpdir, 'gitolite') + ' createenv'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -477,15 +475,15 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite1')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cp = subprocess.run(
+            subprocess.run(
                 call_cmd,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             time.sleep(0.1)
             self.assertEqual(
@@ -501,7 +499,7 @@ class script_fuse_git_bare_fs_tree_gitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
                 {'.htaccess', 'repo1', 'repo2', 'repo3'})
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,

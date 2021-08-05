@@ -15,7 +15,7 @@ import os.path
 import re
 import time
 
-from .empty_attr_mixin import _empty_attr_mixin
+from .empty_attr_mixin import _EmptyAttrMixin
 from .repo_class import RepoClass
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
@@ -29,7 +29,7 @@ def _extract_repopath_from_path(actual_repo, path):
     return repopath
 
 
-class _GitBareRepoTreeMixin(_empty_attr_mixin):
+class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-24

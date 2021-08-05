@@ -21,6 +21,8 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+# pylint: disable=missing-docstring,invalid-name,redefined-builtin
+
 from recommonmark.parser import CommonMarkParser
 
 # -- General configuration ------------------------------------------------

@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 import os.path
 import re
 
-from .empty_attr_mixin import _empty_attr_mixin
+from .empty_attr_mixin import _EmptyAttrMixin
 from .user_repos import UserRepos
 from .simple_file_handler import SimpleFileHandlerClass
 
@@ -25,7 +25,7 @@ def _extract_repopath_from_path(actual_user, actual_repo, path):
     return repopath
 
 
-class _GitBareRepoTreeGitoliteMixin(_empty_attr_mixin):
+class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
     :Date: 2021-06-17
