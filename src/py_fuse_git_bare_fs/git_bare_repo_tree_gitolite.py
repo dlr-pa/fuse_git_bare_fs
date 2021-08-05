@@ -122,7 +122,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         if (self.provide_htaccess and
-              (path == '/' + actual_user + '/.htaccess')):
+                (path == '/' + actual_user + '/.htaccess')):
             startindex = offset
             stopindex = 1024  # assume no usename is longer than 1011
             if size is not None:
@@ -201,7 +201,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         if (self.provide_htaccess and
-              (path == '/' + actual_user + '/.htaccess')):
+                (path == '/' + actual_user + '/.htaccess')):
             return self.simple_file_handler.get(self.src_dir)
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
@@ -218,7 +218,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
         if (self.provide_htaccess and
-              (path == '/' + actual_user + '/.htaccess')):
+                (path == '/' + actual_user + '/.htaccess')):
             return self.simple_file_handler.remove(self.src_dir, file_handler)
         actual_repo = self._extract_repo_from_path(actual_user, path)
         if actual_repo is None:  # no such file or directory
