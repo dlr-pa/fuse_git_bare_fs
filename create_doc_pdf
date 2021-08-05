@@ -3,7 +3,7 @@ set -e
 
 skipcp='false'
 if [ ! $# -eq 0 ]; then
-    if [ 'skipcp' = $1 ]; then
+    if [ 'skipcp' = "$1" ]; then
 	skipcp='true'
     fi
 fi

@@ -1,3 +1,2 @@
 You can use these scripts to mount repositories handled by gitolite
 to user directories, which could be shared by webdav.
-

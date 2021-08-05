@@ -40,36 +40,36 @@ echo "workdir: $workdir"
 echo "keydir: $keydir"
 echo -e "outputdir: $outputdir\n"
 
-if [ ! -d $outputdir ]; then
+if [ ! -d "$outputdir" ]; then
     echo "error: outputdir $outputdir does not exists"
     exit 1
 fi
 
-if [ ! -d $workdir ]; then
-    mkdir $workdir
+if [ ! -d "$workdir" ]; then
+    mkdir "$workdir"
 fi
 
 echo "## mount gitoliteadminrepo ##"
-mountpoint -q $workdir
+mountpoint -q "$workdir"
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
-    fuse_git_bare_fs.py repo -daemon $gitoliteadminrepo $workdir && echo "$gitoliteadminrepo mounted on $workdir"
+    fuse_git_bare_fs.py repo -daemon "$gitoliteadminrepo" "$workdir" && echo "$gitoliteadminrepo mounted on $workdir"
 fi
 
 if [ $test_environment -eq 1 ]; then # test environment
     userlist=$(basename --suffix=.pub $keydir/*; echo "u1 u2 foo bar admin")
 else
-    userlist=$((gitolite list-users | grep -v @; basename --suffix=.pub $keydir/*) | sort -u)
+    userlist=$( (gitolite list-users | grep -v @; basename --suffix=.pub $keydir/*) | sort -u)
 fi
 
-echo $userlist
+echo "$userlist"
 
 echo "## create user dir ##"
 for username in $userlist; do
-    if [ ! $username = "admin" ]; then
-	echo $username
-	if [ ! -d $outputdir/$username ]; then
-	    mkdir --mode=$outputdirmode $outputdir/$username
+    if [ ! "$username" = "admin" ]; then
+	echo "$username"
+	if [ ! -d "$outputdir/$username" ]; then
+	    mkdir --mode=$outputdirmode "$outputdir/$username"
 	    echo "Require user $username" > $outputdir/$username/.htaccess
 	    chmod $outputfilemode $outputdir/$username/.htaccess
 	fi

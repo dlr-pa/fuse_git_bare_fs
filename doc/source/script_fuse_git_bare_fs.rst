@@ -3,6 +3,7 @@ command line script: :program:`fuse_git_bare_fs`
 
 .. program:: fuse_git_bare_fs
 
+
 	     
 overview
 --------
