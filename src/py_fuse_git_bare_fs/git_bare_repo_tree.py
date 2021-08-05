@@ -13,7 +13,6 @@ except ModuleNotFoundError:
 import os
 import os.path
 import re
-import threading
 import time
 
 from .empty_attr_mixin import _empty_attr_mixin
@@ -23,12 +22,12 @@ from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import simple_file_handler_class
 
 
-
 def _extract_repopath_from_path(actual_repo, path):
     repopath = path[1+len(actual_repo):]
     if not bool(repopath):
         repopath = '/'
     return repopath
+
 
 class _GitBareRepoTreeMixin(_empty_attr_mixin):
     """
@@ -295,7 +294,7 @@ class _GitBareRepoTreeMixin(_empty_attr_mixin):
         raise fusepy.FuseOSError(errno.EROFS)
 
 
-class git_bare_repo_tree(
+class GitBareRepoTree(
         _GitBareRepoTreeMixin, fusepy.Operations):
     """
     :Author: Daniel Mohr
@@ -305,7 +304,7 @@ class git_bare_repo_tree(
     """
 
 
-class git_bare_repo_tree_logging(
+class GitBareRepoTreeLogging(
         _GitBareRepoTreeMixin, fusepy.LoggingMixIn, fusepy.Operations):
     """
     :Author: Daniel Mohr

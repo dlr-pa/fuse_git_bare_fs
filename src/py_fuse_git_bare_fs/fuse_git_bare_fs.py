@@ -65,9 +65,9 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
-            from .git_bare_repo_tree import git_bare_repo_tree_logging
+            from .git_bare_repo_tree import GitBareRepoTreeLogging
             logging.basicConfig(level=logging.DEBUG)
-            operations_instance = git_bare_repo_tree_logging(
+            operations_instance = GitBareRepoTreeLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0])
@@ -84,8 +84,8 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
-            from .git_bare_repo_tree import git_bare_repo_tree
-            operations_instance = git_bare_repo_tree(
+            from .git_bare_repo_tree import GitBareRepoTree
+            operations_instance = GitBareRepoTree(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0])
