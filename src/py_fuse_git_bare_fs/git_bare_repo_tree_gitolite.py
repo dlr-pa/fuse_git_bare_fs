@@ -93,7 +93,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:
             raise fusepy.FuseOSError(errno.ENOENT)
-        elif path == '/' + actual_user:
+        if path == '/' + actual_user:
             return self._empty_dir_attr
         elif (self.provide_htaccess and
               (path == '/' + actual_user + '/.htaccess')):
@@ -109,8 +109,8 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
                     break
             if part_of_repo_path:
                 return self._empty_dir_attr
-            else:  # no such file or directory
-                raise fusepy.FuseOSError(errno.ENOENT)
+            # no such file or directory
+            raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].getattr(
             _extract_repopath_from_path(actual_user, actual_repo, path))
 
@@ -121,7 +121,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        elif (self.provide_htaccess and
+        if (self.provide_htaccess and
               (path == '/' + actual_user + '/.htaccess')):
             startindex = offset
             stopindex = 1024  # assume no usename is longer than 1011
@@ -149,7 +149,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        elif path == '/' + actual_user:
+        if path == '/' + actual_user:
             retlist = ['.', '..']
             for repo in self.repos.get_repos(user=actual_user):
                 retlist.append(repo.split('/')[0])
@@ -167,8 +167,8 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
                     repos.append(res[0])
             if bool(repos):  # path is part of repo path
                 return ['.', '..'] + list(set(repos))
-            else:  # no such file or directory
-                raise fusepy.FuseOSError(errno.ENOENT)
+            # no such file or directory
+            raise fusepy.FuseOSError(errno.ENOENT)
         return self.repos.repos[actual_repo].readdir(
             _extract_repopath_from_path(actual_user, actual_repo, path))
 
@@ -200,7 +200,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        elif (self.provide_htaccess and
+        if (self.provide_htaccess and
               (path == '/' + actual_user + '/.htaccess')):
             return self.simple_file_handler.get(self.src_dir)
         actual_repo = self._extract_repo_from_path(actual_user, path)
@@ -217,7 +217,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         actual_user = self._extract_user_from_path(path)
         if actual_user is None:  # no such file or directory
             raise fusepy.FuseOSError(errno.ENOENT)
-        elif (self.provide_htaccess and
+        if (self.provide_htaccess and
               (path == '/' + actual_user + '/.htaccess')):
             return self.simple_file_handler.remove(self.src_dir, file_handler)
         actual_repo = self._extract_repo_from_path(actual_user, path)

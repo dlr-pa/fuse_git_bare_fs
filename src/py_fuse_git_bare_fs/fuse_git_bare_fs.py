@@ -10,7 +10,9 @@ try:
     import fusepy  # https://github.com/fusepy/fusepy
 except ModuleNotFoundError:
     import fuse as fusepy
+import grp
 import os.path
+import pwd
 import sys
 
 
@@ -22,6 +24,7 @@ def fuse_git_bare_fs_repo(args):
     """
     operations_instance = None
     if args.daemon:  # running in foreground
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import logging
         from .git_bare_repo import GitBareRepoLogging
         logging.basicConfig(level=logging.DEBUG)
@@ -30,6 +33,7 @@ def fuse_git_bare_fs_repo(args):
             args.root_object[0].encode(),
             args.max_cache_size[0])
     else:
+        # pylint: disable = bad-option-value, import-outside-toplevel
         from .git_bare_repo import GitBareRepo
         operations_instance = GitBareRepo(
             os.path.abspath(args.src_dir),
@@ -51,6 +55,7 @@ def fuse_git_bare_fs_tree(args):
     """
     operations_instance = None
     if args.daemon:  # running in foreground
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import logging
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import \
@@ -73,6 +78,7 @@ def fuse_git_bare_fs_tree(args):
                 args.max_cache_size[0])
     else:
         if args.get_user_list_from_gitolite:
+            # pylint: disable = bad-option-value, import-outside-toplevel
             from .git_bare_repo_tree_gitolite \
                 import GitBareRepoTreeGitolite
             operations_instance = GitBareRepoTreeGitolite(
@@ -84,6 +90,7 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
+            # pylint: disable = bad-option-value, import-outside-toplevel
             from .git_bare_repo_tree import GitBareRepoTree
             operations_instance = GitBareRepoTree(
                 os.path.abspath(args.src_dir),
@@ -383,7 +390,6 @@ def fuse_git_bare_fs():
         args = parser.parse_args()
     if args.subparser_name is not None:
         if args.gid[0] is not None:
-            import grp
             gid = None
             try:
                 gid = int(args.gid[0])
@@ -393,7 +399,6 @@ def fuse_git_bare_fs():
                 gid = grp.getgrnam(args.gid[0]).gr_gid
             os.setgid(gid)
         if args.uid[0] is not None:
-            import pwd
             uid = None
             try:
                 uid = int(args.uid[0])

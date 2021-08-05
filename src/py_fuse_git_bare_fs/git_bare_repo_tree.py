@@ -92,11 +92,10 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
                         reposrcname = dirpath[1 + len(self.src_dir):]
                         repos[reposrcname] = [reposrcname, None]
                         break
-                    else:
-                        reposrcname = os.path.join(
-                            dirpath, dirname)[1 + len(self.src_dir):]
-                        reponame = reposrcname[:-4]
-                        repos[reponame] = [reposrcname, None]
+                    reposrcname = os.path.join(
+                        dirpath, dirname)[1 + len(self.src_dir):]
+                    reponame = reposrcname[:-4]
+                    repos[reponame] = [reposrcname, None]
         return repos
 
     def _extract_repo_from_path(self, path):
@@ -137,9 +136,9 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             if part_of_repo_path:
                 self._lock.release_read()
                 return self._empty_dir_attr
-            else:  # no such file or directory
-                self._lock.release_read()
-                raise fusepy.FuseOSError(errno.ENOENT)
+            # no such file or directory
+            self._lock.release_read()
+            raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo_list = self.repos[actual_repo]
         self._lock.release_read()
         if actual_repo_list[1] is None:
@@ -201,9 +200,9 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             if bool(repos):  # path is part of repo path
                 self._lock.release_read()
                 return list(set(repos))
-            else:  # no such file or directory
-                self._lock.release_read()
-                raise fusepy.FuseOSError(errno.ENOENT)
+            # no such file or directory
+            self._lock.release_read()
+            raise fusepy.FuseOSError(errno.ENOENT)
         actual_repo_list = self.repos[actual_repo]
         self._lock.release_read()
         if actual_repo_list[1] is None:

@@ -93,8 +93,7 @@ class SimpleFileCache():
             if size is not None:
                 stopindex = min(startindex + size, len(cpi.stdout) - 1)
             return cpi.stdout[startindex:stopindex]
-        else:
-            return ret
+        return ret
 
     def _clear_repo_old(self, repopath):
         """

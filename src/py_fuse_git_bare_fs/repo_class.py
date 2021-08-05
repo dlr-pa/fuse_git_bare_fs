@@ -242,9 +242,8 @@ class RepoClass():
                         time.time()
                     self.lock.release_read()
                     return ret
-                else:
-                    self.lock.release_read()
-                    raise fusepy.FuseOSError(errno.ENOENT)
+                self.lock.release_read()
+                raise fusepy.FuseOSError(errno.ENOENT)
         ret = dict()
         ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time

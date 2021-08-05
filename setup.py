@@ -51,7 +51,6 @@ class TestWithPytest(Command):
         :Author: Daniel Mohr
         :Date: 2021-02-04
         """
-        pass
 
     def run(self):
         """
@@ -71,6 +70,7 @@ class TestWithPytest(Command):
         sys.path.append(os.path.abspath('.'))
         # https://docs.pytest.org/en/stable/contents.html
         # https://pytest-cov.readthedocs.io/en/latest/
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import pytest
         pyargs = []
         if self.parallel:
@@ -149,7 +149,6 @@ class TestWithUnittest(Command):
         :Author: Daniel Mohr
         :Date: 2021-02-04
         """
-        pass
 
     def run(self):
         """
@@ -166,6 +165,7 @@ class TestWithUnittest(Command):
                 "error in command line: " +
                 "value for option 'src' is not 'installed' or 'local'")
         sys.path.append(os.path.abspath('.'))
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import unittest
         suite = unittest.TestSuite()
         import tests
@@ -217,6 +217,7 @@ class CheckModules(Command):
         pass
 
     def run(self):
+        # pylint: disable=bad-option-value,import-outside-toplevel
         import importlib
         summary = ""
         i = 0

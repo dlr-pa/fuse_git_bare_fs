@@ -38,6 +38,7 @@ class PyFuseGitBareFsRepoClass(unittest.TestCase):
         check how it is handled by py_fuse_git_bare_fs.repo_class.
         """
         # pylint: disable=too-many-statements
+        # pylint: disable = bad-option-value, import-outside-toplevel
         from py_fuse_git_bare_fs.repo_class import RepoClass
         serverdir = 'server'
         clientdir = 'client'
@@ -109,8 +110,10 @@ class PyFuseGitBareFsRepoClass(unittest.TestCase):
                 repo.release(filename, file_handler)
                 self.assertEqual(data, b'abc\n')
             try:
+                # pylint: disable = bad-option-value, import-outside-toplevel
                 import fusepy
             except ModuleNotFoundError:
+                # pylint: disable = bad-option-value, import-outside-toplevel
                 import fuse as fusepy
             with self.assertRaises(fusepy.FuseOSError):
                 file_status = repo.getattr('/foo')
