@@ -77,12 +77,12 @@ for username in $userlist; do
 done
 
 echo "## remove obsolete user dir ##"
-for subdirname in $(ls -1 "$outputdir"); do
+for subdirname in "$outputdir"/*; do
     echo "$userlist" | grep -w -q "$subdirname"
     exit_status=$?
     if [ $exit_status -ne 0 -o "$subdirname" = "admin" ]; then
 	# check mount and do unumount if necessary
-	for subsubdirname in $(ls -1 "$outputdir/$subdirname"); do
+	for subsubdirname in "$outputdir/$subdirname"/*; do
 	    if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
 		mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 		exit_status=$?
@@ -110,7 +110,7 @@ if [ $test_environment -eq 1 ]; then # test environment
 	nrepo=${nrepo%".git"}
 	repolist="$repolist $nrepo"
 	echo "$nrepo"
-	echo dirname $(dirname "$nrepo")
+	echo dirname "$(dirname \"$nrepo\")"
     done
 else
     repolist=$(gitolite list-phy-repos)
