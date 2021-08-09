@@ -80,7 +80,7 @@ echo "## remove obsolete user dir ##"
 for subdirname in "$outputdir"/*; do
     echo "$userlist" | grep -w -q "$subdirname"
     exit_status=$?
-    if [ $exit_status -ne 0 -o "$subdirname" = "admin" ]; then
+    if [ $exit_status -ne 0 ] || [ "$subdirname" = "admin" ]; then
 	# check mount and do unumount if necessary
 	for subsubdirname in "$outputdir/$subdirname"/*; do
 	    if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
@@ -102,6 +102,7 @@ done
 echo "## create mountpoints ##"
 if [ $test_environment -eq 1 ]; then # test environment
     repolist=$(ls -1 "$gitoliterepos"; echo "foo bar baz gitolite-admin testing")
+    # shellcheck disable=SC2046
     repolist=$(basename -s .git -a $(dirname $(find "$gitoliterepos" -name HEAD -type f)))
     repolist=""
     for repo in $(find "$gitoliterepos" -name HEAD -type f); do
@@ -110,7 +111,7 @@ if [ $test_environment -eq 1 ]; then # test environment
 	nrepo=${nrepo%".git"}
 	repolist="$repolist $nrepo"
 	echo "$nrepo"
-	echo dirname "$(dirname \"$nrepo\")"
+	echo dirname $(dirname "$nrepo")
     done
 else
     repolist=$(gitolite list-phy-repos)
@@ -128,8 +129,9 @@ for username in $userlist; do
 		    exit_status=$?
 		fi
 		if [ $exit_status -eq 0 ]; then
-		    if [ -d "$gitoliterepos/$repo" -o -d "$gitoliterepos/$repo.git" ]; then
+		    if [ -d "$gitoliterepos/$repo" ] || [ -d "$gitoliterepos/$repo.git" ]; then
 			if [ ! -d "$outputdir/$username/$repo" ]; then
+			    # shellcheck disable=SC2174
 			    mkdir -p --mode=$outputdirmode "$outputdir/$username/$repo"
 			fi
 			mountpoint -q "$outputdir/$username/$repo"
