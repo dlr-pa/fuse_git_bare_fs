@@ -19,9 +19,9 @@ echo "gitolitehome: $gitolitehome"
 echo "workdir: $workdir"
 echo -e "outputdir: $outputdir\n"
 
-for subdirname in $(ls -1 "$outputdir"); do
+for subdirname in "$outputdir"/*; do
     # check mount and do unumount if necessary
-    for subsubdirname in $(ls -1 "$outputdir/$subdirname"); do
+    for subsubdirname in "$outputdir/$subdirname"/*; do
 	if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
 	    mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 	    exit_status=$?
@@ -39,7 +39,7 @@ for subdirname in $(ls -1 "$outputdir"); do
 		    exit_status=$?
 		    if [ $exit_status -eq 0 ]; then
 			fusermount -u "$path" && echo "unmounted $path"
-			rmdir $path
+			rmdir "$path"
 		    fi
 		done
 		rmdir "$outputdir/$subdirname/$subsubdirname"
