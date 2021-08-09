@@ -9,9 +9,9 @@ mkdir "$mydir/webdav/removeme"
 
 for repo in gitolite-admin foo bar baz; do
     echo "$repo"
-    cd "$mydir/repos/server"
+    cd "$mydir/repos/server" || exit 1
     git init --bare "$repo.git"
-    cd "$mydir/repos/client"
+    cd "$mydir/repos/client" || exit 1
     git clone "../server/$repo.git"
 done
 
@@ -19,14 +19,14 @@ i=1
 while [ $i -le 10 ]; do
     repo=repo$i
     echo "$repo"
-    cd "$mydir/repos/server"
+    cd "$mydir/repos/server" || exit 1
     git init --bare "$repo.git"
-    cd "$mydir/repos/client"
+    cd "$mydir/repos/client" || exit 1
     git clone "../server/$repo.git"
     i=$(( i + 1 ))
 done
 
-cd "$mydir/repos/client/gitolite-admin"
+cd "$mydir/repos/client/gitolite-admin" || exit 1
 mkdir keydir
 for username in u1 u2 u3 u4 u5; do
     echo -n a > "keydir/$username.pub"
@@ -48,7 +48,7 @@ i=1
 while [ $i -le 10 ]; do
     repo=repo$i
     echo "$repo"
-    cd "$mydir/repos/client/$repo"
+    cd "$mydir/repos/client/$repo" || exit 1
     echo "fuse_git_bare_fs rocks" > a.txt
     git add a.txt
     git commit -m "added a.txt"

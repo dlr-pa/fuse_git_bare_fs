@@ -57,9 +57,9 @@ if [ $exit_status -ne 0 ]; then
 fi
 
 if [ $test_environment -eq 1 ]; then # test environment
-    userlist=$(basename --suffix=.pub $keydir/*; echo "u1 u2 foo bar admin")
+    userlist=$(basename --suffix=.pub "$keydir/*"; echo "u1 u2 foo bar admin")
 else
-    userlist=$( (gitolite list-users | grep -v @; basename --suffix=.pub $keydir/*) | sort -u)
+    userlist=$( (gitolite list-users | grep -v @; basename --suffix=.pub "$keydir/*") | sort -u)
 fi
 
 echo "$userlist"
@@ -70,75 +70,75 @@ for username in $userlist; do
 	echo "$username"
 	if [ ! -d "$outputdir/$username" ]; then
 	    mkdir --mode=$outputdirmode "$outputdir/$username"
-	    echo "Require user $username" > $outputdir/$username/.htaccess
-	    chmod $outputfilemode $outputdir/$username/.htaccess
+	    echo "Require user $username" > "$outputdir/$username/.htaccess"
+	    chmod "$outputfilemode" "$outputdir/$username/.htaccess"
 	fi
     fi
 done
 
 echo "## remove obsolete user dir ##"
-for subdirname in $(ls -1 $outputdir); do
-    echo $userlist | grep -w -q $subdirname
+for subdirname in $(ls -1 "$outputdir"); do
+    echo "$userlist" | grep -w -q "$subdirname"
     exit_status=$?
-    if [ $exit_status -ne 0 -o $subdirname = "admin" ]; then
+    if [ $exit_status -ne 0 -o "$subdirname" = "admin" ]; then
 	# check mount and do unumount if necessary
-	for subsubdirname in $(ls -1 $outputdir/$subdirname); do
-	    if [ -d $outputdir/$subdirname/$subsubdirname ]; then
-		mountpoint -q $outputdir/$subdirname/$subsubdirname
+	for subsubdirname in $(ls -1 "$outputdir/$subdirname"); do
+	    if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
+		mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 		exit_status=$?
 		if [ $exit_status -eq 0 ]; then
-		    fusermount -u $outputdir/$subdirname/$subsubdirname && echo "unmounted $outputdir/$subdirname/$subsubdirname"
+		    fusermount -u "$outputdir/$subdirname/$subsubdirname" && echo "unmounted $outputdir/$subdirname/$subsubdirname"
 		fi
 		# remove directory
-		rmdir $outputdir/$subdirname/$subsubdirname && echo "removed $outputdir/$subdirname/$subsubdirname"
+		rmdir "$outputdir/$subdirname/$subsubdirname" && echo "removed $outputdir/$subdirname/$subsubdirname"
 	    fi
 	done
 	# remove directory
-	rm $outputdir/$subdirname/.htaccess
-	rmdir $outputdir/$subdirname && echo "removed $outputdir/$subdirname"
+	rm "$outputdir/$subdirname/.htaccess"
+	rmdir "$outputdir/$subdirname" && echo "removed $outputdir/$subdirname"
     fi
 done
 
 echo "## create mountpoints ##"
 if [ $test_environment -eq 1 ]; then # test environment
-    repolist=$(ls -1 $gitoliterepos; echo "foo bar baz gitolite-admin testing")
-    repolist=$(basename -s .git -a $(dirname $(find $gitoliterepos -name HEAD -type f)))
+    repolist=$(ls -1 "$gitoliterepos"; echo "foo bar baz gitolite-admin testing")
+    repolist=$(basename -s .git -a $(dirname $(find "$gitoliterepos" -name HEAD -type f)))
     repolist=""
-    for repo in $(find $gitoliterepos -name HEAD -type f); do
+    for repo in $(find "$gitoliterepos" -name HEAD -type f); do
 	nrepo=${repo#"$gitoliterepos/"}
-	nrepo=$(dirname $nrepo)
+	nrepo=$(dirname "$nrepo")
 	nrepo=${nrepo%".git"}
 	repolist="$repolist $nrepo"
-	echo $nrepo
-	echo dirname $(dirname $nrepo)
+	echo "$nrepo"
+	echo dirname $(dirname "$nrepo")
     done
 else
     repolist=$(gitolite list-phy-repos)
 fi
 
 for username in $userlist; do
-    if [ ! $username = "admin" ]; then
-	echo $username
+    if [ ! "$username" = "admin" ]; then
+	echo "$username"
 	for repo in $repolist; do
-	    if [ $repo != "gitolite-admin" ]; then
+	    if [ "$repo" != "gitolite-admin" ]; then
 		if [ $test_environment -eq 1 ]; then # test environment
 		    exit_status=0
 		else
-		    gitolite access -q $repo $username
+		    gitolite access -q "$repo" "$username"
 		    exit_status=$?
 		fi
 		if [ $exit_status -eq 0 ]; then
-		    if [ -d $gitoliterepos/$repo -o -d $gitoliterepos/$repo.git ]; then
-			if [ ! -d $outputdir/$username/$repo ]; then
-			    mkdir -p --mode=$outputdirmode $outputdir/$username/$repo
+		    if [ -d "$gitoliterepos/$repo" -o -d "$gitoliterepos/$repo.git" ]; then
+			if [ ! -d "$outputdir/$username/$repo" ]; then
+			    mkdir -p --mode=$outputdirmode "$outputdir/$username/$repo"
 			fi
-			mountpoint -q $outputdir/$username/$repo
+			mountpoint -q "$outputdir/$username/$repo"
 			exit_status=$?
 			if [ $exit_status -ne 0 ]; then
-			    if [ -d $gitoliterepos/$repo ]; then
-				fuse_git_bare_fs.py repo -daemon -allow_other $gitoliterepos/$repo $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
-			    elif [ -d $gitoliterepos/$repo.git ]; then
-				fuse_git_bare_fs.py repo -daemon -allow_other $gitoliterepos/$repo.git $outputdir/$username/$repo && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+			    if [ -d "$gitoliterepos/$repo" ]; then
+				fuse_git_bare_fs.py repo -daemon -allow_other "$gitoliterepos/$repo $outputdir/$username/$repo" && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+			    elif [ -d "$gitoliterepos/$repo.git" ]; then
+				fuse_git_bare_fs.py repo -daemon -allow_other "$gitoliterepos/$repo.git $outputdir/$username/$repo" && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
 			    fi
 			fi
 		    fi
