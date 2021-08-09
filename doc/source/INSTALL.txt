@@ -2,7 +2,7 @@
 INSTALL: fuse_git_bare_fs
 =========================
 
-:Version: 2021-06-28
+:Version: 2021-08-09
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
 
@@ -228,7 +228,7 @@ all available unittests (including scripts)::
 
 This command has a few interesting parameters, e. g.::
 
-  env python3 setup.py run_pytest --coverage
+  env python3 setup.py run_pytest --parallel --coverage
 
 
 hints
