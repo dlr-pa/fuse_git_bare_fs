@@ -111,6 +111,7 @@ if [ $test_environment -eq 1 ]; then # test environment
 	nrepo=${nrepo%".git"}
 	repolist="$repolist $nrepo"
 	echo "$nrepo"
+	# shellcheck disable=SC2046
 	echo dirname $(dirname "$nrepo")
     done
 else
