@@ -105,7 +105,8 @@ if [ $test_environment -eq 1 ]; then # test environment
     # shellcheck disable=SC2046
     repolist=$(basename -s .git -a $(dirname $(find "$gitoliterepos" -name HEAD -type f)))
     repolist=""
-    for repo in $(find "$gitoliterepos" -name HEAD -type f); do
+    while IFS= read -r -d '' repo
+    do
 	nrepo=${repo#"$gitoliterepos/"}
 	nrepo=$(dirname "$nrepo")
 	nrepo=${nrepo%".git"}
@@ -113,7 +114,7 @@ if [ $test_environment -eq 1 ]; then # test environment
 	echo "$nrepo"
 	# shellcheck disable=SC2046
 	echo dirname $(dirname "$nrepo")
-    done
+    done < <(find "$gitoliterepos" -name HEAD -type f -print0)
 else
     repolist=$(gitolite list-phy-repos)
 fi

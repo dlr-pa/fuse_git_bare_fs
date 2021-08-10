@@ -34,14 +34,15 @@ for subdirname in "$outputdir"/*; do
 	    if [ $exit_status -eq 0 ]; then
 		echo "removed $outputdir/$subdirname/$subsubdirname"
 	    else
-		for path in $(find "$outputdir/$subdirname/$subsubdirname" -fstype fuse -type d); do
+		while IFS= read -r -d '' path
+		do
 		    mountpoint -q "$path"
 		    exit_status=$?
 		    if [ $exit_status -eq 0 ]; then
 			fusermount -u "$path" && echo "unmounted $path"
 			rmdir "$path"
 		    fi
-		done
+		done < <(find "$outputdir/$subdirname/$subsubdirname" -fstype fuse -type d -print0)
 		rmdir "$outputdir/$subdirname/$subsubdirname"
 	    fi
 	fi
