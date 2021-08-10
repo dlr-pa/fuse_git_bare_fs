@@ -78,7 +78,7 @@ done
 
 echo "## remove obsolete user dir ##"
 for subdirname in "$outputdir"/*; do
-    subdirname=$(basename $subdirname)
+    subdirname=$(basename "$subdirname")
     echo "$userlist" | grep -w -q "$subdirname"
     exit_status=$?
     if [ $exit_status -ne 0 ] || [ "$subdirname" = "admin" ]; then

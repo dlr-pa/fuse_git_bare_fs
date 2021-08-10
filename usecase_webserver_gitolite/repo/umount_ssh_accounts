@@ -20,10 +20,10 @@ echo "workdir: $workdir"
 echo -e "outputdir: $outputdir\n"
 
 for subdirname in "$outputdir"/*; do
-    subdirname=$(basename $subdirname)
+    subdirname=$(basename "$subdirname")
     # check mount and do unumount if necessary
     for subsubdirname in "$outputdir/$subdirname"/*; do
-	subsubdirname=$(basename $subsubdirname)
+	subsubdirname=$(basename "$subsubdirname")
 	if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
 	    mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 	    exit_status=$?
