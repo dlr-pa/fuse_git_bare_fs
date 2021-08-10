@@ -8,10 +8,10 @@
 import subprocess
 import time
 
-from .read_write_lock import read_write_lock
+from .read_write_lock import ReadWriteLock
 
 
-class simple_file_cache():
+class SimpleFileCache():
     """
     :Author: Daniel Mohr
     :Date: 2021-04-23
@@ -24,7 +24,7 @@ class simple_file_cache():
         :param cache_size: maximal cache size
         :param maxage: files after this time are removed from the cache
         """
-        self.lock = read_write_lock()
+        self.lock = ReadWriteLock()
         self.min_file_size = min_file_size
         self.max_cache_size = max_cache_size
         self.maxage = maxage
@@ -39,6 +39,7 @@ class simple_file_cache():
         :param size: size to read
         :param offset: offset from where to read
         """
+        # pylint: disable=too-many-arguments
         ret = None
         with self.lock.read_locked():
             if ((repopath in self.cache) and (path in self.cache[repopath]) and
@@ -62,25 +63,26 @@ class simple_file_cache():
         :param size: size to read
         :param offset: offset from where to read
         """
+        # pylint: disable=too-many-arguments
         self.clear_old()
         ret = self.get_cached(
             repopath, path, size, offset, maxage=2*self.maxage)
         if ret is None:
-            cp = subprocess.run(
+            cpi = subprocess.run(
                 ["git cat-file --batch"],
                 input=blob_hash,
                 stdout=subprocess.PIPE,
                 cwd=repopath, shell=True, timeout=3, check=True)
-            lcp = len(cp.stdout)
+            lcp = len(cpi.stdout)
             if self.min_file_size <= st_size:
                 self.lock.acquire_read()
                 if self.actual_cache_size + lcp < self.max_cache_size:
                     self.lock.release_read()
                     with self.lock.write_locked():
-                        if not repopath in self.cache:
+                        if repopath not in self.cache:
                             self.cache[repopath] = dict()
                         self.cache[repopath][path] = [time.time(),
-                                                      cp.stdout,
+                                                      cpi.stdout,
                                                       lcp,
                                                       st_size]
                         self.actual_cache_size += self.cache[repopath][path][2]
@@ -89,10 +91,9 @@ class simple_file_cache():
             startindex = lcp - 1 - st_size + offset
             stopindex = lcp - 1
             if size is not None:
-                stopindex = min(startindex + size, len(cp.stdout) - 1)
-            return cp.stdout[startindex:stopindex]
-        else:
-            return ret
+                stopindex = min(startindex + size, len(cpi.stdout) - 1)
+            return cpi.stdout[startindex:stopindex]
+        return ret
 
     def _clear_repo_old(self, repopath):
         """
@@ -105,17 +106,26 @@ class simple_file_cache():
                 del self.cache[repopath][key]
 
     def clear_old(self):
-        now = time.time()
+        """
+        This method removes the cache for old data/repositories.
+        """
         with self.lock.write_locked():
             for repopath in list(self.cache.keys()):
                 self._clear_repo_old(repopath)
 
     def clear_repo_old(self, repopath):
+        """
+        This method removes the cache for the given data/repositories,
+        if the cache is not up to date.
+        """
         with self.lock.write_locked():
             if repopath in self.cache:
                 self._clear_repo_old(repopath)
 
     def clear_repo_all(self, repopath):
+        """
+        This method removes the complete cache.
+        """
         with self.lock.write_locked():
             if repopath in self.cache:
                 del self.cache[repopath]

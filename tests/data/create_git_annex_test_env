@@ -1,22 +1,23 @@
 #!/bin/bash
-# fuse_git_bare_fs.py tree server mountpoint
+# fuse_git_bare_fs tree server mountpoint
 mkdir server
 mkdir server/repo2
 mkdir client
 mkdir mountpoint
 
-cd server
-git init --bare repo1.git
-git init --bare repo2/repo2.git
-git init --bare repo3.git
-cd ..
+(
+    cd server || exit 1
+    git init --bare repo1.git
+    git init --bare repo2/repo2.git
+    git init --bare repo3.git
+) || exit 1
 
-cd client
+cd client || exit 1
 git clone ../server/repo1
 git clone ../server/repo2/repo2
 git clone ../server/repo3
 
-cd repo1
+cd repo1 || exit 1
 echo f1 > f1; git add f1; git commit -m f1
 git push # init master repository on remote
 git annex init # init git-annex locally
@@ -27,7 +28,7 @@ echo f3 > f3; git annex add f3; git commit -m f3;
 git annex sync
 cd ..
 
-cd repo2
+cd repo2 || exit 1
 git annex init # init git-annex locally
 mkdir f1
 echo f1 > f1/f1
@@ -42,7 +43,7 @@ git annex add f3; git commit -m f3;
 git annex sync
 cd ..
 
-cd repo3
+cd repo3 || exit 1
 git annex init
 echo f1 > f1; git add f1; git commit -m f1; git push
 cd ..

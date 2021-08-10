@@ -14,7 +14,8 @@ You can run this file directly::
 
 Or you can run only one test, e. g.::
 
-  env python3 script_fuse_git_bare_fs_repo.py script_fuse_git_bare_fs_repo.test_fuse_git_bare_fs_repo
+  env python3 script_fuse_git_bare_fs_repo.py \
+    script_fuse_git_bare_fs_repo.test_fuse_git_bare_fs_repo
 
   pytest-3 -k test_fuse_git_bare_fs_repo script_fuse_git_bare_fs_repo.py
 """
@@ -26,7 +27,7 @@ import time
 import unittest
 
 
-class script_fuse_git_bare_fs_repo(unittest.TestCase):
+class ScriptFuseGitBareFsRepo(unittest.TestCase):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-26
@@ -37,7 +38,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         mount it, check for files.
         """
         serverdir = 'server'
@@ -48,51 +49,52 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
             # prepare test environment
             for dirpath in [serverdir, clientdir, mountpointdir]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
-            cp = subprocess.run(
+            subprocess.run(
                 ['git init --bare ' + reponame],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, serverdir),
                 timeout=3, check=True)
-            cp = subprocess.run(
+            subprocess.run(
                 ['git clone ../' + os.path.join(serverdir, reponame)],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir),
                 timeout=3, check=True)
-            cp = subprocess.run(
+            subprocess.run(
                 ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
                  'git add a b l d/c; git commit -m init; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run tests
-            cp = subprocess.Popen(
+            cpi = subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.4 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'a', 'b', 'd', 'l'})
-            cp.terminate()
-            cp.wait(timeout=3)
-            cp.kill()
-            cp.stdout.close()
-            cp.stderr.close()
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpi.stdout.close()
+            cpi.stderr.close()
 
     def test_fuse_git_bare_fs_repo_daemon1(self):
         """
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         mount it, check for fiels.
         """
+        # pylint: disable=invalid-name,too-many-statements
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
@@ -101,34 +103,34 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
             # prepare test environment
             for dirpath in [serverdir, clientdir, mountpointdir]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
-            cp = subprocess.run(
+            subprocess.run(
                 ['git init --bare ' + reponame],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, serverdir),
                 timeout=3, check=True)
-            cp = subprocess.run(
+            subprocess.run(
                 ['git clone ../' + os.path.join(serverdir, reponame)],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir),
                 timeout=3, check=True)
-            cp = subprocess.run(
+            subprocess.run(
                 ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
                  'git add a b l d/c; git commit -m init; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run tests
-            cp = subprocess.run(
+            subprocess.run(
                 ['fuse_git_bare_fs repo -daemon ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            t0 = time.time()
-            while time.time() - t0 < 3:  # wait up to 3 seconds for mounting
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                 # typical it needs less than 0.2 seconds
-                if len(os.listdir(os.path.join(tmpdir, mountpointdir))) > 0:
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
                 time.sleep(0.1)
             self.assertEqual(
@@ -169,7 +171,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 file_status = os.lstat(
                     os.path.join(tmpdir, mountpointdir, 'foo'))
             # adapt data
-            cp = subprocess.run(
+            subprocess.run(
                 ['ln -s d/c foo; git add foo; git commit -m foo; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
@@ -179,7 +181,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'a', 'b', 'd', 'l', 'foo'})
             # adapt data
-            cp = subprocess.run(
+            subprocess.run(
                 ['ln -s d/c bar; git add bar; git commit -m bar; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
@@ -195,8 +197,9 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 data = fd.read()
             self.assertEqual(data, 'abc\n')
             # adapt data
-            cp = subprocess.run(
-                ['echo abc..xyz>baz; git add baz; git commit -m baz; git push'],
+            subprocess.run(
+                ['echo abc..xyz>baz; '
+                 'git add baz; git commit -m baz; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
@@ -206,7 +209,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 data = fd.read()
             self.assertEqual(data, 'abc..xyz\n')
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
@@ -217,9 +220,10 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
 
-        This test creates a repo, put some files in and 
+        This test creates a repo, put some files in and
         mount it, check for files.
         """
+        # pylint: disable=invalid-name
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
@@ -228,24 +232,24 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
             # prepare test environment
             for dirpath in [serverdir, clientdir, mountpointdir]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
-            cp = subprocess.run(
+            subprocess.run(
                 ['git init --bare ' + reponame],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, serverdir),
                 timeout=3, check=True)
-            cp = subprocess.run(
+            subprocess.run(
                 ['git clone ../' + os.path.join(serverdir, reponame)],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir),
                 timeout=3, check=True)
-            cp = subprocess.run(
+            subprocess.run(
                 ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
                  'git add a b l d/c; git commit -m init; git push'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run tests
-            cp = subprocess.run(
+            subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo -daemon ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
@@ -254,7 +258,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 timeout=3, check=True)
             time.sleep(0.3)
             # adapt data
-            cp = subprocess.run(
+            subprocess.run(
                 ['git branch foo; git checkout foo; echo "f">f;'
                  'git rm -r a b l d; git add f; git commit -m f; '
                  'git push --set-upstream origin foo'],
@@ -266,7 +270,7 @@ class script_fuse_git_bare_fs_repo(unittest.TestCase):
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 set(['f']))
             # remove mount
-            cp = subprocess.run(
+            subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,

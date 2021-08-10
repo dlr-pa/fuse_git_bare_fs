@@ -10,7 +10,9 @@ try:
     import fusepy  # https://github.com/fusepy/fusepy
 except ModuleNotFoundError:
     import fuse as fusepy
+import grp
 import os.path
+import pwd
 import sys
 
 
@@ -20,22 +22,23 @@ def fuse_git_bare_fs_repo(args):
     :Email: daniel.mohr@dlr.de
     :Date: 2021-06-10 (last change).
     """
+    # pylint: disable = bad-option-value, import-outside-toplevel
     operations_instance = None
     if args.daemon:  # running in foreground
         import logging
-        from .git_bare_repo import git_bare_repo_logging
+        from .git_bare_repo import GitBareRepoLogging
         logging.basicConfig(level=logging.DEBUG)
-        operations_instance = git_bare_repo_logging(
+        operations_instance = GitBareRepoLogging(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0])
     else:
-        from .git_bare_repo import git_bare_repo
-        operations_instance = git_bare_repo(
+        from .git_bare_repo import GitBareRepo
+        operations_instance = GitBareRepo(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0])
-    fuse = fusepy.FUSE(
+    fusepy.FUSE(
         operations_instance,
         args.target_dir,
         foreground=args.daemon,
@@ -49,13 +52,15 @@ def fuse_git_bare_fs_tree(args):
     :Email: daniel.mohr@dlr.de
     :Date: 2021-06-15 (last change).
     """
+    # pylint: disable=bad-option-value,import-outside-toplevel
     operations_instance = None
     if args.daemon:  # running in foreground
         import logging
         if args.get_user_list_from_gitolite:
-            from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite_logging
+            from .git_bare_repo_tree_gitolite import \
+                GitBareRepoTreeGitoliteLogging
             logging.basicConfig(level=logging.DEBUG)
-            operations_instance = git_bare_repo_tree_gitolite_logging(
+            operations_instance = GitBareRepoTreeGitoliteLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
@@ -64,16 +69,17 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
-            from .git_bare_repo_tree import git_bare_repo_tree_logging
+            from .git_bare_repo_tree import GitBareRepoTreeLogging
             logging.basicConfig(level=logging.DEBUG)
-            operations_instance = git_bare_repo_tree_logging(
+            operations_instance = GitBareRepoTreeLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0])
     else:
         if args.get_user_list_from_gitolite:
-            from .git_bare_repo_tree_gitolite import git_bare_repo_tree_gitolite
-            operations_instance = git_bare_repo_tree_gitolite(
+            from .git_bare_repo_tree_gitolite \
+                import GitBareRepoTreeGitolite
+            operations_instance = GitBareRepoTreeGitolite(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.provide_htaccess,
@@ -82,12 +88,12 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_user_file[0],
                 args.max_cache_size[0])
         else:
-            from .git_bare_repo_tree import git_bare_repo_tree
-            operations_instance = git_bare_repo_tree(
+            from .git_bare_repo_tree import GitBareRepoTree
+            operations_instance = GitBareRepoTree(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0])
-    fuse = fusepy.FUSE(
+    fusepy.FUSE(
         operations_instance,
         args.target_dir,
         foreground=args.daemon,
@@ -101,6 +107,7 @@ def my_argument_parser():
     :Email: daniel.mohr@dlr.de
     :Date: 2021-06-15 (last change).
     """
+    # pylint: disable=too-many-statements
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
     epilog += 'Date: 2021-06-15\n'
@@ -110,7 +117,7 @@ def my_argument_parser():
     description += 'tree(s) of git bare repositories '
     description += 'as a filesystem in user space (fuse). '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
+    description += 'For a write access you should do a git commit and use git.'
     parser = argparse.ArgumentParser(
         description=description,
         epilog=epilog,
@@ -130,11 +137,12 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='opt',
-        help='These options are splitted at "," and used as seperated options. '
-        'The sub-commands are extracted as well. The flag "-daemon" is used in '
-        'any case. This allows to use this program as mount program e. g. in '
-        '/etc/fstab. Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will '
-        'become "tree -a -b c"')
+        help='These options are splitted at "," and used as seperated options.'
+        ' The sub-commands are extracted as well. '
+        'The flag "-daemon" is used in any case. '
+        'This allows to use this program as mount program e. g. in /etc/fstab.'
+        ' Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will'
+        ' become "tree -a -b c"')
     common_parser.add_argument(
         '-root_object',
         nargs=1,
@@ -191,29 +199,33 @@ def my_argument_parser():
         default=[None],
         dest='gid',
         help='The program is run under this gid. On default nothing is done. '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-ro',
         action='store_true',
         help='Make a read only mountpoint. This is always the case! '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-dev',
         action='store_true',
         help='This is ignored. '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-suid',
         action='store_true',
         help='This is ignored. '
-        'This allows to use this program as mount program e. g. in /etc/fstab.')
+        'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
     # subparser repo
     description = '"fuse_git_bare_fs repo" is a tool to mount the working '
     description += 'tree of a git bare repository '
     description += 'as a filesystem in user space (fuse). '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
-    description += 'This script needs about 7.6 MB of memory to run. '
+    description += 'For a write access you should do a git commit and use git.'
+    description += ' This script needs about 7.6 MB of memory to run. '
     description += 'More memory is necessary for large working trees or '
     description += 'to provide file content.'
     epilog = 'Examples:\n\n'
@@ -247,8 +259,8 @@ def my_argument_parser():
     description += 'purpose are available. It is assumed that the bare '
     description += 'repositories are named like "*.git". '
     description += 'It gives only read access. '
-    description += 'For a write access you should do a git commit and use git. '
-    description += 'For unmount just press ctrl-c, kill the program or do '
+    description += 'For a write access you should do a git commit and use git.'
+    description += ' For unmount just press ctrl-c, kill the program or do '
     description += '"fusermount -u target_dir".'
     epilog = 'Examples:\n\n'
     epilog += 'fuse_git_bare_fs tree a b\n\n'
@@ -271,8 +283,8 @@ def my_argument_parser():
     tree_parser = argparse.ArgumentParser(add_help=False)
     tree_parser.add_argument(
         'src_dir',
-        help='This is the path to the directory tree of git bare repositories. '
-        'The working trees of their root_object (e. g. master) will be '
+        help='This is the path to the directory tree of git bare repositories.'
+        ' The working trees of their root_object (e. g. master) will be '
         'transparent available in the target_dir.')
     parser_tree = subparsers.add_parser(
         'tree',
@@ -305,8 +317,9 @@ def my_argument_parser():
         required=False,
         default=[None],
         dest='htaccess_template',
-        help='A htaccess template can be given. It is "Require user [username]"'
-        ' added. On default only "Require user [username]" is used.')
+        help='A htaccess template can be given. '
+        'It is "Require user [username]" '
+        'added. On default only "Require user [username]" is used.')
     parser_tree.add_argument(
         '-gitolite_cmd',
         nargs=1,
@@ -338,6 +351,12 @@ def my_argument_parser():
 
 
 def fuse_git_bare_fs():
+    """
+    :Author: Daniel Mohr
+    :Email: daniel.mohr@dlr.de
+    :Date: 2021-06-10 (last change).
+    """
+    # pylint: disable=too-many-branches,too-many-statements
     # command line arguments:
     parser = my_argument_parser()
     # parse arguments
@@ -347,16 +366,16 @@ def fuse_git_bare_fs():
         found_positional_params = 0
         for i in range(1, len(sys.argv)):
             if sys.argv[i] == '-o':
-                opt = sys.argv[i + 1].split(',')
-                for o in opt:
-                    if '=' in o:
-                        par, val = o.split('=')
+                options = sys.argv[i + 1].split(',')
+                for opt in options:
+                    if '=' in opt:
+                        par, val = opt.split('=')
                         param.append('-' + par)
                         param.append(val)
-                    elif o in ['repo', 'tree']:
-                        param = [o] + param
+                    elif opt in ['repo', 'tree']:
+                        param = [opt] + param
                     else:
-                        param.append('-' + o)
+                        param.append('-' + opt)
             elif sys.argv[i] in ['repo', 'tree']:
                 param = [sys.argv[i]] + param
             else:
@@ -368,7 +387,6 @@ def fuse_git_bare_fs():
         args = parser.parse_args()
     if args.subparser_name is not None:
         if args.gid[0] is not None:
-            import grp
             gid = None
             try:
                 gid = int(args.gid[0])
@@ -378,7 +396,6 @@ def fuse_git_bare_fs():
                 gid = grp.getgrnam(args.gid[0]).gr_gid
             os.setgid(gid)
         if args.uid[0] is not None:
-            import pwd
             uid = None
             try:
                 uid = int(args.uid[0])
@@ -390,7 +407,7 @@ def fuse_git_bare_fs():
             pw_dir = pwd.getpwuid(uid).pw_dir
             os.environ['HOME'] = pw_dir
             os.chdir(pw_dir)
-            if not 'PATH' in os.environ:
+            if 'PATH' not in os.environ:
                 os.environ['PATH'] = '/usr/local/sbin:/usr/local/bin:' + \
                     '/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
         args.func(args)  # call the programs

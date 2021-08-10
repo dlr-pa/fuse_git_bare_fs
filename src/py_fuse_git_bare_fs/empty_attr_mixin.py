@@ -9,7 +9,8 @@ import os
 import time
 
 
-class _empty_attr_mixin():
+class _EmptyAttrMixin():
+    # pylint: disable=too-few-public-methods
     _empty_dir_attr = {'st_mode': 16893, 'st_size': 4096,
                        'st_uid': os.geteuid(), 'st_gid': os.getegid()}
     _empty_dir_attr['st_atime'] = _empty_dir_attr['st_mtime'] = \

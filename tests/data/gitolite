@@ -1,55 +1,59 @@
 #!/bin/bash
 
-if [ $1 = "list-users" ]; then
+if [ "$1" = "list-users" ]; then
     echo user1
     echo user2
-elif [ $1 = "list-phy-repos" ]; then
+elif [ "$1" = "list-phy-repos" ]; then
     echo "repo1"
     echo "repo2"
     echo "repo3"
-elif [ $1 = "access" ]; then
-    if [ $3 = "repo1" ]; then
-	if [ $4 = "user1" ]; then
+elif [ "$1" = "access" ]; then
+    if [ "$3" = "repo1" ]; then
+	if [ "$4" = "user1" ]; then
 	    exit 0
-	elif [ $4 = "user2" ]; then
+	elif [ "$4" = "user2" ]; then
 	    exit 1
 	fi
-    elif [ $3 = "repo2" ]; then
-	if [ $4 = "user1" ]; then
+    elif [ "$3" = "repo2" ]; then
+	if [ "$4" = "user1" ]; then
 	    exit 0
-	elif [ $4 = "user2" ]; then
+	elif [ "$4" = "user2" ]; then
 	    exit 1
 	fi
     else
 	exit 0
     fi
-elif [ $1 = "createenv" ]; then
-    # fuse_git_bare_fs.py tree -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd /full_path/gitolite server mountpoint
+elif [ "$1" = "createenv" ]; then
+    # fuse_git_bare_fs tree -get_user_list_from_gitolite -provide_htaccess -gitolite_cmd /full_path/gitolite server mountpoint
     mkdir server
-    cd server
-    git init --bare gitolite-admin.git
-    git init --bare repo1.git
-    git init --bare repo2.git
-    git init --bare repo3.git
-    cd ..
+    (
+	cd server || exit 1
+	git init --bare gitolite-admin.git
+	git init --bare repo1.git
+	git init --bare repo2.git
+	git init --bare repo3.git
+    ) || exit 1
     mkdir client
-    cd client
-    git clone ../server/gitolite-admin
-    git clone ../server/repo1
-    git clone ../server/repo2
-    git clone ../server/repo3
-    cd gitolite-admin
-    echo a > a; git add a; git commit -m a; git push
-    cd ..
-    cd repo1
-    echo b > b; git add b; git commit -m b; git push
-    cd ..
-    cd repo2
-    echo c > c; git add c; git commit -m c; git push
-    cd ..
-    cd repo3
-    echo d > d; git add d; git commit -m d; git push
-    cd ..
-    cd ..
+    (
+	cd client || exit 1
+	git clone ../server/gitolite-admin
+	git clone ../server/repo1
+	git clone ../server/repo2
+	git clone ../server/repo3
+	cd gitolite-admin || exit 1
+	echo a > a; git add a; git commit -m a; git push
+    ) || exit 1
+    (
+	cd client/repo1 || exit 1
+	echo b > b; git add b; git commit -m b; git push
+    ) || exit 1
+    (
+	cd client/repo2 || exit 1
+	echo c > c; git add c; git commit -m c; git push
+    ) || exit 1
+    (
+	cd client/repo3 || exit 1
+	echo d > d; git add d; git commit -m d; git push
+    ) || exit 1
     mkdir mountpoint
 fi

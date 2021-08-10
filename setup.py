@@ -5,9 +5,10 @@
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
+import distutils  # we need distutils for distutils.errors.DistutilsArgError
+from distutils.core import Command, setup
 import os
-
-from distutils.core import setup, Command
+import sys
 
 
 class TestWithPytest(Command):
@@ -50,16 +51,14 @@ class TestWithPytest(Command):
         :Author: Daniel Mohr
         :Date: 2021-02-04
         """
-        pass
 
     def run(self):
         """
         :Author: Daniel Mohr
         :Date: 2021-06-25
         """
+        # pylint: disable=too-many-branches
         # env python3 setup.py run_pytest
-        import sys
-        import os.path
         if self.src == 'installed':
             pass
         elif self.src == 'local':
@@ -71,13 +70,14 @@ class TestWithPytest(Command):
         sys.path.append(os.path.abspath('.'))
         # https://docs.pytest.org/en/stable/contents.html
         # https://pytest-cov.readthedocs.io/en/latest/
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import pytest
         pyargs = []
         if self.parallel:
             try:
                 # if available, using parallel test run
+                # pylint: disable=unused-variable
                 import xdist
-                import sys
                 if os.name == 'posix':
                     # since we are only running seconds,
                     # we use the load of the last minute:
@@ -88,7 +88,7 @@ class TestWithPytest(Command):
                 else:
                     nthreads = max(2, int(0.5 * os.cpu_count()))
                 pyargs += ['-n %i' % nthreads]
-            except:
+            except (ModuleNotFoundError, ImportError):
                 pass
         if self.coverage:
             # env python3 setup.py run_pytest --coverage
@@ -149,7 +149,6 @@ class TestWithUnittest(Command):
         :Author: Daniel Mohr
         :Date: 2021-02-04
         """
-        pass
 
     def run(self):
         """
@@ -157,8 +156,6 @@ class TestWithUnittest(Command):
         :Date: 2021-06-25
         """
         # env python3 setup.py run_unittest
-        import sys
-        import os.path
         if self.src == 'installed':
             pass
         elif self.src == 'local':
@@ -168,6 +165,7 @@ class TestWithUnittest(Command):
                 "error in command line: " +
                 "value for option 'src' is not 'installed' or 'local'")
         sys.path.append(os.path.abspath('.'))
+        # pylint: disable=bad-option-value,import-outside-toplevel
         import unittest
         suite = unittest.TestSuite()
         import tests
@@ -175,6 +173,8 @@ class TestWithUnittest(Command):
         setup_self = self
 
         class TestRequiredModuleImport(unittest.TestCase):
+            # pylint: disable=missing-docstring
+            # pylint: disable=no-self-use
             def test_required_module_import(self):
                 import importlib
                 for module in setup_self.distribution.metadata.get_requires():
@@ -182,6 +182,8 @@ class TestWithUnittest(Command):
                         try:
                             importlib.import_module(module)
                         except ModuleNotFoundError:
+                            # pylint: disable=import-error,unused-variable
+                            # pylint: disable=unused-variable,unused-import
                             import fuse as fusepy
                     else:
                         importlib.import_module(module)
@@ -216,6 +218,7 @@ class CheckModules(Command):
         pass
 
     def run(self):
+        # pylint: disable=bad-option-value,import-outside-toplevel
         import importlib
         summary = ""
         i = 0
@@ -257,6 +260,7 @@ class CheckModulesModulefinder(Command):
         pass
 
     def run(self):
+        # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
             print("\nchecking for modules used in '%s':" % script)
@@ -266,7 +270,7 @@ class CheckModulesModulefinder(Command):
 
 
 # necessary modules
-required_modules = ['argparse',
+REQUIRED_MODULES = ['argparse',
                     'errno',
                     'fusepy',
                     'grp',
@@ -282,17 +286,17 @@ required_modules = ['argparse',
                     'time',
                     'warnings']
 # optional modules for python3 setup.py check_modules
-required_modules += ['importlib']
+REQUIRED_MODULES += ['importlib']
 # optional modules for python3 setup.py check_modules_modulefinder
-required_modules += ['modulefinder']
+REQUIRED_MODULES += ['modulefinder']
 # modules to build doc
-#required_modules += ['sphinx', 'sphinxarg', 'recommonmark']
+# REQUIRED_MODULES += ['sphinx', 'sphinxarg', 'recommonmark']
 # modules to run tests with unittest
-required_modules += ['shutil', 'tempfile', 'unittest']
+REQUIRED_MODULES += ['shutil', 'tempfile', 'unittest']
 # modules to run tests with pytest
-required_modules += ['pytest']
+REQUIRED_MODULES += ['pytest']
 # optional modules to run tests with pytest in parallel
-required_modules += ['xdist']
+REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
@@ -330,6 +334,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Topic :: System :: Filesystems'],
-    # cat $(find | grep "py$") | egrep -i "^[ \t]*import .*$" | egrep -i --only-matching "import .*$" | sort -u
-    requires=required_modules
+    # cat $(find | grep "py$") | egrep -i "^[ \t]*import .*$" | \
+    #   egrep -i --only-matching "import .*$" | sort -u
+    requires=REQUIRED_MODULES
 )

@@ -1,16 +1,16 @@
 #!/bin/bash
 
-if [ $1 = "list-users" ]; then
+if [ "$1" = "list-users" ]; then
     echo user1
     echo user2
-elif [ $1 = "list-phy-repos" ]; then
+elif [ "$1" = "list-phy-repos" ]; then
     echo "repo2"
     echo "repo3"
-elif [ $1 = "access" ]; then
-    if [ $3 = "repo2" ]; then
-	if [ $4 = "user1" ]; then
+elif [ "$1" = "access" ]; then
+    if [ "$3" = "repo2" ]; then
+	if [ "$4" = "user1" ]; then
 	    exit 0
-	elif [ $4 = "user2" ]; then
+	elif [ "$4" = "user2" ]; then
 	    exit 1
 	fi
     else

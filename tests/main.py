@@ -19,7 +19,7 @@ env python3 setup.py run_pytest
 import unittest
 
 
-class test_module_import(unittest.TestCase):
+class TestModuleImport(unittest.TestCase):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-14
@@ -29,11 +29,15 @@ class test_module_import(unittest.TestCase):
         """
         :Author: Daniel Mohr
         :Date: 2021-04-14
+
+        env python3 main.py TestModuleImport.test_module_import
         """
+        # pylint: disable = unused-variable, unused-import, no-self-use
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import py_fuse_git_bare_fs
 
 
-class test_scripts_executable(unittest.TestCase):
+class TestScriptsExecutable(unittest.TestCase):
     """
     :Author: Daniel Mohr
     :Date: 2021-04-26
@@ -44,20 +48,22 @@ class test_scripts_executable(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-04-26
         """
+        # pylint: disable = invalid-name
+        # pylint: disable = bad-option-value, import-outside-toplevel
         import subprocess
         for cmd in ["fuse_git_bare_fs -h", "fuse_git_bare_fs repo -h",
                     "fuse_git_bare_fs tree -h"]:
-            cp = subprocess.run(
+            cpi = subprocess.run(
                 [cmd],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, timeout=3, check=True)
             # check at least minimal help output
-            self.assertTrue(len(cp.stdout) >= 775)
+            self.assertTrue(len(cpi.stdout) >= 775)
             # check begin of help output
-            self.assertTrue(cp.stdout.startswith(
+            self.assertTrue(cpi.stdout.startswith(
                 b'usage: fuse_git_bare_fs'))
             # check end of help output
-            self.assertTrue(cp.stdout.endswith(
+            self.assertTrue(cpi.stdout.endswith(
                 b'License: ' +
                 b'GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.\n'))
 
@@ -73,7 +79,7 @@ def module(suite):
     """
     print('add tests for the module')
     loader = unittest.defaultTestLoader
-    suite.addTest(loader.loadTestsFromTestCase(test_module_import))
+    suite.addTest(loader.loadTestsFromTestCase(TestModuleImport))
     # py_fuse_git_bare_fs.repo_class
     suite.addTest(loader.loadTestsFromName(
         'tests.py_fuse_git_bare_fs_repo_class'))
@@ -90,7 +96,7 @@ def scripts(suite):
     """
     print('add tests for the scripts')
     loader = unittest.defaultTestLoader
-    suite.addTest(loader.loadTestsFromTestCase(test_scripts_executable))
+    suite.addTest(loader.loadTestsFromTestCase(TestScriptsExecutable))
     # fuse_git_bare_fs repo
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_repo'))
@@ -103,3 +109,7 @@ def scripts(suite):
     # with git-annex: fuse_git_bare_fs tree
     suite.addTest(loader.loadTestsFromName(
         'tests.script_fuse_git_bare_fs_tree_annex'))
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

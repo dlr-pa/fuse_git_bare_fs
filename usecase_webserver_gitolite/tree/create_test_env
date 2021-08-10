@@ -1,27 +1,27 @@
 #!/bin/bash
 mydir=$(mktemp -d)
 echo -e "create a test environment in: $mydir\n"
-mkdir $mydir/repos
-mkdir $mydir/repos/server
-mkdir $mydir/repos/client
-mkdir $mydir/webdav
-mkdir $mydir/webdav/removeme
+mkdir "$mydir/repos"
+mkdir "$mydir/repos/server"
+mkdir "$mydir/repos/client"
+mkdir "$mydir/webdav"
+mkdir $"mydir/webdav/removeme"
 
 for repo in gitolite-admin foo bar baz; do
-    echo $repo
-    cd $mydir/repos/server
+    echo "$repo"
+    cd "$mydir/repos/server" || exit 1
     git init --bare $repo.git
-    cd $mydir/repos/client
+    cd "$mydir/repos/client" || exit 1
     git clone ../server/$repo.git
 done
-mkdir $mydir/repos/server/repodir
-cd $mydir/repos/server/repodir
+mkdir "$mydir/repos/server/repodir"
+cd "$mydir/repos/server/repodir" || exit 1
 git init --bare foo_bar_baz.git
-mkdir $mydir/repos/client/repodir
-cd $mydir/repos/client/repodir
+mkdir "$mydir/repos/client/repodir"
+cd "$mydir/repos/client/repodir" || exit 1
 git clone ../../server/repodir/foo_bar_baz.git
 
-cd $mydir/repos/client/gitolite-admin
+cd "$mydir/repos/client/gitolite-admin" || exit 1
 mkdir keydir
 for username in u1 u2 u3 u4 u5; do
     echo -n a > keydir/$username.pub
@@ -31,7 +31,7 @@ git commit -m init
 git push
 
 for repo in foo bar repodir/foo_bar_baz; do
-    cd $mydir/repos/client/$repo
+    cd "$mydir/repos/client/$repo" || exit 1
     echo "fuse_git_bare_fs rocks" > a.txt
     git add a.txt
     git commit -m "added a.txt"
@@ -41,11 +41,11 @@ for repo in foo bar repodir/foo_bar_baz; do
     git push
 done
 
-mkdir $mydir/target
+mkdir "$mydir/target"
 
 echo -e "\ncreated a test environment in: $mydir\n"
 
 echo "alias gitolite='echo'"
-echo -e "fuse_git_bare_fs.py tree $mydir/repos/server $mydir/target\n"
+echo -e "fuse_git_bare_fs tree $mydir/repos/server $mydir/target\n"
 
 echo "./umount_ssh_accounts $mydir"

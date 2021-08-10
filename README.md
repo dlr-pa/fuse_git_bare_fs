@@ -3,8 +3,8 @@
 
 ## intro
 
-'fuse_git_bare_fs.py' is a tool to mount the working tree of a
-[git](https://git-scm.com/) bare repository as a filesystem in 
+'fuse_git_bare_fs' is a tool to mount the working tree of a
+[git](https://git-scm.com/) bare repository as a filesystem in
 user space ([FUSE](https://en.wikipedia.org/wiki/Filesystem_in_Userspace)).
 
 You can find more information on the web:

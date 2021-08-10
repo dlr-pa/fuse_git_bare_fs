@@ -18,12 +18,12 @@ import subprocess
 import time
 import warnings
 
-from .read_write_lock import read_write_lock
-from .simple_file_cache import simple_file_cache
-from .simple_file_handler import simple_file_handler_class
+from .read_write_lock import ReadWriteLock
+from .simple_file_cache import SimpleFileCache
+from .simple_file_handler import SimpleFileHandlerClass
 
 
-class repo_class():
+class RepoClass():
     """
     :Author: Daniel Mohr
     :Date: 2021-04-24
@@ -31,6 +31,7 @@ class repo_class():
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
     """
+    # pylint: disable=too-many-instance-attributes
     time_regpat = re.compile(r' ([0-9]+) [+\-0-9]+$')
     tree_content_regpat = re.compile(
         r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
@@ -46,6 +47,7 @@ class repo_class():
     def __init__(self, src_dir, root_object=b'master',
                  max_cache_size=1073741824, cache=None,
                  simple_file_handler=None):
+        # pylint: disable=too-many-arguments
         self.src_dir = src_dir
         self.root_object = root_object
         self.tree = None
@@ -54,16 +56,16 @@ class repo_class():
         # we use the last commit time for everything, could be enhanced
         self.time = None
         if cache is None:
-            self.cache = simple_file_cache(max_cache_size=max_cache_size)
+            self.cache = SimpleFileCache(max_cache_size=max_cache_size)
         else:
             self.cache = cache
         self.content_cache = dict()
         self.content_cache_size = 0
         if simple_file_handler is None:
-            self.simple_file_handler = simple_file_handler_class()
+            self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
-        self.lock = read_write_lock()
+        self.lock = ReadWriteLock()
         with self.lock.write_locked():
             self._read_tree()
 
@@ -73,12 +75,12 @@ class repo_class():
         self.lock.acquire_write()
 
     def _cache_up_to_date(self):
-        cp = subprocess.run(
+        cpi = subprocess.run(
             ["git cat-file --batch-check='%(objectname)'"],
             input=self.root_object,
             stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
-        if cp.stdout.decode().strip() == self.commit_hash:
+        if cpi.stdout.decode().strip() == self.commit_hash:
             return True
         self.simple_file_handler.remove_repo(self.src_dir)
         return False
@@ -91,11 +93,11 @@ class repo_class():
             self.time = None
             self.content_cache = dict()
             self.cache.clear_repo_old(self.src_dir)
-            cp = subprocess.run(
+            cpi = subprocess.run(
                 ["git cat-file --batch"], input=self.root_object,
                 stdout=subprocess.PIPE,
                 cwd=self.src_dir, shell=True, timeout=3, check=True)
-            if cp.stdout.startswith(self.root_object):
+            if cpi.stdout.startswith(self.root_object):
                 # empty repo or self.root_object does not exists
                 msg = \
                     'root repository object "%s" in "%s" does not exists. ' % \
@@ -103,7 +105,7 @@ class repo_class():
                 msg += 'Mountpoint will be empty.'
                 warnings.warn(msg)
                 return False
-            splittedstdout = cp.stdout.decode().split('\n')
+            splittedstdout = cpi.stdout.decode().split('\n')
             self.commit_hash = splittedstdout[0].split()[0]
             for data in splittedstdout:
                 if data.startswith('tree'):
@@ -118,11 +120,11 @@ class repo_class():
         return True
 
     def _git_cat_file(self, git_object):
-        cp = subprocess.run(
+        cpi = subprocess.run(
             ['git cat-file -p ' + git_object],
             stdout=subprocess.PIPE,
             cwd=self.src_dir, shell=True, timeout=3, check=True)
-        return cp.stdout.decode()
+        return cpi.stdout.decode()
 
     def _read_tree(self, update_cache=None):
         if not self._update_cache(update_cache=update_cache):
@@ -132,7 +134,7 @@ class repo_class():
         #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
         trees = [('/', self.tree_hash)]  # (name, hash)
         self.tree['/'] = dict()
-        while len(trees) > 0:
+        while bool(trees):
             act_path, act_tree_hash = trees.pop(0)
             self.tree[act_path]['listdir'] = []
             self.tree[act_path]['blobs'] = dict()
@@ -154,13 +156,14 @@ class repo_class():
                         self.tree[obj_path] = dict()
 
     def _get_size_of_blob(self, head, tail):
-        if not 'st_size' in self.tree[head]['blobs'][tail]:
-            cp = subprocess.run(
+        if 'st_size' not in self.tree[head]['blobs'][tail]:
+            cpi = subprocess.run(
                 ["git cat-file --batch-check='%(objectsize)'"],
                 input=self.tree[head]['blobs'][tail]['hash'].encode(),
                 stdout=subprocess.PIPE,
                 cwd=self.src_dir, shell=True, timeout=3, check=True)
-            self.tree[head]['blobs'][tail]['st_size'] = int(cp.stdout.decode())
+            self.tree[head]['blobs'][tail]['st_size'] = \
+                int(cpi.stdout.decode())
 
     def readdir(self, path):
         """
@@ -174,7 +177,7 @@ class repo_class():
             self.cache.clear_repo_old(self.src_dir)
         self.lock.acquire_read()
         ret = None
-        if (self.tree is None) or (not path in self.tree):
+        if (self.tree is None) or (path not in self.tree):
             ret = ['.', '..']
         else:
             ret = ['.', '..'] + self.tree[path]['listdir']
@@ -207,6 +210,12 @@ class repo_class():
         return apath
 
     def getattr(self, path):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        get attributes of the path
+        """
         updated_cache = False
         if not self._cache_up_to_date():
             updated_cache = True
@@ -215,11 +224,11 @@ class repo_class():
         head, tail = os.path.split(path)
         self.lock.acquire_read()
         if ((updated_cache) or
-                (self.tree is None) or (not head in self.tree)):
+                (self.tree is None) or (head not in self.tree)):
             if not updated_cache:
                 with self.lock.write_locked():
                     self._read_tree()
-            if (self.tree is None) or (not head in self.tree):
+            if (self.tree is None) or (head not in self.tree):
                 # file:///usr/share/doc/python3/html/library/errno.html
                 # no such file or directory
                 if (tail == '') and (head == '/'):
@@ -233,9 +242,8 @@ class repo_class():
                         time.time()
                     self.lock.release_read()
                     return ret
-                else:
-                    self.lock.release_read()
-                    raise fusepy.FuseOSError(errno.ENOENT)
+                self.lock.release_read()
+                raise fusepy.FuseOSError(errno.ENOENT)
         ret = dict()
         ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
@@ -247,7 +255,7 @@ class repo_class():
             # 100644 normal file
             # 100755 executable file
             # 120000 symbolic link
-            if not tail in self.tree[head]['blobs']:
+            if tail not in self.tree[head]['blobs']:
                 # no such file or directory
                 self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
@@ -259,7 +267,8 @@ class repo_class():
                 # check if it is an accessable git-annex file
                 blob_hash = self.tree[head]['blobs'][tail]['hash'].encode()
                 link_path = self.cache.get(
-                    self.src_dir, path, blob_hash, st_size, st_size, 0).decode()
+                    self.src_dir, path,
+                    blob_hash, st_size, st_size, 0).decode()
                 #      self._get_annex_path_bare_repo(link_path))
                 #      self._get_annex_path_non_bare_repo(link_path))
                 annex_object = self.annex_object_regpat.findall(link_path)
@@ -275,8 +284,16 @@ class repo_class():
         self.lock.release_read()
         return ret
 
-    def read(self, path, size, offset, fh):
-        if not self.simple_file_handler.is_file_handler(self.src_dir, fh):
+    def read(self, path, size, offset, file_fandler):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        read parts of path
+        """
+        # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+        if not self.simple_file_handler.is_file_handler(self.src_dir,
+                                                        file_fandler):
             raise fusepy.FuseOSError(errno.EBADF)
         is_maybe_annex = False  # no git-annex file
         ret = self.cache.get_cached(self.src_dir, path, size, offset, 0.5)
@@ -287,7 +304,7 @@ class repo_class():
             try:
                 st_mode = self.gitmode2st_mode[
                     self.tree[head]['blobs'][tail]['mode']]
-            except:
+            except (KeyError, TypeError):
                 pass
         link_buf = None
         if st_mode == 41471:  # 120000 symbolic link
@@ -324,15 +341,15 @@ class repo_class():
         head, tail = os.path.split(path)
         self.lock.acquire_read()
         if ((updated_cache) or
-                (self.tree is None) or (not head in self.tree)):
+                (self.tree is None) or (head not in self.tree)):
             if not updated_cache:
                 with self.lock.write_locked():
                     self._read_tree()
-            if (self.tree is None) or (not head in self.tree):
+            if (self.tree is None) or (head not in self.tree):
                 # no such file or directory
                 self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
-        if not tail in self.tree[head]['blobs']:
+        if tail not in self.tree[head]['blobs']:
             # no such file or directory
             self.lock.release_read()
             raise fusepy.FuseOSError(errno.ENOENT)
@@ -364,14 +381,47 @@ class repo_class():
             self.src_dir, path, blob_hash, st_size, size, offset)
 
     def open(self, path, flags):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        Creates a lock on path and return it as a file handler.
+        Only open as read is supported, but this is not checked.
+
+        This lock will be destroyed, if the repository is changed or it is
+        released.
+
+        The arguments are not used, but can be given to be compatible to
+        typical open functions.
+        """
+        # pylint: disable=unused-argument
         if not self._cache_up_to_date():
-            updated_cache = True
             with self.lock.write_locked():
                 self._read_tree(update_cache=True)
         return self.simple_file_handler.get(self.src_dir)
 
-    def release(self, path, fh):
-        self.simple_file_handler.remove(self.src_dir, fh)
+    def release(self, path, file_fandler):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        Releases the lock file_fandler on path.
+
+        The argument path is not used, but can be given to be compatible to
+        typical release functions.
+        """
+        # pylint: disable=unused-argument
+        self.simple_file_handler.remove(self.src_dir, file_fandler)
 
     def utimens(self, path, times=None):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        This is not implemented at the moment.
+
+        The arguments are not used, but can be given to be compatible to
+        typical open functions.
+        """
+        # pylint: disable=unused-argument,no-self-use
         raise fusepy.FuseOSError(errno.EROFS)

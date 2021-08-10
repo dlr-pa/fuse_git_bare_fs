@@ -6,7 +6,7 @@
 Welcome to fuse_git_bare_fs's documentation!
 ============================================
 
-:program:`fuse_git_bare_fs.py` is a tool to mount the working tree of a
+:program:`fuse_git_bare_fs` is a tool to mount the working tree of a
 [git]_ bare repository as a filesystem in user space ([FUSE]_).
 
 You can find more information on the web and in the following:

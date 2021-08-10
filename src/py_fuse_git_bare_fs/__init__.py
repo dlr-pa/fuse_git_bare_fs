@@ -6,7 +6,9 @@ py_fuse_git_bare_fs
 
 description
 ===========
-"fuse_git_bare_fs" is a tool to mount the working tree of a git bare repository as a filesystem in user space (fuse). It gives only read access. For a write access you should do a git commit and use git.
+"fuse_git_bare_fs" is a tool to mount the working tree of a git bare repository
+as a filesystem in user space (fuse). It gives only read access.
+For a write access you should do a git commit and use git.
 
 copyright + license
 ===================
@@ -38,7 +40,7 @@ try:
     # try to get version from package metadata
     import pkg_resources
     __version__ = pkg_resources.require('py_fuse_git_bare_fs')[0].version
-except:
+except (ModuleNotFoundError, ImportError, pkg_resources.DistributionNotFound):
     pass
 
 from .fuse_git_bare_fs import fuse_git_bare_fs

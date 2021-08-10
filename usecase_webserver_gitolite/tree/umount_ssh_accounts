@@ -19,40 +19,41 @@ echo "gitolitehome: $gitolitehome"
 echo "workdir: $workdir"
 echo -e "outputdir: $outputdir\n"
 
-for subdirname in $(ls -1 $outputdir); do
+for subdirname in "$outputdir"/*; do
     # check mount and do unumount if necessary
-    for subsubdirname in $(ls -1 $outputdir/$subdirname); do
-	if [ -d $outputdir/$subdirname/$subsubdirname ]; then
-	    mountpoint -q $outputdir/$subdirname/$subsubdirname
+    for subsubdirname in "$outputdir/$subdirname"/*; do
+	if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
+	    mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 	    exit_status=$?
 	    if [ $exit_status -eq 0 ]; then
-		fusermount -u $outputdir/$subdirname/$subsubdirname && echo "unmounted $outputdir/$subdirname/$subsubdirname"
+		fusermount -u "$outputdir/$subdirname/$subsubdirname" && echo "unmounted $outputdir/$subdirname/$subsubdirname"
 	    fi
 	    # remove directory
-	    rmdir $outputdir/$subdirname/$subsubdirname
+	    rmdir "$outputdir/$subdirname/$subsubdirname"
 	    exit_status=$?
 	    if [ $exit_status -eq 0 ]; then
 		echo "removed $outputdir/$subdirname/$subsubdirname"
 	    else
-		for path in $(find $outputdir/$subdirname/$subsubdirname -fstype fuse -type d); do
-		    mountpoint -q $path
+		while IFS= read -r -d '' path
+		do
+		    mountpoint -q "$path"
 		    exit_status=$?
 		    if [ $exit_status -eq 0 ]; then
-			fusermount -u $path && echo "unmounted $path"
-			rmdir $path
+			fusermount -u "$path" && echo "unmounted $path"
+			rmdir "$path"
 		    fi
-		done
-		rmdir $outputdir/$subdirname/$subsubdirname
+		done < <(find "$outputdir/$subdirname/$subsubdirname" -fstype fuse -type d -print0)
+		rmdir "$outputdir/$subdirname/$subsubdirname"
 	    fi
 	fi
     done
     # remove directory
-    rm $outputdir/$subdirname/.htaccess
-    rmdir $outputdir/$subdirname && echo "removed $outputdir/$subdirname"
+    rm "$outputdir/$subdirname/.htaccess"
+    rmdir "$outputdir/$subdirname" && echo "removed $outputdir/$subdirname"
 done
 
-mountpoint -q $workdir
+mountpoint -q "$workdir"
 exit_status=$?
 if [ $exit_status -eq 0 ]; then
-    fusermount -u $workdir && echo "unmounted $workdir"
+    fusermount -u "$workdir" && echo "unmounted $workdir"
 fi
