@@ -20,8 +20,10 @@ echo "workdir: $workdir"
 echo -e "outputdir: $outputdir\n"
 
 for subdirname in "$outputdir"/*; do
+    subdirname=$(basename $subdirname)
     # check mount and do unumount if necessary
     for subsubdirname in "$outputdir/$subdirname"/*; do
+	subsubdirname=$(basename $subsubdirname)
 	if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
 	    mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 	    exit_status=$?
@@ -29,6 +31,7 @@ for subdirname in "$outputdir"/*; do
 		fusermount -u "$outputdir/$subdirname/$subsubdirname" && echo "unmounted $outputdir/$subdirname/$subsubdirname"
 	    fi
 	    # remove directory
+	    echo "try: rmdir $outputdir/$subdirname/$subsubdirname"
 	    rmdir "$outputdir/$subdirname/$subsubdirname"
 	    exit_status=$?
 	    if [ $exit_status -eq 0 ]; then
@@ -40,7 +43,7 @@ for subdirname in "$outputdir"/*; do
 		    exit_status=$?
 		    if [ $exit_status -eq 0 ]; then
 			fusermount -u "$path" && echo "unmounted $path"
-			rmdir "$path"
+			rmdir "$path" && echo "removed $path"
 		    fi
 		done < <(find "$outputdir/$subdirname/$subsubdirname" -fstype fuse -type d -print0)
 		rmdir "$outputdir/$subdirname/$subsubdirname"

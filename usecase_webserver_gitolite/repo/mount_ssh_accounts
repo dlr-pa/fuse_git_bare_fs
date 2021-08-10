@@ -57,9 +57,9 @@ if [ $exit_status -ne 0 ]; then
 fi
 
 if [ $test_environment -eq 1 ]; then # test environment
-    userlist=$(basename --suffix=.pub "$keydir/*"; echo "u1 u2 foo bar admin")
+    userlist=$(basename --suffix=.pub "$keydir"/*; echo "u1 u2 foo bar admin")
 else
-    userlist=$( (gitolite list-users | grep -v @; basename --suffix=.pub "$keydir/*") | sort -u)
+    userlist=$( (gitolite list-users | grep -v @; basename --suffix=.pub "$keydir"/*) | sort -u)
 fi
 
 echo "$userlist"
@@ -78,11 +78,13 @@ done
 
 echo "## remove obsolete user dir ##"
 for subdirname in "$outputdir"/*; do
+    subdirname=$(basename $subdirname)
     echo "$userlist" | grep -w -q "$subdirname"
     exit_status=$?
     if [ $exit_status -ne 0 ] || [ "$subdirname" = "admin" ]; then
 	# check mount and do unumount if necessary
 	for subsubdirname in "$outputdir/$subdirname"/*; do
+	    echo "subsubdirname: $subsubdirname"
 	    if [ -d "$outputdir/$subdirname/$subsubdirname" ]; then
 		mountpoint -q "$outputdir/$subdirname/$subsubdirname"
 		exit_status=$?
@@ -140,9 +142,9 @@ for username in $userlist; do
 			exit_status=$?
 			if [ $exit_status -ne 0 ]; then
 			    if [ -d "$gitoliterepos/$repo" ]; then
-				fuse_git_bare_fs repo -daemon -allow_other "$gitoliterepos/$repo $outputdir/$username/$repo" && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+				fuse_git_bare_fs repo -daemon -allow_other "$gitoliterepos/$repo" "$outputdir/$username/$repo" && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
 			    elif [ -d "$gitoliterepos/$repo.git" ]; then
-				fuse_git_bare_fs repo -daemon -allow_other "$gitoliterepos/$repo.git $outputdir/$username/$repo" && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
+				fuse_git_bare_fs repo -daemon -allow_other "$gitoliterepos/$repo.git" "$outputdir/$username/$repo" && echo "$gitoliterepos/$repo mounted on $outputdir/$username/$repo"
 			    fi
 			fi
 		    fi
