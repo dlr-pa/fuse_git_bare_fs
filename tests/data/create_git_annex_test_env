@@ -1,5 +1,5 @@
 #!/bin/bash
-# fuse_git_bare_fs.py tree server mountpoint
+# fuse_git_bare_fs tree server mountpoint
 mkdir server
 mkdir server/repo2
 mkdir client

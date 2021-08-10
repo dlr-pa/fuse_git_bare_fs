@@ -46,6 +46,6 @@ mkdir "$mydir/target"
 echo -e "\ncreated a test environment in: $mydir\n"
 
 echo "alias gitolite='echo'"
-echo -e "fuse_git_bare_fs.py tree $mydir/repos/server $mydir/target\n"
+echo -e "fuse_git_bare_fs tree $mydir/repos/server $mydir/target\n"
 
 echo "./umount_ssh_accounts $mydir"

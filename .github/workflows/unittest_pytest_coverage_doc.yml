@@ -37,7 +37,7 @@ jobs:
       # https://github.com/marketplace/actions/setup-python
     - uses: pre-commit/action@v2.0.3
       # https://github.com/pre-commit/action
-      continue-on-error: true
+      #continue-on-error: true
 
   ubuntu-1804_test_doc:
     runs-on: ubuntu-18.04
