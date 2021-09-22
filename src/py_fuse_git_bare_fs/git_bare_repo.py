@@ -18,7 +18,6 @@ except ModuleNotFoundError:
     import fuse as fusepy
 
 
-
 class _GitBareRepoMixin():
     """
     :Author: Daniel Mohr

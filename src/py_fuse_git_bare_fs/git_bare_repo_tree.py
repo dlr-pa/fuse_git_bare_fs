@@ -23,7 +23,6 @@ except ModuleNotFoundError:
     import fuse as fusepy
 
 
-
 def _extract_repopath_from_path(actual_repo, path):
     repopath = path[1+len(actual_repo):]
     if not bool(repopath):
