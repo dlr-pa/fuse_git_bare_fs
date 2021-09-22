@@ -1,21 +1,24 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-17 (last change).
+:Date: 2021-09-22 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import errno
+import os.path
+import re
+import warnings
+
+from .empty_attr_mixin import _EmptyAttrMixin
+from .simple_file_handler import SimpleFileHandlerClass
+from .user_repos import UserRepos
+
 try:
     import fusepy  # https://github.com/fusepy/fusepy
 except ModuleNotFoundError:
     import fuse as fusepy
-import os.path
-import re
 
-from .empty_attr_mixin import _EmptyAttrMixin
-from .user_repos import UserRepos
-from .simple_file_handler import SimpleFileHandlerClass
 
 
 def _extract_repopath_from_path(actual_user, actual_repo, path):
@@ -28,7 +31,7 @@ def _extract_repopath_from_path(actual_user, actual_repo, path):
 class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-06-17
+    :Date: 2021-09-22
 
     read only access to working trees of git bare repositories
     """
@@ -37,7 +40,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
                  htaccess_template=None,
                  gitolite_cmd='gitolite', gitolite_user_file=None,
                  max_cache_size=1073741824,
-                 simple_file_handler=None):
+                 simple_file_handler=None, nofail=False):
         # pylint: disable=too-many-arguments
         self.src_dir = src_dir
         self.root_object = root_object
@@ -50,9 +53,22 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
-        self.repos = UserRepos(src_dir, self.root_object,
-                               gitolite_cmd, gitolite_user_file,
-                               max_cache_size)
+        self.nofail = nofail
+        if self.nofail:
+            # pylint: disable=broad-except
+            try:
+                self.repos = UserRepos(src_dir, self.root_object,
+                                       gitolite_cmd, gitolite_user_file,
+                                       max_cache_size)
+            except Exception:
+                msg = 'mount fail, '
+                msg += 'try running without "-nofail" to get precise error'
+                warnings.warn(msg)
+                sys.exit(0)
+        else:
+            self.repos = UserRepos(src_dir, self.root_object,
+                                   gitolite_cmd, gitolite_user_file,
+                                   max_cache_size)
 
     def _extract_user_from_path(self, path):
         actual_user = None

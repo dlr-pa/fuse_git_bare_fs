@@ -1,14 +1,14 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-25
+:Date: 2021-09-22
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import distutils  # we need distutils for distutils.errors.DistutilsArgError
-from distutils.core import Command, setup
 import os
 import sys
+from distutils.core import Command, setup
 
 
 class TestWithPytest(Command):
@@ -300,7 +300,7 @@ REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-06-25',
+    version='2021-09-22',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
@@ -334,7 +334,5 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Topic :: System :: Filesystems'],
-    # cat $(find | grep "py$") | egrep -i "^[ \t]*import .*$" | \
-    #   egrep -i --only-matching "import .*$" | sort -u
     requires=REQUIRED_MODULES
 )

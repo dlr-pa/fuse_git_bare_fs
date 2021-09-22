@@ -1,40 +1,58 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-29 (last change).
+:Date: 2021-09-22 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import errno
+import sys
+import warnings
+
+from .repo_class import RepoClass
+from .simple_file_handler import SimpleFileHandlerClass
+
 try:
     import fusepy  # https://github.com/fusepy/fusepy
 except ModuleNotFoundError:
     import fuse as fusepy
 
-from .repo_class import RepoClass
-from .simple_file_handler import SimpleFileHandlerClass
 
 
 class _GitBareRepoMixin():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-24
+    :Date: 2021-09-22
 
     read only access to the working tree of a git bare repository
     """
     # /usr/lib/python3/dist-packages/fusepy.py
 
     def __init__(self, src_dir, root_object, max_cache_size,
-                 simple_file_handler=None):
+                 simple_file_handler=None, nofail=False):
         self.src_dir = src_dir
         self.root_object = root_object
         if simple_file_handler is None:
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
-        self.repo = RepoClass(
-            self.src_dir, self.root_object, max_cache_size=max_cache_size,
-            simple_file_handler=self.simple_file_handler)
+        self.nofail = nofail
+        if self.nofail:
+            # pylint: disable=broad-except
+            try:
+                self.repo = RepoClass(
+                    self.src_dir, self.root_object,
+                    max_cache_size=max_cache_size,
+                    simple_file_handler=self.simple_file_handler)
+            except Exception:
+                msg = 'mount fail, '
+                msg += 'try running without "-nofail" to get precise error'
+                warnings.warn(msg)
+                sys.exit(0)
+        else:
+            self.repo = RepoClass(
+                self.src_dir, self.root_object, max_cache_size=max_cache_size,
+                simple_file_handler=self.simple_file_handler)
 
     def __del__(self):
         if hasattr(self, 'simple_file_handler'):
