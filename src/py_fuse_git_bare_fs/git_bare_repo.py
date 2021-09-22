@@ -25,6 +25,7 @@ class _GitBareRepoMixin():
 
     read only access to the working tree of a git bare repository
     """
+    # pylint: disable=too-many-arguments
     # /usr/lib/python3/dist-packages/fusepy.py
 
     def __init__(self, src_dir, root_object, max_cache_size,

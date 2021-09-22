@@ -194,11 +194,11 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                 {'.htaccess', 'repo3'})
             for username in ['user1', 'user2']:
                 with open(
-                        os.path.join(
-                            tmpdir,
-                            mountpointdir,
-                            username,
-                            '.htaccess')) as fd:
+                    os.path.join(
+                        tmpdir,
+                        mountpointdir,
+                        username,
+                        '.htaccess')) as fd:
                     data = fd.read()
                 self.assertEqual(data, 'Require user ' + username + '\n')
             self.assertEqual(

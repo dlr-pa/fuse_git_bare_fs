@@ -6,9 +6,9 @@
 """
 
 import distutils  # we need distutils for distutils.errors.DistutilsArgError
+from distutils.core import Command, setup
 import os
 import sys
-from distutils.core import Command, setup
 
 
 class TestWithPytest(Command):

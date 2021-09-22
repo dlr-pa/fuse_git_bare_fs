@@ -8,6 +8,7 @@
 import errno
 import os
 import re
+import sys
 import time
 import warnings
 
@@ -37,7 +38,7 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
 
     read only access to working trees of git bare repositories
     """
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes,too-many-arguments
     # /usr/lib/python3/dist-packages/fusepy.py
 
     def __init__(self, src_dir, root_object, max_cache_size,

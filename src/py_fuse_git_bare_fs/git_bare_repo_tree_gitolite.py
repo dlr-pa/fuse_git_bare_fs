@@ -8,6 +8,7 @@
 import errno
 import os.path
 import re
+import sys
 import warnings
 
 from .empty_attr_mixin import _EmptyAttrMixin
