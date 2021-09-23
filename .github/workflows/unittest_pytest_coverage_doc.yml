@@ -114,7 +114,7 @@ jobs:
           echo "#!/bin/sh -l" > do_test
           echo "set -e -x" >> do_test
           echo "zypper addrepo --check https://download.opensuse.org/repositories/devel:languages:haskell/openSUSE_Leap_15.2/devel:languages:haskell.repo" >> do_test
-          echo "zypper --non-interactive refresh --force" >> do_test
+          echo "zypper --non-interactive --gpg-auto-import-keys refresh" >> do_test
           echo "zypper --non-interactive install git-annex python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-Sphinx python3-sphinx-argparse python3-recommonmark texlive-latexmk git python3-pip fuse" >> do_test
           echo "env python3 -V" >> do_test
           echo "test -n \"$(git config user.name)\" || git config --global user.name $USER" >> do_test
