@@ -300,7 +300,7 @@ REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021-09-22',
+    version='2021.09.22',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
