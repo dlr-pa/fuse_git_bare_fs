@@ -117,11 +117,6 @@ jobs:
           echo "zypper --non-interactive --gpg-auto-import-keys refresh" >> do_test
           echo "zypper --non-interactive install git-annex python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-Sphinx python3-sphinx-argparse python3-recommonmark texlive-latexmk git python3-pip fuse" >> do_test
           echo "env python3 -V" >> do_test
-          echo "echo $USER" >> do_test
-          echo "echo \"$(git config user.name)\"" >> do_test
-          echo "echo $HOSTNAME" >> do_test
-          echo "echo \"$(git config user.email)\"" >> do_test
-          echo "test -n \"$USER\" || USER=foo" >> do_test
           echo "test -n \"$(git config user.name)\" || git config --global user.name $USER" >> do_test
           echo "hostname=$HOSTNAME" >> do_test
           echo "test -n \"$hostname\" || hostname=\"runner\"" >> do_test
