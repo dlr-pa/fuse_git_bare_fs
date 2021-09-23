@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-26
+:Date: 2021-09-23
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree' regarding git-annex files
@@ -33,13 +33,13 @@ import unittest
 class ScriptFuseGitBareFsTreeAnnex(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-22
+    :Date: 2021-09-23
     """
 
     def test_fuse_git_bare_fs_tree_annex(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2021-09-23
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -58,7 +58,7 @@ class ScriptFuseGitBareFsTreeAnnex(unittest.TestCase):
                 [os.path.join(tmpdir, 'create_git_annex_test_env')],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
-                timeout=3, check=True)
+                timeout=6, check=True)
             # run tests
             cp = subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' + serverdir + ' ' +
@@ -104,14 +104,14 @@ class ScriptFuseGitBareFsTreeAnnex(unittest.TestCase):
                 os.lstat(os.path.join(repo2, 'f3')).st_mode, 41471)
             # clean up:
             cp.terminate()
-            cp.wait(timeout=3)
+            cp.wait(timeout=6)
             cp.kill()
             cp.stdout.close()
             cp.stderr.close()
             cp = subprocess.run(
                 ['chmod -R +w *'],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir, timeout=3, check=True)
+                shell=True, cwd=tmpdir, timeout=6, check=True)
 
 
 if __name__ == '__main__':
