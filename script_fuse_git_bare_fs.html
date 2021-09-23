@@ -145,8 +145,8 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <p>“fuse_git_bare_fs repo” is a tool to mount the working tree of a git bare repository as a filesystem in user space (fuse). It gives only read access. For a write access you should do a git commit and use git. This script needs about 7.6 MB of memory to run. More memory is necessary for large working trees or to provide file content.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">fuse_git_bare_fs</span> <span class="n">repo</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
                              <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
+                             <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span>
+                             <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
                              <span class="n">src_dir</span> <span class="n">target_dir</span>
 </pre></div>
 </div>
@@ -198,6 +198,9 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <kbd><span class="option">-ro=False</span></kbd></td>
 <td>Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
 <tr><td class="option-group">
+<kbd><span class="option">-nofail=False</span></kbd></td>
+<td>Try to exit without error if initial mount fails. Only works if the program runs as a daemon. This helps to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<tr><td class="option-group">
 <kbd><span class="option">-dev=False</span></kbd></td>
 <td>This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
 <tr><td class="option-group">
@@ -213,8 +216,9 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <p>“fuse_git_bare_fs tree” is a tool to mount the working tree of git bare repositories in a directory tree as a filesystem in user space (fuse). The idea is to provide the git repositories manage by a gitolite instance. Therefore parameters for this purpose are available. It is assumed that the bare repositories are named like “*.git”. It gives only read access. For a write access you should do a git commit and use git. For unmount just press ctrl-c, kill the program or do “fusermount -u target_dir”.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">fuse_git_bare_fs</span> <span class="n">tree</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
                              <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">get_user_list_from_gitolite</span><span class="p">]</span>
+                             <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span>
+                             <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
+                             <span class="p">[</span><span class="o">-</span><span class="n">get_user_list_from_gitolite</span><span class="p">]</span>
                              <span class="p">[</span><span class="o">-</span><span class="n">provide_htaccess</span><span class="p">]</span>
                              <span class="p">[</span><span class="o">-</span><span class="n">htaccess_template</span> <span class="n">HTACCESS_TEMPLATE</span><span class="p">]</span>
                              <span class="p">[</span><span class="o">-</span><span class="n">gitolite_cmd</span> <span class="n">GITOLITE_CMD</span><span class="p">]</span>
@@ -269,6 +273,9 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <tr><td class="option-group">
 <kbd><span class="option">-ro=False</span></kbd></td>
 <td>Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-nofail=False</span></kbd></td>
+<td>Try to exit without error if initial mount fails. Only works if the program runs as a daemon. This helps to use this program as mount program e. g. in /etc/fstab.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-dev=False</span></kbd></td>
 <td>This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
