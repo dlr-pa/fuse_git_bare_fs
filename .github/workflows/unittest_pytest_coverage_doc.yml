@@ -15,7 +15,7 @@ on:
 
 jobs:
   pep8_check:
-    # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu1804-README.md
+    # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -68,15 +68,6 @@ jobs:
       run: env python3 setup.py run_pytest --parallel --coverage
     - name: build doc
       run: ./create_doc
-    - name: adapt doc fo jekyll
-      if: ${{ github.event_name == 'push' }}
-      run: touch manual_fuse_git_bare_fs_html/.nojekyll
-    - name: deploy pages
-      if: ${{ github.event_name == 'push' }}
-      uses: JamesIves/github-pages-deploy-action@4.1.4
-      with:
-        branch: documentation
-        folder: manual_fuse_git_bare_fs_html
 
   ubuntu-2004_test_doc:
     needs: [pep8_check, pre-commit]
@@ -106,3 +97,34 @@ jobs:
       run: env python3 setup.py run_pytest --parallel --coverage
     - name: build doc
       run: ./create_doc
+
+  deploy_pages:
+    # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+    runs-on: ubuntu-latest
+    needs: [ubuntu-1804_test_doc, ubuntu-2004_test_doc]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: apt-get update
+      run: sudo apt-get update
+    - name: install dependencies (ubuntu packages)
+      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+    - name: setup author identity for git commits
+      run: |
+        test -n "$(git config user.name)" || git config --global user.name $USER
+        hostname=$HOSTNAME
+        test -n "$hostname" || hostname="runner"
+        test -n "$(git config user.email)" || git config --global user.email $(git config user.name)@$hostname
+    - name: install fuse_git_bare_fs
+      run: pip3 install .
+    - name: build doc
+      run: ./create_doc
+    - name: adapt doc fo jekyll
+      if: ${{ github.event_name == 'push' }}
+      run: touch manual_fuse_git_bare_fs_html/.nojekyll
+    - name: deploy pages
+      if: ${{ github.event_name == 'push' }}
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: documentation
+        folder: manual_fuse_git_bare_fs_html
