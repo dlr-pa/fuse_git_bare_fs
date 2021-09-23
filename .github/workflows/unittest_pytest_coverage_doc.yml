@@ -19,8 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: apt-get update
+      run: sudo apt-get update
     - name: install dependencies for PEP 8 code style check (ubuntu packages)
-      run: sudo apt install pep8 pylint3 python3-recommonmark python3-pytest python3-netcdf4
+      run: sudo apt-get install pep8 pylint3 python3-recommonmark python3-pytest python3-netcdf4
     - name: install dependencies (cfchecker via pip)
       run: pip3 install cfchecker
     - name: check PEP 8 code style
@@ -44,8 +46,10 @@ jobs:
     needs: [pep8_check, pre-commit]
     steps:
     - uses: actions/checkout@v2
+    - name: apt-get update
+      run: sudo apt-get update
     - name: install dependencies (ubuntu packages)
-      run: sudo apt install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
     - name: setup author identity for git commits
       run: |
         test -n "$(git config user.name)" || git config --global user.name $USER
@@ -80,8 +84,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: apt-get update
+      run: sudo apt-get update
     - name: install dependencies (ubuntu packages)
-      run: sudo apt install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
     - name: setup author identity for git commits
       run: |
         test -n "$(git config user.name)" || git config --global user.name $USER

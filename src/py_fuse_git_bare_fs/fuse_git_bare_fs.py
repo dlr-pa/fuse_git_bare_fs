@@ -1,26 +1,28 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-15 (last change).
+:Date: 2021-09-22 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import argparse
-try:
-    import fusepy  # https://github.com/fusepy/fusepy
-except ModuleNotFoundError:
-    import fuse as fusepy
 import grp
 import os.path
 import pwd
 import sys
+import warnings
+
+try:
+    import fusepy  # https://github.com/fusepy/fusepy
+except ModuleNotFoundError:
+    import fuse as fusepy
 
 
 def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-10 (last change).
+    :Date: 2021-09-22 (last change).
     """
     # pylint: disable = bad-option-value, import-outside-toplevel
     operations_instance = None
@@ -37,7 +39,8 @@ def fuse_git_bare_fs_repo(args):
         operations_instance = GitBareRepo(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
-            args.max_cache_size[0])
+            args.max_cache_size[0],
+            nofail=args.nofail)
     fusepy.FUSE(
         operations_instance,
         args.target_dir,
@@ -50,9 +53,14 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-15 (last change).
+    :Date: 2021-09-22 (last change).
     """
     # pylint: disable=bad-option-value,import-outside-toplevel
+    if (not os.path.isdir(args.target_dir)) and args.nofail:
+        msg = 'mount fail, '
+        msg += 'try running without "-nofail" to get precise error'
+        warnings.warn(msg)
+        sys.exit(0)
     operations_instance = None
     if args.daemon:  # running in foreground
         import logging
@@ -86,13 +94,15 @@ def fuse_git_bare_fs_tree(args):
                 args.htaccess_template[0],
                 args.gitolite_cmd[0],
                 args.gitolite_user_file[0],
-                args.max_cache_size[0])
+                args.max_cache_size[0],
+                nofail=args.nofail)
         else:
             from .git_bare_repo_tree import GitBareRepoTree
             operations_instance = GitBareRepoTree(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
-                args.max_cache_size[0])
+                args.max_cache_size[0],
+                nofail=args.nofail)
     fusepy.FUSE(
         operations_instance,
         args.target_dir,
@@ -105,7 +115,7 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-15 (last change).
+    :Date: 2021-09-22 (last change).
     """
     # pylint: disable=too-many-statements
     epilog = ''
@@ -206,6 +216,13 @@ def my_argument_parser():
         action='store_true',
         help='Make a read only mountpoint. This is always the case! '
         'This allows to use this program as mount program '
+        'e. g. in /etc/fstab.')
+    common_parser.add_argument(
+        '-nofail',
+        action='store_true',
+        help='Try to exit without error if initial mount fails. '
+        'Only works if the program runs as a daemon. '
+        'This helps to use this program as mount program '
         'e. g. in /etc/fstab.')
     common_parser.add_argument(
         '-dev',

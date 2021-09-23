@@ -1,25 +1,27 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-29 (last change).
+:Date: 2021-09-22 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
 import errno
+import os
+import re
+import sys
+import time
+import warnings
+
+from .empty_attr_mixin import _EmptyAttrMixin
+from .read_write_lock import ReadWriteLock
+from .repo_class import RepoClass
+from .simple_file_cache import SimpleFileCache
+from .simple_file_handler import SimpleFileHandlerClass
+
 try:
     import fusepy  # https://github.com/fusepy/fusepy
 except ModuleNotFoundError:
     import fuse as fusepy
-import os
-import os.path
-import re
-import time
-
-from .empty_attr_mixin import _EmptyAttrMixin
-from .repo_class import RepoClass
-from .read_write_lock import ReadWriteLock
-from .simple_file_cache import SimpleFileCache
-from .simple_file_handler import SimpleFileHandlerClass
 
 
 def _extract_repopath_from_path(actual_repo, path):
@@ -32,15 +34,15 @@ def _extract_repopath_from_path(actual_repo, path):
 class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-24
+    :Date: 2021-09-22
 
     read only access to working trees of git bare repositories
     """
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes,too-many-arguments
     # /usr/lib/python3/dist-packages/fusepy.py
 
     def __init__(self, src_dir, root_object, max_cache_size,
-                 simple_file_handler=None):
+                 simple_file_handler=None, nofail=False):
         self.src_dir = src_dir
         self.root_object = root_object
         self.cache = SimpleFileCache(max_cache_size=max_cache_size)
@@ -48,11 +50,22 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
+        self.nofail = nofail
         self.repos = dict()
         self._lock = ReadWriteLock()
         dt0 = time.time()
         with self._lock.write_locked():
-            self.repos = self._get_repos()
+            if self.nofail:
+                # pylint: disable=broad-except
+                try:
+                    self.repos = self._get_repos()
+                except Exception:
+                    msg = 'mount fail, '
+                    msg += 'try running without "-nofail" to get precise error'
+                    warnings.warn(msg)
+                    sys.exit(0)
+            else:
+                self.repos = self._get_repos()
         self._update_repos_time = time.time()
         self._update_repos_dt = max(6, (self._update_repos_time - dt0) * 100)
 
