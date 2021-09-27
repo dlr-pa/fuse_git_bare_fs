@@ -98,44 +98,20 @@ jobs:
     - name: build doc
       run: ./create_doc
 
-  amd64_opensuse_leap_152_test:
-    # https://github.com/daniel-mohr/amd64_opensuse_leap_15.2
+  opensuse_leap_152_test:
     runs-on: ubuntu-latest
     needs: [pep8_check, pre-commit]
     name: opensuse leap 15.2
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: create test script for docker
-        # git-annex is not official for openSUSE Leap 15.2
-        # but experimental is available and seems to work:
-        # https://software.opensuse.org/package/git-annex
-        run: |
-          echo "#!/bin/sh -l" > do_test
-          echo "set -e -x" >> do_test
-          echo "zypper addrepo --check https://download.opensuse.org/repositories/devel:languages:haskell/openSUSE_Leap_15.2/devel:languages:haskell.repo" >> do_test
-          echo "zypper --non-interactive --gpg-auto-import-keys refresh" >> do_test
-          echo "zypper --non-interactive install git-annex python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-Sphinx python3-sphinx-argparse python3-recommonmark texlive-latexmk git python3-pip fuse" >> do_test
-          echo "env python3 -V" >> do_test
-          echo "test -n \"$(git config user.name)\" || git config --global user.name $USER" >> do_test
-          echo "hostname=$HOSTNAME" >> do_test
-          echo "test -n \"$hostname\" || hostname=\"runner\"" >> do_test
-          echo "test -n \"$(git config user.email)\" || git config --global user.email $(git config user.name)@$hostname" >> do_test
-          echo "pip3 install ." >> do_test
-          echo "env python3 setup.py run_unittest" >> do_test
-          echo "env python3 setup.py run_pytest --parallel --coverage" >> do_test
-          chmod +x do_test
-      - name: cat test script
-        run: cat do_test
-      - name: run my script in docker image
-        uses: daniel-mohr/amd64_opensuse_leap_15.2@v0
-        with:
-          cmdfile: ./do_test
+      - name: run test_suite in opensuse/leap:15.2
+        run: sudo docker run --mount type=bind,source=$(pwd),destination=/app --rm --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined opensuse/leap:15.2 app/.github/workflows/do_test_opensuse_leap:15.2
 
   deploy_pages:
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     runs-on: ubuntu-latest
-    needs: [ubuntu-1804_test_doc, ubuntu-2004_test_doc, amd64_opensuse_leap_152_test]
+    needs: [ubuntu-1804_test_doc, ubuntu-2004_test_doc, opensuse_leap_152_test]
     steps:
     - uses: actions/checkout@v2
     - name: apt-get update
