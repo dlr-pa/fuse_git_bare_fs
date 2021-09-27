@@ -4,23 +4,16 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>command line script: fuse_git_bare_fs &#8212; fuse_git_bare_fs 2021-06-25 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2021-06-25',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="search" type="application/opensearchdescription+xml"
           title="Search within fuse_git_bare_fs 2021-06-25 documentation"
           href="_static/opensearch.xml"/>
@@ -28,8 +21,7 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="python module: py_fuse_git_bare_fs" href="module_py_fuse_git_bare_fs.html" />
     <link rel="prev" title="INSTALL: fuse_git_bare_fs" href="INSTALL.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -76,11 +68,11 @@ filesystem in user space (<a class="reference internal" href="#fuse" id="id2">[F
 use <strong class="program">fuse_git_bare_fs</strong> as a mount program(cf. <a class="reference internal" href="#vfs-fuse" id="id3">[vfs_fuse]</a>, <a class="reference internal" href="#mount" id="id4">[mount]</a>).
 For example to mount ‘/foo’ to ‘/bar’ as the user ‘sr’ and the group ‘grp’,
 you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference internal" href="#fstab" id="id5">[fstab]</a>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">foo</span> <span class="o">/</span><span class="n">bar</span> <span class="n">fuse</span><span class="o">.</span><span class="n">fuse_git_bare_fs</span> <span class="n">uid</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span><span class="n">gid</span><span class="o">=</span><span class="n">grp</span><span class="p">,</span><span class="n">tree</span><span class="p">,</span><span class="n">root_object</span><span class="o">=</span><span class="n">master</span><span class="p">,</span><span class="n">ro</span> <span class="mi">0</span> <span class="mi">0</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">foo</span> <span class="o">/</span><span class="n">bar</span> <span class="n">fuse</span><span class="o">.</span><span class="n">fuse_git_bare_fs</span> <span class="n">uid</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span><span class="n">gid</span><span class="o">=</span><span class="n">grp</span><span class="p">,</span><span class="n">tree</span><span class="p">,</span><span class="n">root_object</span><span class="o">=</span><span class="n">master</span><span class="p">,</span><span class="n">ro</span> <span class="mi">0</span> <span class="mi">0</span>
 </pre></div>
 </div>
 <p>For a non persistent mount you can use <strong class="program">fuse_git_bare_fs</strong> directly:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuse_git_bare_fs</span> <span class="n">tree</span> <span class="o">-</span><span class="n">uid</span><span class="o">=</span><span class="n">sr</span> <span class="o">-</span><span class="n">gid</span><span class="o">=</span><span class="n">grp</span> <span class="o">/</span><span class="n">foo</span> <span class="o">/</span><span class="n">bar</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fuse_git_bare_fs</span> <span class="n">tree</span> <span class="o">-</span><span class="n">uid</span><span class="o">=</span><span class="n">sr</span> <span class="o">-</span><span class="n">gid</span><span class="o">=</span><span class="n">grp</span> <span class="o">/</span><span class="n">foo</span> <span class="o">/</span><span class="n">bar</span>
 </pre></div>
 </div>
 <p>These commands are explained in more detail in the following (help output):</p>
@@ -123,36 +115,52 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <div class="section" id="help-output">
 <h2>help output<a class="headerlink" href="#help-output" title="Permalink to this headline">¶</a></h2>
 <p>“fuse_git_bare_fs” is a tool to mount the working tree(s) of git bare repositories as a filesystem in user space (fuse). It gives only read access. For a write access you should do a git commit and use git.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">fuse_git_bare_fs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OPT</span><span class="p">]</span> <span class="p">{</span><span class="n">repo</span><span class="p">,</span><span class="n">tree</span><span class="p">}</span> <span class="o">...</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">fuse_git_bare_fs</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OPT</span><span class="p">]</span> <span class="p">{</span><span class="n">repo</span><span class="p">,</span><span class="n">tree</span><span class="p">}</span> <span class="o">...</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>Options:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+<div class="section" id="Positional Arguments">
+<h3>Positional Arguments<a class="headerlink" href="#Positional Arguments" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
 <tr><td class="option-group">
-<kbd><span class="option">-o=[None]</span></kbd></td>
-<td>These options are splitted at “,” and used as seperated options. The sub-commands are extracted as well. The flag “-daemon” is used in any case. This allows to use this program as mount program e. g. in /etc/fstab. Example: “a,b=c” will become “-a -b c”; “a,tree,b=c” will become “tree -a -b c”</td></tr>
+<kbd>subparser_name</kbd></td>
+<td><p class="first">Possible choices: repo, tree</p>
+<p class="last">There are different sub-commands with there own flags.</p>
+</td></tr>
 </tbody>
 </table>
-</dd>
-<dt>Sub-commands:</dt>
-<dd><dl class="first last docutils">
-<dt><strong>repo</strong></dt>
-<dd><p class="first">Mount the working tree of a git repository. For more help: fuse_git_bare_fs repo -h</p>
+</div>
+<div class="section" id="Named Arguments">
+<h3>Named Arguments<a class="headerlink" href="#Named Arguments" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd>-o</kbd></td>
+<td><p class="first">These options are splitted at “,” and used as seperated options. The sub-commands are extracted as well. The flag “-daemon” is used in any case. This allows to use this program as mount program e. g. in /etc/fstab. Example: “a,b=c” will become “-a -b c”; “a,tree,b=c” will become “tree -a -b c”</p>
+<p class="last">Default: [None]</p>
+</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="Sub-commands:">
+<h3>Sub-commands:<a class="headerlink" href="#Sub-commands:" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="repo">
+<h4>repo<a class="headerlink" href="#repo" title="Permalink to this headline">¶</a></h4>
 <p>“fuse_git_bare_fs repo” is a tool to mount the working tree of a git bare repository as a filesystem in user space (fuse). It gives only read access. For a write access you should do a git commit and use git. This script needs about 7.6 MB of memory to run. More memory is necessary for large working trees or to provide file content.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">fuse_git_bare_fs</span> <span class="n">repo</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
-                             <span class="n">src_dir</span> <span class="n">target_dir</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fuse_git_bare_fs</span> <span class="n">repo</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
+                      <span class="n">src_dir</span> <span class="n">target_dir</span>
 </pre></div>
 </div>
-<dl class="last docutils">
-<dt>Positional arguments:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+<div class="section" id="Positional Arguments_repeat1">
+<h5>Positional Arguments<a class="headerlink" href="#Positional Arguments_repeat1" title="Permalink to this headline">¶</a></h5>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
@@ -164,71 +172,89 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <td>This is the mountpoint.</td></tr>
 </tbody>
 </table>
-</dd>
-<dt>Options:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+</div>
+<div class="section" id="Named Arguments_repeat1">
+<h5>Named Arguments<a class="headerlink" href="#Named Arguments_repeat1" title="Permalink to this headline">¶</a></h5>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-root_object=['master']</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>Defines the root repository object of the working tree. This will be given as a parameter to “git cat-file”; hence you can look in the relevant man page of “git cat-file” to understand how to specify the branch and or revision. default: master</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-cache_size=[1073741824]</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>Defines the maximal used cache size. default: 1073741824 (1 GB)</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-daemon=True</span></kbd></td>
-<td>If given, go to background and work as a daemon. To unmount you can do: fusermount -u target_dir</td></tr>
+<kbd>-root_object</kbd></td>
+<td><p class="first">Defines the root repository object of the working tree. This will be given as a parameter to “git cat-file”; hence you can look in the relevant man page of “git cat-file” to understand how to specify the branch and or revision. default: master</p>
+<p class="last">Default: [‘master’]</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-threads=True</span></kbd></td>
-<td>If given, the fuse mount will be threaded. This is not tested.</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-allow_other=False</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>If given, allows other users to use the fuse mount point. Therefore you have to allow this in /etc/fuse.conf by uncommenting “user_allow_other” there.</td></tr>
+<kbd>-cache_size</kbd></td>
+<td><p class="first">Defines the maximal used cache size. default: 1073741824 (1 GB)</p>
+<p class="last">Default: [1073741824]</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-uid=[None]</span></kbd></td>
-<td>The program is run under this uid. The current direcotry and the home directory are set appropriate. This allows to use this program as mount program e. g. in /etc/fstab. On default nothing is done (the calling user is used).</td></tr>
+<kbd>-daemon</kbd></td>
+<td><p class="first">If given, go to background and work as a daemon. To unmount you can do: fusermount -u target_dir</p>
+<p class="last">Default: True</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-gid=[None]</span></kbd></td>
-<td>The program is run under this gid. On default nothing is done. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<kbd>-threads</kbd></td>
+<td><p class="first">If given, the fuse mount will be threaded. This is not tested.</p>
+<p class="last">Default: True</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-ro=False</span></kbd></td>
-<td>Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<kbd>-allow_other</kbd></td>
+<td><p class="first">If given, allows other users to use the fuse mount point. Therefore you have to allow this in /etc/fuse.conf by uncommenting “user_allow_other” there.</p>
+<p class="last">Default: False</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-nofail=False</span></kbd></td>
-<td>Try to exit without error if initial mount fails. Only works if the program runs as a daemon. This helps to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<kbd>-uid</kbd></td>
+<td><p class="first">The program is run under this uid. The current direcotry and the home directory are set appropriate. This allows to use this program as mount program e. g. in /etc/fstab. On default nothing is done (the calling user is used).</p>
+<p class="last">Default: [None]</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-dev=False</span></kbd></td>
-<td>This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<kbd>-gid</kbd></td>
+<td><p class="first">The program is run under this gid. On default nothing is done. This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: [None]</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-suid=False</span></kbd></td>
-<td>This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<kbd>-ro</kbd></td>
+<td><p class="first">Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-nofail</kbd></td>
+<td><p class="first">Try to exit without error if initial mount fails. Only works if the program runs as a daemon. This helps to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-dev</kbd></td>
+<td><p class="first">This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-suid</kbd></td>
+<td><p class="first">This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
 </tbody>
 </table>
-</dd>
-</dl>
-</dd>
-<dt><strong>tree</strong></dt>
-<dd><p class="first">Mount the working tree of git repositories in a directory tree. For more help: fuse_git_bare_fs tree -h</p>
-<p>“fuse_git_bare_fs tree” is a tool to mount the working tree of git bare repositories in a directory tree as a filesystem in user space (fuse). The idea is to provide the git repositories manage by a gitolite instance. Therefore parameters for this purpose are available. It is assumed that the bare repositories are named like “*.git”. It gives only read access. For a write access you should do a git commit and use git. For unmount just press ctrl-c, kill the program or do “fusermount -u target_dir”.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">fuse_git_bare_fs</span> <span class="n">tree</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">get_user_list_from_gitolite</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">provide_htaccess</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">htaccess_template</span> <span class="n">HTACCESS_TEMPLATE</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">gitolite_cmd</span> <span class="n">GITOLITE_CMD</span><span class="p">]</span>
-                             <span class="p">[</span><span class="o">-</span><span class="n">gitolite_user_file</span> <span class="n">GITOLITE_USER_FILE</span><span class="p">]</span>
-                             <span class="n">src_dir</span> <span class="n">target_dir</span>
+</div>
+</div>
+<div class="section" id="tree">
+<h4>tree<a class="headerlink" href="#tree" title="Permalink to this headline">¶</a></h4>
+<p>“fuse_git_bare_fs tree” is a tool to mount the working tree of git bare repositories in a directory tree as a filesystem in user space (fuse). The idea is to provide the git repositories manage by a gitolite instance. Therefore parameters for this purpose are available. It is assumed that the bare repositories are named like “<a href="#id1"><span class="problematic" id="id2">*</span></a>.git”. It gives only read access. For a write access you should do a git commit and use git. For unmount just press ctrl-c, kill the program or do “fusermount -u target_dir”.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fuse_git_bare_fs</span> <span class="n">tree</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">get_user_list_from_gitolite</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">provide_htaccess</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">htaccess_template</span> <span class="n">HTACCESS_TEMPLATE</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">gitolite_cmd</span> <span class="n">GITOLITE_CMD</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">gitolite_user_file</span> <span class="n">GITOLITE_USER_FILE</span><span class="p">]</span>
+                      <span class="n">src_dir</span> <span class="n">target_dir</span>
 </pre></div>
 </div>
-<dl class="last docutils">
-<dt>Positional arguments:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+<div class="section" id="Positional Arguments_repeat2">
+<h5>Positional Arguments<a class="headerlink" href="#Positional Arguments_repeat2" title="Permalink to this headline">¶</a></h5>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
@@ -240,76 +266,102 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <td>This is the mountpoint.</td></tr>
 </tbody>
 </table>
-</dd>
-<dt>Options:</dt>
-<dd><table class="first last docutils option-list" frame="void" rules="none">
+</div>
+<div class="section" id="Named Arguments_repeat2">
+<h5>Named Arguments<a class="headerlink" href="#Named Arguments_repeat2" title="Permalink to this headline">¶</a></h5>
+<table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-root_object=['master']</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>Defines the root repository object of the working tree. This will be given as a parameter to “git cat-file”; hence you can look in the relevant man page of “git cat-file” to understand how to specify the branch and or revision. default: master</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-cache_size=[1073741824]</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>Defines the maximal used cache size. default: 1073741824 (1 GB)</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-daemon=True</span></kbd></td>
-<td>If given, go to background and work as a daemon. To unmount you can do: fusermount -u target_dir</td></tr>
+<kbd>-root_object</kbd></td>
+<td><p class="first">Defines the root repository object of the working tree. This will be given as a parameter to “git cat-file”; hence you can look in the relevant man page of “git cat-file” to understand how to specify the branch and or revision. default: master</p>
+<p class="last">Default: [‘master’]</p>
+</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-threads=True</span></kbd></td>
-<td>If given, the fuse mount will be threaded. This is not tested.</td></tr>
+<kbd>-cache_size</kbd></td>
+<td><p class="first">Defines the maximal used cache size. default: 1073741824 (1 GB)</p>
+<p class="last">Default: [1073741824]</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-daemon</kbd></td>
+<td><p class="first">If given, go to background and work as a daemon. To unmount you can do: fusermount -u target_dir</p>
+<p class="last">Default: True</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-threads</kbd></td>
+<td><p class="first">If given, the fuse mount will be threaded. This is not tested.</p>
+<p class="last">Default: True</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-allow_other</kbd></td>
+<td><p class="first">If given, allows other users to use the fuse mount point. Therefore you have to allow this in /etc/fuse.conf by uncommenting “user_allow_other” there.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-uid</kbd></td>
+<td><p class="first">The program is run under this uid. The current direcotry and the home directory are set appropriate. This allows to use this program as mount program e. g. in /etc/fstab. On default nothing is done (the calling user is used).</p>
+<p class="last">Default: [None]</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-gid</kbd></td>
+<td><p class="first">The program is run under this gid. On default nothing is done. This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: [None]</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-ro</kbd></td>
+<td><p class="first">Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-nofail</kbd></td>
+<td><p class="first">Try to exit without error if initial mount fails. Only works if the program runs as a daemon. This helps to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-dev</kbd></td>
+<td><p class="first">This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-suid</kbd></td>
+<td><p class="first">This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</p>
+<p class="last">Default: False</p>
+</td></tr>
 <tr><td class="option-group" colspan="2">
-<kbd><span class="option">-allow_other=False</span></kbd></td>
+<kbd>-get_user_list_from_gitolite</kbd></td>
 </tr>
-<tr><td>&#160;</td><td>If given, allows other users to use the fuse mount point. Therefore you have to allow this in /etc/fuse.conf by uncommenting “user_allow_other” there.</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-uid=[None]</span></kbd></td>
-<td>The program is run under this uid. The current direcotry and the home directory are set appropriate. This allows to use this program as mount program e. g. in /etc/fstab. On default nothing is done (the calling user is used).</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-gid=[None]</span></kbd></td>
-<td>The program is run under this gid. On default nothing is done. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-ro=False</span></kbd></td>
-<td>Make a read only mountpoint. This is always the case! This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-nofail=False</span></kbd></td>
-<td>Try to exit without error if initial mount fails. Only works if the program runs as a daemon. This helps to use this program as mount program e. g. in /etc/fstab.</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-dev=False</span></kbd></td>
-<td>This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
-<tr><td class="option-group">
-<kbd><span class="option">-suid=False</span></kbd></td>
-<td>This is ignored. This allows to use this program as mount program e. g. in /etc/fstab.</td></tr>
+<tr><td>&#160;</td><td><p class="first">This creates subdirectories for each user. The users are extracted from the gitolite-admin repository included in the given src_dir. In every user directory only the repositories are mounted, which are accessable for the appropriate user. It is suposed that the command “gitolite” is available and that the gitolite-admin repository is called “gitolite-admin”. Additional configuration can be given with the flags “-gitolite_cmd” and “-gitolite_user_file”.</p>
+<p class="last">Default: False</p>
+</td></tr>
 <tr><td class="option-group" colspan="2">
-<kbd><span class="option">-get_user_list_from_gitolite=False</span></kbd></td>
+<kbd>-provide_htaccess</kbd></td>
 </tr>
-<tr><td>&#160;</td><td>This creates subdirectories for each user. The users are extracted from the gitolite-admin repository included in the given src_dir. In every user directory only the repositories are mounted, which are accessable for the appropriate user. It is suposed that the command “gitolite” is available and that the gitolite-admin repository is called “gitolite-admin”. Additional configuration can be given with the flags “-gitolite_cmd” and “-gitolite_user_file”.</td></tr>
+<tr><td>&#160;</td><td><p class="first">This creates “.htaccess” files in the user directories. This only appears if the flag “-get_user_list_from_gitolite” is given.</p>
+<p class="last">Default: False</p>
+</td></tr>
 <tr><td class="option-group" colspan="2">
-<kbd><span class="option">-provide_htaccess=False</span></kbd></td>
+<kbd>-htaccess_template</kbd></td>
 </tr>
-<tr><td>&#160;</td><td>This creates “.htaccess” files in the user directories. This only appears if the flag “-get_user_list_from_gitolite” is given.</td></tr>
+<tr><td>&#160;</td><td><p class="first">A htaccess template can be given. It is “Require user [username]” added. On default only “Require user [username]” is used.</p>
+<p class="last">Default: [None]</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-gitolite_cmd</kbd></td>
+<td><p class="first">Defines the gitolite command. You can give an absolute path. default: gitolite</p>
+<p class="last">Default: [‘gitolite’]</p>
+</td></tr>
 <tr><td class="option-group" colspan="2">
-<kbd><span class="option">-htaccess_template=[None]</span></kbd></td>
+<kbd>-gitolite_user_file</kbd></td>
 </tr>
-<tr><td>&#160;</td><td>A htaccess template can be given. It is “Require user [username]” added. On default only “Require user [username]” is used.</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-gitolite_cmd=['gitolite']</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>Defines the gitolite command. You can give an absolute path. default: gitolite</td></tr>
-<tr><td class="option-group" colspan="2">
-<kbd><span class="option">-gitolite_user_file=[None]</span></kbd></td>
-</tr>
-<tr><td>&#160;</td><td>If given, the list of users is created from the content of this file and the gitolite command “list-users”. You can give an absolute path. If not given (default) only the gitolite command “list-users” is used to create the list of users. If the file does not exist, it is ignored until it is available. This is useful if gitolite only knows groups and the users are defined elsewhere (e. g. LDAP configuration of gitolite). You should update the given file regularly (e. g. by a cron job) from the source (e. g. directory service). Further you could overwrite the default gitolite command by a command, which return nothing for “list-users” and otherwise uses the normal gitolite command.</td></tr>
+<tr><td>&#160;</td><td><p class="first">If given, the list of users is created from the content of this file and the gitolite command “list-users”. You can give an absolute path. If not given (default) only the gitolite command “list-users” is used to create the list of users. If the file does not exist, it is ignored until it is available. This is useful if gitolite only knows groups and the users are defined elsewhere (e. g. LDAP configuration of gitolite). You should update the given file regularly (e. g. by a cron job) from the source (e. g. directory service). Further you could overwrite the default gitolite command by a command, which return nothing for “list-users” and otherwise uses the normal gitolite command.</p>
+<p class="last">Default: [None]</p>
+</td></tr>
 </tbody>
 </table>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd>
-</dl>
+</div>
+</div>
+</div>
 <p>Author: Daniel Mohr
 Date: 2021-06-15
 License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
@@ -327,8 +379,8 @@ License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
                         title="previous chapter">INSTALL: fuse_git_bare_fs</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="module_py_fuse_git_bare_fs.html"
-                        title="next chapter">python module: <code class="docutils literal"><span class="pre">py_fuse_git_bare_fs</span></code></a></p>
-<h3><a href="index.html">Table Of Contents</a></h3>
+                        title="next chapter">python module: <code class="docutils literal notranslate"><span class="pre">py_fuse_git_bare_fs</span></code></a></p>
+<h3><a href="index.html">Table of Contents</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="README.html">README: fuse_git_bare_fs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="INSTALL.html">INSTALL: fuse_git_bare_fs</a></li>
@@ -337,19 +389,21 @@ License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
 <li class="toctree-l2"><a class="reference internal" href="#help-output">help output</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="module_py_fuse_git_bare_fs.html">python module: <code class="docutils literal"><span class="pre">py_fuse_git_bare_fs</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_py_fuse_git_bare_fs.html">python module: <code class="docutils literal notranslate"><span class="pre">py_fuse_git_bare_fs</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="test_coverage_report/index.html">test coverage report</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpl.html">GPL</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
   <div role="note" aria-label="source link">
@@ -383,7 +437,7 @@ License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Daniel Mohr.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.7.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
 </html>
