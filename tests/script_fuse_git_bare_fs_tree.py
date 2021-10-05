@@ -146,6 +146,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         :Author: Daniel Mohr
         :Date: 2021-10-05
         """
+        # pylint: disable=too-many-statements
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
