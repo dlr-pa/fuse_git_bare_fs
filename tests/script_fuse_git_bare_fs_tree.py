@@ -27,6 +27,7 @@ import tempfile
 import time
 import unittest
 
+
 def _prepare_test_environment(serverdir, clientdir, mountpointdir,
                               reponame1, reponame2, tmpdir):
     # pylint: disable=too-many-arguments
@@ -101,10 +102,12 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
                 if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir, reponame1))),
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, reponame1))),
                 {'a', 'b', 'd', 'l'})
             self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir, reponame2))),
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, reponame2))),
                 {'2'})
             # read data
             with open(os.path.join(
