@@ -37,10 +37,15 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2021-10-05
 
         This test creates a repo, put some files in and
         mount it, check for files.
+
+        env python3 script_fuse_git_bare_fs_repo.py \
+          ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo1
+
+        pytest-3 -k test_fuse_git_bare_fs_repo1 script_fuse_git_bare_fs_repo.py
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -81,6 +86,11 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'a', 'b', 'd', 'l'})
+            # read data
+            with open(os.path.join(tmpdir, mountpointdir, 'a')) as fd:
+                data = fd.read()
+            self.assertEqual(data, 'a\n')
+            # clean up
             cpi.terminate()
             cpi.wait(timeout=3)
             cpi.kill()
