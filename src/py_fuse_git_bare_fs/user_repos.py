@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-06-16 (last change).
+:Date: 2021-10-05 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ from .simple_file_handler import SimpleFileHandlerClass
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-06-16
+    :Date: 2021-10-05
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -86,18 +86,6 @@ class UserRepos():
           self.lock.release_write()
         """
         if (update_cache) or (not self._cache_up_to_date()):
-            self.commit_hash = None
-            self.mtime_gitolite_user_file = None
-            self.users = None
-            self.users_from_file = None
-            self.repos = None
-            self.userrepoaccess = dict()
-            if ((self.gitolite_user_file is not None) and
-                    os.path.isfile(self.gitolite_user_file)):
-                self.mtime_gitolite_user_file = \
-                    os.path.getmtime(self.gitolite_user_file)
-                with open(self.gitolite_user_file, 'r') as fd:
-                    self.users_from_file = set(fd.read().splitlines())
             cpi = subprocess.run(
                 ["git cat-file --batch"], input=b"master",
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -106,9 +94,41 @@ class UserRepos():
                 # empty repo or "master" does not exists
                 msg = 'root repository object "master" does not exists.'
                 warnings.warn(msg)
+                self.commit_hash = None
+                self.mtime_gitolite_user_file = None
+                self.users = None
+                self.users_from_file = None
+                self.repos = None
+                self.userrepoaccess = dict()
                 return False
             splittedstdout = cpi.stdout.decode().split('\n')
-            self.commit_hash = splittedstdout[0].split()[0]
+            commit_hash = splittedstdout[0].split()[0]
+            if commit_hash != self.commit_hash:
+                self.commit_hash = commit_hash
+                self.users = None
+                self.repos = None
+                self.userrepoaccess = dict()
+            if ((self.gitolite_user_file is not None) and
+                    os.path.isfile(self.gitolite_user_file)):
+                mtime_gitolite_user_file = \
+                    os.path.getmtime(self.gitolite_user_file)
+                with open(self.gitolite_user_file, 'r') as fd:
+                    users_from_file = set(fd.read().splitlines())
+                if self.mtime_gitolite_user_file != mtime_gitolite_user_file:
+                    self.mtime_gitolite_user_file = mtime_gitolite_user_file
+                if ((self.users_from_file is None) or
+                    bool(users_from_file.symmetric_difference(
+                        self.users_from_file))):
+                    self.users_from_file = users_from_file
+                    self.users = None
+                    self.repos = None
+                    self.userrepoaccess = dict()
+            else:
+                self.mtime_gitolite_user_file = None
+                self.users_from_file = None
+                self.users = None
+                self.repos = None
+                self.userrepoaccess = dict()
         return True
 
     def get_users(self):
