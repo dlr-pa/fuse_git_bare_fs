@@ -15,9 +15,9 @@ You can run this file directly::
 Or you can run only one test, e. g.::
 
   env python3 script_fuse_git_bare_fs_tree.py \
-    ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree
+    ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree1
 
-  pytest-3 -k test_fuse_git_bare_fs_tree script_fuse_git_bare_fs_tree.py
+  pytest-3 -k test_fuse_git_bare_fs_tree1 script_fuse_git_bare_fs_tree.py
 """
 
 import os
@@ -26,6 +26,47 @@ import subprocess
 import tempfile
 import time
 import unittest
+
+def _prepare_test_environment(serverdir, clientdir, mountpointdir,
+                              reponame1, reponame2, tmpdir):
+    # pylint: disable=too-many-arguments
+    # prepare test environment
+    for dirpath in [serverdir, clientdir, mountpointdir,
+                    os.path.join(serverdir, 'foo'),
+                    os.path.join(clientdir, 'foo')]:
+        os.mkdir(os.path.join(tmpdir, dirpath))
+    subprocess.run(
+        ['git init --bare ' + reponame1 + '.git'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=True, cwd=os.path.join(tmpdir, serverdir),
+        timeout=3, check=True)
+    subprocess.run(
+        ['git clone ../' + os.path.join(serverdir, reponame1)],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=True, cwd=os.path.join(tmpdir, clientdir),
+        timeout=3, check=True)
+    subprocess.run(
+        ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+         'git add a b l d/c; git commit -m init; git push'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=True, cwd=os.path.join(tmpdir, clientdir, reponame1),
+        timeout=3, check=True)
+    subprocess.run(
+        ['git init --bare ' + reponame2 + '.git'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=True, cwd=os.path.join(tmpdir, serverdir),
+        timeout=3, check=True)
+    subprocess.run(
+        ['git clone ../../' + os.path.join(serverdir, reponame2)],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=True, cwd=os.path.join(tmpdir, clientdir, 'foo'),
+        timeout=3, check=True)
+    subprocess.run(
+        ['echo "2">2;'
+         'git add 2; git commit -m init; git push'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        shell=True, cwd=os.path.join(tmpdir, clientdir, reponame2),
+        timeout=3, check=True)
 
 
 class ScriptFuseGitBareFsTree(unittest.TestCase):
@@ -45,43 +86,8 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         reponame1 = 'repo1'
         reponame2 = 'foo/repo2'
         with tempfile.TemporaryDirectory() as tmpdir:
-            # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir,
-                            os.path.join(serverdir, 'foo'),
-                            os.path.join(clientdir, 'foo')]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame1 + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame1)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame1),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git init --bare ' + reponame2 + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../../' + os.path.join(serverdir, reponame2)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, 'foo'),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "2">2;'
-                 'git add 2; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame2),
-                timeout=3, check=True)
+            _prepare_test_environment(serverdir, clientdir, mountpointdir,
+                                      reponame1, reponame2, tmpdir)
             # run tests (bare repositories)
             cpi = subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' +
@@ -95,12 +101,10 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
                 if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
             self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame1))),
+                set(os.listdir(os.path.join(tmpdir, mountpointdir, reponame1))),
                 {'a', 'b', 'd', 'l'})
             self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame2))),
+                set(os.listdir(os.path.join(tmpdir, mountpointdir, reponame2))),
                 {'2'})
             # read data
             with open(os.path.join(
@@ -145,43 +149,8 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         reponame1 = 'repo1'
         reponame2 = 'foo/repo2'
         with tempfile.TemporaryDirectory() as tmpdir:
-            # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir,
-                            os.path.join(serverdir, 'foo'),
-                            os.path.join(clientdir, 'foo')]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame1 + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame1)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame1),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git init --bare ' + reponame2 + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../../' + os.path.join(serverdir, reponame2)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, 'foo'),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "2">2;'
-                 'git add 2; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame2),
-                timeout=3, check=True)
+            _prepare_test_environment(serverdir, clientdir, mountpointdir,
+                                      reponame1, reponame2, tmpdir)
             # run tests (bare repositories)
             cpi = subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' +

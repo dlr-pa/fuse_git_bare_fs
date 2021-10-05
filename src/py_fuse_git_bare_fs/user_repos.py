@@ -117,8 +117,8 @@ class UserRepos():
                 if self.mtime_gitolite_user_file != mtime_gitolite_user_file:
                     self.mtime_gitolite_user_file = mtime_gitolite_user_file
                 if ((self.users_from_file is None) or
-                    bool(users_from_file.symmetric_difference(
-                        self.users_from_file))):
+                        bool(users_from_file.symmetric_difference(
+                            self.users_from_file))):
                     self.users_from_file = users_from_file
                     self.users = None
                     self.repos = None
