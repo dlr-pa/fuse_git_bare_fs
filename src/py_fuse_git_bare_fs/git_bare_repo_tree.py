@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-09-22 (last change).
+:Date: 2021-10-05 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -34,12 +34,29 @@ def _extract_repopath_from_path(actual_repo, path):
 class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-09-22
+    :Date: 2021-10-05
 
     read only access to working trees of git bare repositories
     """
     # pylint: disable=too-many-instance-attributes,too-many-arguments
     # /usr/lib/python3/dist-packages/fusepy.py
+
+    # disable unused operations to avoid unnecessary errors:
+    access = None
+    flush = None
+    getxattr = None
+    listxattr = None
+    opendir = None
+    releasedir = None
+    statfs = None
+    # we only use/provide:
+    #  getattr
+    #  read
+    #  readdir
+    #  readlink
+    #  open
+    #  release
+    #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
                  simple_file_handler=None, nofail=False):

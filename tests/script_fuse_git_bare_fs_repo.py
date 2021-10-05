@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-26
+:Date: 2021-10-05
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs repo'
@@ -15,12 +15,13 @@ You can run this file directly::
 Or you can run only one test, e. g.::
 
   env python3 script_fuse_git_bare_fs_repo.py \
-    script_fuse_git_bare_fs_repo.test_fuse_git_bare_fs_repo
+    ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo1
 
-  pytest-3 -k test_fuse_git_bare_fs_repo script_fuse_git_bare_fs_repo.py
+  pytest-3 -k test_fuse_git_bare_fs_repo1 script_fuse_git_bare_fs_repo.py
 """
 
 import os
+import re
 import subprocess
 import tempfile
 import time
@@ -30,10 +31,10 @@ import unittest
 class ScriptFuseGitBareFsRepo(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-26
+    :Date: 2021-10-05
     """
 
-    def test_fuse_git_bare_fs_repo(self):
+    def test_fuse_git_bare_fs_repo1(self):
         """
         :Author: Daniel Mohr
         :Date: 2021-04-26
@@ -83,6 +84,86 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.terminate()
             cpi.wait(timeout=3)
             cpi.kill()
+            cpi.stdout.close()
+            cpi.stderr.close()
+
+    def test_fuse_git_bare_fs_repo2(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-10-05
+
+        This test creates a repo, put some files in and
+        mount it, check for files.
+
+        env python3 script_fuse_git_bare_fs_repo.py \
+          ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo2
+
+        pytest-3 -k test_fuse_git_bare_fs_repo2 script_fuse_git_bare_fs_repo.py
+        """
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir, mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            subprocess.run(
+                ['git init --bare ' + reponame],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run tests
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                # typical it needs less than 0.4 seconds
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                    break
+            cp_ls = subprocess.run(
+                ['ls -g -G'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, mountpointdir),
+                timeout=3, check=True)
+            self.assertEqual(
+                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                {'a', 'b', 'd', 'l'})
+            cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
+            self.assertEqual(cp_ls_stdout[0], b'total 0')
+            self.assertTrue(
+                bool(re.findall(b'-rw-rw-r-- 0 .+ a', cp_ls_stdout[1])))
+            self.assertTrue(
+                bool(re.findall(b'-rw-rw-r-- 0 .+ b', cp_ls_stdout[2])))
+            self.assertTrue(
+                bool(re.findall(b'drwxrwxr-x 0 4096 .+ d', cp_ls_stdout[3])))
+            self.assertTrue(
+                bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpistdout, cpistderr = cpi.communicate()
+            self.assertFalse(
+                bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
+                msg='stdout logs errror(s):\n' + cpistdout.decode())
+            self.assertFalse(
+                bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
+                msg='stderr logs errror(s):\n' + cpistderr.decode())
             cpi.stdout.close()
             cpi.stderr.close()
 
