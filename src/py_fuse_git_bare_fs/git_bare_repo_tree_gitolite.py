@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-09-22 (last change).
+:Date: 2021-10-05 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -31,10 +31,27 @@ def _extract_repopath_from_path(actual_user, actual_repo, path):
 class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-09-22
+    :Date: 2021-10-05
 
     read only access to working trees of git bare repositories
     """
+
+    # disable unused operations to avoid unnecessary errors:
+    access = None
+    flush = None
+    getxattr = None
+    listxattr = None
+    opendir = None
+    releasedir = None
+    statfs = None
+    # we only use/provide:
+    #  getattr
+    #  read
+    #  readdir
+    #  readlink
+    #  open
+    #  release
+    #  utimens
 
     def __init__(self, src_dir, root_object, provide_htaccess,
                  htaccess_template=None,
@@ -242,6 +259,19 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         return self.repos.repos[actual_repo].release(
             _extract_repopath_from_path(actual_user, actual_repo, path),
             file_handler)
+
+    def utimens(self, path, times=None):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-04-24
+
+        This is not implemented at the moment.
+
+        The arguments are not used, but can be given to be compatible to
+        typical open functions.
+        """
+        # pylint: disable=unused-argument,no-self-use
+        raise fusepy.FuseOSError(errno.EROFS)
 
 
 class GitBareRepoTreeGitolite(
