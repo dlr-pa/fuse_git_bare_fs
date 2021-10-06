@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-05 (last change).
+:Date: 2021-10-06 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,14 +18,15 @@ from .simple_file_handler import SimpleFileHandlerClass
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-05
+    :Date: 2021-10-06
     """
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, repopath, root_object,
                  gitolite_cmd='gitolite', gitolite_user_file=None,
                  max_cache_size=1073741824,
-                 simple_file_handler=None):
+                 simple_file_handler=None,
+                 file_st_modes=None):
         # pylint: disable=too-many-arguments
         self.repopath = repopath
         self.root_object = root_object  # not used for gitolite-admin
@@ -37,6 +38,7 @@ class UserRepos():
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
+        self.file_st_modes = file_st_modes
         self.lock = ReadWriteLock()
         with self.lock.write_locked():
             self.commit_hash = None
@@ -159,7 +161,7 @@ class UserRepos():
     def get_repos(self, user=None):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-16
+        :Date: 2021-10-06
         """
         # pylint: disable=too-many-branches
         if (not self._cache_up_to_date()) or (self.repos is None):
@@ -180,14 +182,16 @@ class UserRepos():
                         self.repos[reponame] = RepoClass(
                             os.path.join(self.repopath, reponame) + '.git',
                             root_object=self.root_object, cache=self.cache,
-                            simple_file_handler=self.simple_file_handler)
+                            simple_file_handler=self.simple_file_handler,
+                            file_st_modes=self.file_st_modes)
                 else:
                     for reponame in repos:
                         if reponame not in self.repos.keys():
                             self.repos[reponame] = RepoClass(
                                 os.path.join(self.repopath, reponame) + '.git',
                                 root_object=self.root_object, cache=self.cache,
-                                simple_file_handler=self.simple_file_handler)
+                                simple_file_handler=self.simple_file_handler,
+                                file_st_modes=self.file_st_modes)
                     for reponame in list(self.repos.keys()):
                         if reponame not in repos:
                             del self.repos[reponame]

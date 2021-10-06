@@ -58,7 +58,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
                  htaccess_template=None,
                  gitolite_cmd='gitolite', gitolite_user_file=None,
                  max_cache_size=1073741824,
-                 simple_file_handler=None, nofail=False):
+                 simple_file_handler=None, file_st_modes=None, nofail=False):
         # pylint: disable=too-many-arguments
         self.src_dir = src_dir
         self.root_object = root_object
@@ -71,13 +71,17 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
+        if file_st_modes is not None:
+            self._empty_dir_attr['st_mode'] = file_st_modes[3]
+            self._empty_file_attr['st_mode'] = file_st_modes[0]
         self.nofail = nofail
         if self.nofail:
             # pylint: disable=broad-except
             try:
                 self.repos = UserRepos(src_dir, self.root_object,
                                        gitolite_cmd, gitolite_user_file,
-                                       max_cache_size)
+                                       max_cache_size,
+                                       file_st_modes=file_st_modes)
             except Exception:
                 msg = 'mount fail, '
                 msg += 'try running without "-nofail" to get precise error'
@@ -86,7 +90,8 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         else:
             self.repos = UserRepos(src_dir, self.root_object,
                                    gitolite_cmd, gitolite_user_file,
-                                   max_cache_size)
+                                   max_cache_size,
+                                   file_st_modes=file_st_modes)
 
     def _extract_user_from_path(self, path):
         actual_user = None

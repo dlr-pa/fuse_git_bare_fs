@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-09-22 (last change).
+:Date: 2021-10-06 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,7 +22,7 @@ def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-09-22 (last change).
+    :Date: 2021-10-06 (last change).
     """
     # pylint: disable = bad-option-value, import-outside-toplevel
     operations_instance = None
@@ -33,13 +33,15 @@ def fuse_git_bare_fs_repo(args):
         operations_instance = GitBareRepoLogging(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
-            args.max_cache_size[0])
+            args.max_cache_size[0],
+            file_st_modes=args.file_st_modes)
     else:
         from .git_bare_repo import GitBareRepo
         operations_instance = GitBareRepo(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0],
+            file_st_modes=args.file_st_modes,
             nofail=args.nofail)
     fusepy.FUSE(
         operations_instance,
@@ -53,7 +55,7 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-09-22 (last change).
+    :Date: 2021-10-06 (last change).
     """
     # pylint: disable=bad-option-value,import-outside-toplevel
     if (not os.path.isdir(args.target_dir)) and args.nofail:
@@ -75,14 +77,16 @@ def fuse_git_bare_fs_tree(args):
                 args.htaccess_template[0],
                 args.gitolite_cmd[0],
                 args.gitolite_user_file[0],
-                args.max_cache_size[0])
+                args.max_cache_size[0],
+                file_st_modes=args.file_st_modes)
         else:
             from .git_bare_repo_tree import GitBareRepoTreeLogging
             logging.basicConfig(level=logging.DEBUG)
             operations_instance = GitBareRepoTreeLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
-                args.max_cache_size[0])
+                args.max_cache_size[0],
+                file_st_modes=args.file_st_modes)
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite \
@@ -95,6 +99,7 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_cmd[0],
                 args.gitolite_user_file[0],
                 args.max_cache_size[0],
+                file_st_modes=args.file_st_modes,
                 nofail=args.nofail)
         else:
             from .git_bare_repo_tree import GitBareRepoTree
@@ -102,6 +107,7 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0],
+                file_st_modes=args.file_st_modes,
                 nofail=args.nofail)
     fusepy.FUSE(
         operations_instance,
@@ -115,12 +121,12 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-09-22 (last change).
+    :Date: 2021-10-06 (last change).
     """
     # pylint: disable=too-many-statements
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-06-15\n'
+    epilog += 'Date: 2021-10-06\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     description = '"fuse_git_bare_fs" is a tool to mount the working '
@@ -152,7 +158,8 @@ def my_argument_parser():
         'The flag "-daemon" is used in any case. '
         'This allows to use this program as mount program e. g. in /etc/fstab.'
         ' Example: "a,b=c" will become "-a -b c"; "a,tree,b=c" will'
-        ' become "tree -a -b c"')
+        ' become "tree -a -b c". '
+        'Example usage: fuse_git_bare_fs -o "repo,allow_other" foo bar')
     common_parser.add_argument(
         '-root_object',
         nargs=1,
@@ -190,6 +197,23 @@ def my_argument_parser():
         help='If given, allows other users to use the fuse mount point. '
         'Therefore you have to allow this in /etc/fuse.conf by '
         'uncommenting "user_allow_other" there.')
+    common_parser.add_argument(
+        '-file_st_modes',
+        nargs=4,
+        default=[33204, 33277, 41471, 16893],
+        type=int,
+        required=False,
+        help='Set the file modes used to provide the files. '
+        'The default 33204, 33277, 41471, 16893 reflect the modes used '
+        'by git. The values are for normal file, executable file, '
+        'symbolic link and for a directory. For example if other users should '
+        'not be allowed to read something you can set: '
+        '33184 33256 41471 16888. '
+        'If you want to use this with "-o" flag, set: '
+        '-o file_st_modes=33184=33256=41471=16888. '
+        'Example: fuse_git_bare_fs '
+        '-o "repo,file_st_modes=33184=33256=41471=16888" foo bar',
+        metavar=('file', 'executable', 'link', 'directory'))
     common_parser.add_argument(
         '-uid',
         nargs=1,
@@ -249,7 +273,7 @@ def my_argument_parser():
     epilog += 'fuse_git_bare_fs repo a b\n\n'
     epilog += 'sudo -u www-data fuse_git_bare_fs repo a b\n\n'
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-04-13\n'
+    epilog += 'Date: 2021-10-06\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     repo_parser = argparse.ArgumentParser(add_help=False)
@@ -294,7 +318,7 @@ def my_argument_parser():
     epilog += 'allow_other,get_user_list_from_gitolite,provide_htaccess,'
     epilog += 'root_object=master,ro 0 0\n\n'
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-06-15\n'
+    epilog += 'Date: 2021-10-06\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     tree_parser = argparse.ArgumentParser(add_help=False)
@@ -371,7 +395,7 @@ def fuse_git_bare_fs():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-10 (last change).
+    :Date: 2021-10-06 (last change).
     """
     # pylint: disable=too-many-branches,too-many-statements
     # command line arguments:
@@ -386,9 +410,12 @@ def fuse_git_bare_fs():
                 options = sys.argv[i + 1].split(',')
                 for opt in options:
                     if '=' in opt:
-                        par, val = opt.split('=')
+                        par, val = opt.split('=', maxsplit=1)
                         param.append('-' + par)
-                        param.append(val)
+                        if '=' in val:
+                            param += val.split('=')
+                        else:
+                            param.append(val)
                     elif opt in ['repo', 'tree']:
                         param = [opt] + param
                     else:
