@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-05 (last change).
+:Date: 2021-10-06 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 class _GitBareRepoMixin():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-05
+    :Date: 2021-10-06
 
     read only access to the working tree of a git bare repository
     """
@@ -32,6 +32,7 @@ class _GitBareRepoMixin():
     access = None
     flush = None
     getxattr = None
+    ioctl = None
     listxattr = None
     opendir = None
     releasedir = None

@@ -56,4 +56,6 @@ elif [ "$1" = "createenv" ]; then
 	echo d > d; git add d; git commit -m d; git push
     ) || exit 1
     mkdir mountpoint
+    echo "user1" > users
+    echo "user2" >> users
 fi
