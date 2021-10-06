@@ -140,7 +140,7 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <tbody valign="top">
 <tr><td class="option-group">
 <kbd>-o</kbd></td>
-<td><p class="first">These options are splitted at “,” and used as seperated options. The sub-commands are extracted as well. The flag “-daemon” is used in any case. This allows to use this program as mount program e. g. in /etc/fstab. Example: “a,b=c” will become “-a -b c”; “a,tree,b=c” will become “tree -a -b c”</p>
+<td><p class="first">These options are splitted at “,” and used as seperated options. The sub-commands are extracted as well. The flag “-daemon” is used in any case. This allows to use this program as mount program e. g. in /etc/fstab. Example: “a,b=c” will become “-a -b c”; “a,tree,b=c” will become “tree -a -b c”. Example usage: fuse_git_bare_fs -o “repo,allow_other” foo bar</p>
 <p class="last">Default: [None]</p>
 </td></tr>
 </tbody>
@@ -153,8 +153,9 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <p>“fuse_git_bare_fs repo” is a tool to mount the working tree of a git bare repository as a filesystem in user space (fuse). It gives only read access. For a write access you should do a git commit and use git. This script needs about 7.6 MB of memory to run. More memory is necessary for large working trees or to provide file content.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fuse_git_bare_fs</span> <span class="n">repo</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
-                      <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span>
-                      <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">file_st_modes</span> <span class="n">file</span> <span class="n">executable</span> <span class="n">link</span> <span class="n">directory</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
                       <span class="n">src_dir</span> <span class="n">target_dir</span>
 </pre></div>
 </div>
@@ -205,6 +206,11 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <p class="last">Default: False</p>
 </td></tr>
 <tr><td class="option-group">
+<kbd>-file_st_modes</kbd></td>
+<td><p class="first">Set the file modes used to provide the files. The default 33204, 33277, 41471, 16893 reflect the modes used by git. The values are for normal file, executable file, symbolic link and for a directory. For example if other users should not be allowed to read something you can set: 33184 33256 41471 16888. If you want to use this with “-o” flag, set: -o file_st_modes=33184=33256=41471=16888. Example: fuse_git_bare_fs -o “repo,file_st_modes=33184=33256=41471=16888” foo bar</p>
+<p class="last">Default: [33204, 33277, 41471, 16893]</p>
+</td></tr>
+<tr><td class="option-group">
 <kbd>-uid</kbd></td>
 <td><p class="first">The program is run under this uid. The current direcotry and the home directory are set appropriate. This allows to use this program as mount program e. g. in /etc/fstab. On default nothing is done (the calling user is used).</p>
 <p class="last">Default: [None]</p>
@@ -243,9 +249,10 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <p>“fuse_git_bare_fs tree” is a tool to mount the working tree of git bare repositories in a directory tree as a filesystem in user space (fuse). The idea is to provide the git repositories manage by a gitolite instance. Therefore parameters for this purpose are available. It is assumed that the bare repositories are named like “<a href="#id1"><span class="problematic" id="id2">*</span></a>.git”. It gives only read access. For a write access you should do a git commit and use git. For unmount just press ctrl-c, kill the program or do “fusermount -u target_dir”.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fuse_git_bare_fs</span> <span class="n">tree</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">root_object</span> <span class="n">ROOT_OBJECT</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">-</span><span class="n">cache_size</span> <span class="n">MAX_CACHE_SIZE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">daemon</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">threads</span><span class="p">]</span>
-                      <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span>
-                      <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">get_user_list_from_gitolite</span><span class="p">]</span>
-                      <span class="p">[</span><span class="o">-</span><span class="n">provide_htaccess</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">allow_other</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">file_st_modes</span> <span class="n">file</span> <span class="n">executable</span> <span class="n">link</span> <span class="n">directory</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">uid</span> <span class="n">UID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">gid</span> <span class="n">GID</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">ro</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">nofail</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">dev</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">suid</span><span class="p">]</span>
+                      <span class="p">[</span><span class="o">-</span><span class="n">get_user_list_from_gitolite</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">provide_htaccess</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">-</span><span class="n">htaccess_template</span> <span class="n">HTACCESS_TEMPLATE</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">-</span><span class="n">gitolite_cmd</span> <span class="n">GITOLITE_CMD</span><span class="p">]</span>
                       <span class="p">[</span><span class="o">-</span><span class="n">gitolite_user_file</span> <span class="n">GITOLITE_USER_FILE</span><span class="p">]</span>
@@ -297,6 +304,11 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 <kbd>-allow_other</kbd></td>
 <td><p class="first">If given, allows other users to use the fuse mount point. Therefore you have to allow this in /etc/fuse.conf by uncommenting “user_allow_other” there.</p>
 <p class="last">Default: False</p>
+</td></tr>
+<tr><td class="option-group">
+<kbd>-file_st_modes</kbd></td>
+<td><p class="first">Set the file modes used to provide the files. The default 33204, 33277, 41471, 16893 reflect the modes used by git. The values are for normal file, executable file, symbolic link and for a directory. For example if other users should not be allowed to read something you can set: 33184 33256 41471 16888. If you want to use this with “-o” flag, set: -o file_st_modes=33184=33256=41471=16888. Example: fuse_git_bare_fs -o “repo,file_st_modes=33184=33256=41471=16888” foo bar</p>
+<p class="last">Default: [33204, 33277, 41471, 16893]</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>-uid</kbd></td>
@@ -363,7 +375,7 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </div>
 </div>
 <p>Author: Daniel Mohr
-Date: 2021-06-15
+Date: 2021-10-06
 License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
 </div>
 </div>
