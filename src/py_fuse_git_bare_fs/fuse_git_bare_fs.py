@@ -398,6 +398,7 @@ def fuse_git_bare_fs():
     :Date: 2021-10-06 (last change).
     """
     # pylint: disable=too-many-branches,too-many-statements
+    # pylint: disable=too-many-nested-blocks
     # command line arguments:
     parser = my_argument_parser()
     # parse arguments
