@@ -48,7 +48,8 @@ def fuse_git_bare_fs_repo(args):
         args.target_dir,
         foreground=args.daemon,
         nothreads=args.threads,
-        allow_other=args.allow_other)
+        allow_other=args.allow_other,
+        default_permissions=args.default_permissions)
 
 
 def fuse_git_bare_fs_tree(args):
@@ -114,7 +115,8 @@ def fuse_git_bare_fs_tree(args):
         args.target_dir,
         foreground=args.daemon,
         nothreads=args.threads,
-        allow_other=args.allow_other)
+        allow_other=args.allow_other,
+        default_permissions=args.default_permissions)
 
 
 def my_argument_parser():
@@ -198,6 +200,12 @@ def my_argument_parser():
         'Therefore you have to allow this in /etc/fuse.conf by '
         'uncommenting "user_allow_other" there.')
     common_parser.add_argument(
+        '-default_permissions',
+        action='store_true',
+        help='If given, the file permissions will be used by fuse. '
+        'This is important to use together with "-allow_other" and '
+        '"-file_st_modes".')
+    common_parser.add_argument(
         '-file_st_modes',
         nargs=4,
         default=[33204, 33277, 41471, 16893],
@@ -209,6 +217,8 @@ def my_argument_parser():
         'symbolic link and for a directory. For example if other users should '
         'not be allowed to read something you can set: '
         '33184 33256 41471 16888. '
+        'Normally these permission modes are ignored by fuse. '
+        'Therefore you have to set the parameter "-default_permissions". '
         'If you want to use this with "-o" flag, set: '
         '-o file_st_modes=33184=33256=41471=16888. '
         'Example: fuse_git_bare_fs '
