@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-05 (last change).
+:Date: 2021-10-06 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -31,7 +31,7 @@ def _extract_repopath_from_path(actual_user, actual_repo, path):
 class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-05
+    :Date: 2021-10-06
 
     read only access to working trees of git bare repositories
     """
@@ -40,6 +40,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     access = None
     flush = None
     getxattr = None
+    ioctl = None
     listxattr = None
     opendir = None
     releasedir = None
