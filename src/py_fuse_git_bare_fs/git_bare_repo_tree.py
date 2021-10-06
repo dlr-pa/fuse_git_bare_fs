@@ -60,7 +60,7 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
-                 simple_file_handler=None, nofail=False):
+                 simple_file_handler=None, file_st_modes=None, nofail=False):
         self.src_dir = src_dir
         self.root_object = root_object
         self.cache = SimpleFileCache(max_cache_size=max_cache_size)
@@ -68,6 +68,10 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
+        self.file_st_modes = file_st_modes
+        if self.file_st_modes is not None:
+            self._empty_dir_attr['st_mode'] = self.file_st_modes[3]
+            self._empty_file_attr['st_mode'] = self.file_st_modes[0]
         self.nofail = nofail
         self.repos = dict()
         self._lock = ReadWriteLock()
@@ -176,7 +180,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             actual_repo_list[1] = RepoClass(
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=self.file_st_modes)
         ret = actual_repo_list[1].getattr(
             _extract_repopath_from_path(actual_repo, path))
         return ret
@@ -197,7 +202,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             actual_repo_list[1] = RepoClass(
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=self.file_st_modes)
         ret = actual_repo_list[1].read(
             _extract_repopath_from_path(actual_repo, path),
             size, offset, file_handler)
@@ -240,7 +246,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             actual_repo_list[1] = RepoClass(
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=self.file_st_modes)
         ret = actual_repo_list[1].readdir(
             _extract_repopath_from_path(actual_repo, path))
         return ret
@@ -261,7 +268,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             actual_repo_list[1] = RepoClass(
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=self.file_st_modes)
         file_handler = self.open(path, 'r')
         ret = actual_repo_list[1].read(
             _extract_repopath_from_path(actual_repo, path),
@@ -289,7 +297,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             actual_repo_list[1] = RepoClass(
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=self.file_st_modes)
         return actual_repo_list[1].open(
             _extract_repopath_from_path(actual_repo, path), flags)
 
@@ -309,7 +318,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             actual_repo_list[1] = RepoClass(
                 os.path.join(self.src_dir, actual_repo_list[0]),
                 root_object=self.root_object, cache=self.cache,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=self.file_st_modes)
         actual_repo_list[1].release(
             _extract_repopath_from_path(actual_repo, path), file_handler)
 

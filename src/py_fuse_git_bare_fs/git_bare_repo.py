@@ -47,7 +47,7 @@ class _GitBareRepoMixin():
     #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
-                 simple_file_handler=None, nofail=False):
+                 simple_file_handler=None, file_st_modes=None, nofail=False):
         self.src_dir = src_dir
         self.root_object = root_object
         if simple_file_handler is None:
@@ -61,7 +61,8 @@ class _GitBareRepoMixin():
                 self.repo = RepoClass(
                     self.src_dir, self.root_object,
                     max_cache_size=max_cache_size,
-                    simple_file_handler=self.simple_file_handler)
+                    simple_file_handler=self.simple_file_handler,
+                    file_st_modes=file_st_modes)
             except Exception:
                 msg = 'mount fail, '
                 msg += 'try running without "-nofail" to get precise error'
@@ -70,7 +71,8 @@ class _GitBareRepoMixin():
         else:
             self.repo = RepoClass(
                 self.src_dir, self.root_object, max_cache_size=max_cache_size,
-                simple_file_handler=self.simple_file_handler)
+                simple_file_handler=self.simple_file_handler,
+                file_st_modes=file_st_modes)
 
     def __del__(self):
         if hasattr(self, 'simple_file_handler'):

@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-29 (last change).
+:Date: 2021-10-06 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,15 +18,16 @@ import subprocess
 import time
 import warnings
 
+from .empty_attr_mixin import _EmptyAttrMixin
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
 
 
-class RepoClass():
+class RepoClass(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-24
+    :Date: 2021-10-06
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -46,7 +47,7 @@ class RepoClass():
 
     def __init__(self, src_dir, root_object=b'master',
                  max_cache_size=1073741824, cache=None,
-                 simple_file_handler=None):
+                 simple_file_handler=None, file_st_modes=None):
         # pylint: disable=too-many-arguments
         self.src_dir = src_dir
         self.root_object = root_object
@@ -65,6 +66,12 @@ class RepoClass():
             self.simple_file_handler = SimpleFileHandlerClass()
         else:
             self.simple_file_handler = simple_file_handler
+        if file_st_modes is not None:
+            self.gitmode2st_mode['100644'] = file_st_modes[0]  # normal file
+            self.gitmode2st_mode['100755'] = file_st_modes[1]  # executable
+            self.gitmode2st_mode['120000'] = file_st_modes[2]  # symbolic link
+            self._empty_dir_attr['st_mode'] = file_st_modes[3]
+            self._empty_file_attr['st_mode'] = file_st_modes[0]
         self.lock = ReadWriteLock()
         with self.lock.write_locked():
             self._read_tree()
@@ -212,7 +219,7 @@ class RepoClass():
     def getattr(self, path):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-24
+        :Date: 2021-10-06
 
         get attributes of the path
         """
@@ -236,8 +243,7 @@ class RepoClass():
                         self.root_object
                     msg += 'Mountpoint will be empty.'
                     warnings.warn(msg)
-                    ret = {'st_mode': 16893, 'st_size': 4096}
-                    ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
+                    ret = self._empty_dir_attr.copy()
                     ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = \
                         time.time()
                     self.lock.release_read()
@@ -248,7 +254,7 @@ class RepoClass():
         ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
         if (tail == '') or (path in self.tree):  # path is dir
-            ret['st_mode'] = 16893
+            ret['st_mode'] = self._empty_dir_attr['st_mode']
             ret['st_size'] = 4096  # typical for ext4
         else:  # path is blob
             # https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
