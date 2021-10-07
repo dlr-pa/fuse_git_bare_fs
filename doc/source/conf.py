@@ -38,6 +38,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
+              'sphinx.ext.githubpages',
               'recommonmark',
               'sphinx.ext.autosectionlabel',
               'sphinxarg.ext']
