@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06 (last change).
+:Date: 2021-10-08 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -13,12 +13,16 @@ from .repo_class import RepoClass
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
+try:
+    from .repotools_git import get_ref
+except ModuleNotFoundError:
+    from .repotools_dulwich import get_ref
 
 
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-06
+    :Date: 2021-10-08
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -70,12 +74,7 @@ class UserRepos():
             # self.gitolite_user_file is not a file anymore
             # (maybe it is deleted)
             return False
-        cpi = subprocess.run(
-            ["git cat-file --batch-check='%(objectname)'"],
-            input=b"master",
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            cwd=self.adminrepo, shell=True, timeout=3, check=True)
-        if cpi.stdout.decode().strip() == commit_hash:
+        if get_ref(self.adminrepo, b'master') == commit_hash:
             return True
         return False
 
