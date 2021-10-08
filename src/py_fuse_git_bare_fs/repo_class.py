@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06 (last change).
+:Date: 2021-10-08 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,12 +22,16 @@ from .empty_attr_mixin import _EmptyAttrMixin
 from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
+try:
+    from .repotools_git import get_ref
+except ModuleNotFoundError:
+    from .repotools_dulwich import get_ref
 
 
 class RepoClass(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-06
+    :Date: 2021-10-08
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -82,12 +86,7 @@ class RepoClass(_EmptyAttrMixin):
         self.lock.acquire_write()
 
     def _cache_up_to_date(self):
-        cpi = subprocess.run(
-            ["git cat-file --batch-check='%(objectname)'"],
-            input=self.root_object,
-            stdout=subprocess.PIPE,
-            cwd=self.src_dir, shell=True, timeout=3, check=True)
-        if cpi.stdout.decode().strip() == self.commit_hash:
+        if get_ref(self.src_dir, self.root_object) == self.commit_hash:
             return True
         self.simple_file_handler.remove_repo(self.src_dir)
         return False
