@@ -33,6 +33,7 @@ def get_ref(src_dir, root_object):
         cwd=src_dir, shell=True, timeout=3, check=True)
     return cpi.stdout.decode().strip()
 
+
 def get_blob_data(src_dir, blob_hash):
     """
     :return: the data of a blob in a git repository
@@ -46,13 +47,15 @@ def get_blob_data(src_dir, blob_hash):
     :Date: 2021-10-11
     """
     cpi = subprocess.run(
-            ["git cat-file --batch"],
-            input=blob_hash,
-            stdout=subprocess.PIPE,
-            cwd=src_dir, shell=True, timeout=3, check=True)
+        ["git cat-file --batch"],
+        input=blob_hash,
+        stdout=subprocess.PIPE,
+        cwd=src_dir, shell=True, timeout=3, check=True)
     return cpi.stdout
 
+
 def get_repo_data(src_dir, root_object, time_regpat):
+    # pylint: disable=anomalous-backslash-in-string
     """
     :param src_dir: path to the git repository as str
     :param root_object: name of the branch as bytes

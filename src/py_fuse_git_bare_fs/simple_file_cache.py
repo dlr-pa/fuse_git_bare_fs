@@ -5,14 +5,14 @@
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
-import subprocess
 import time
 
 from .read_write_lock import ReadWriteLock
+
 try:
-    from .repotools_dulwich import get_ref, get_blob_data
+    from .repotools_dulwich import get_blob_data
 except (ModuleNotFoundError, ImportError):
-    from .repotools_git import get_ref, get_blob_data
+    from .repotools_git import get_blob_data
 
 
 class SimpleFileCache():

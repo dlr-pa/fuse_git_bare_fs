@@ -5,9 +5,11 @@
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
+import warnings
+
 import dulwich.errors
 import dulwich.repo
-import warnings
+
 
 def get_ref(src_dir, root_object):
     """
@@ -36,8 +38,8 @@ def get_ref(src_dir, root_object):
     refs = repo.get_refs()
     if refs_root_object in refs:
         return repo.get_refs()[refs_root_object].decode()
-    else:
-        return root_object + b' missing'
+    return root_object + b' missing'
+
 
 def get_blob_data(src_dir, blob_hash):
     """
@@ -56,7 +58,9 @@ def get_blob_data(src_dir, blob_hash):
     repo = dulwich.repo.Repo(src_dir)
     # repo.get_object(blob_hash).type_name == b'blob'
     data = repo.get_object(blob_hash).data
-    return blob_hash + b' ' + b'blob' + b' ' + str(len(data)).encode() + b'\n' + repo.get_object(blob_hash).data + b'\n'
+    return blob_hash + b' ' + b'blob' + b' ' + str(len(data)).encode() + \
+        b'\n' + repo.get_object(blob_hash).data + b'\n'
+
 
 def get_repo_data(src_dir, root_object, time_regpat=None):
     """
