@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-08 (last change).
+:Date: 2021-10-11 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -14,9 +14,9 @@ from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
 try:
-    from .repotools_git import get_ref
-except ModuleNotFoundError:
     from .repotools_dulwich import get_ref
+except ModuleNotFoundError:
+    from .repotools_git import get_ref
 
 
 class UserRepos():

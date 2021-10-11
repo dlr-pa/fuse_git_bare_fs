@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06
+:Date: 2021-10-11
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -300,7 +300,7 @@ REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021.10.06',
+    version='2021.10.11',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
