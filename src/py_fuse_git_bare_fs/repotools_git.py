@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-08 (last change).
+:Date: 2021-10-11 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -17,6 +17,11 @@ def get_ref(src_dir, root_object):
     :return: hash of the branch root_object of the repository src_dir as str
              or error message as bytes
 
+    Example:
+
+      from py_fuse_git_bare_fs.repotools_git import get_ref
+      get_ref('.', b'master')
+
     :Author: Daniel Mohr
     :Date: 2021-10-08
     """
@@ -26,3 +31,22 @@ def get_ref(src_dir, root_object):
         stdout=subprocess.PIPE,
         cwd=src_dir, shell=True, timeout=3, check=True)
     return cpi.stdout.decode().strip()
+
+def get_blob_data(src_dir, blob_hash):
+    """
+    :return: the data of a blob in a git repository
+
+    Example:
+
+      from py_fuse_git_bare_fs.repotools_git import get_ref, get_blob_data
+      get_blob_data('.', b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
+
+    :Author: Daniel Mohr
+    :Date: 2021-10-11
+    """
+    cpi = subprocess.run(
+            ["git cat-file --batch"],
+            input=blob_hash,
+            stdout=subprocess.PIPE,
+            cwd=src_dir, shell=True, timeout=3, check=True)
+    return cpi.stdout

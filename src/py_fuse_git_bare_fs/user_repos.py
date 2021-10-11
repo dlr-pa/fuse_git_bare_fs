@@ -15,14 +15,14 @@ from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
 try:
     from .repotools_dulwich import get_ref
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from .repotools_git import get_ref
 
 
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-08
+    :Date: 2021-10-11
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -87,11 +87,8 @@ class UserRepos():
           self.lock.release_write()
         """
         if (update_cache) or (not self._cache_up_to_date()):
-            cpi = subprocess.run(
-                ["git cat-file --batch"], input=b"master",
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                cwd=self.adminrepo, shell=True, timeout=3, check=True)
-            if cpi.stdout.startswith(b"master"):
+            commit_hash = get_ref(self.adminrepo, b"master")
+            if commit_hash.startswith("master"):
                 # empty repo or "master" does not exists
                 msg = 'root repository object "master" does not exists.'
                 warnings.warn(msg)
@@ -102,8 +99,6 @@ class UserRepos():
                 self.repos = None
                 self.userrepoaccess = dict()
                 return False
-            splittedstdout = cpi.stdout.decode().split('\n')
-            commit_hash = splittedstdout[0].split()[0]
             if commit_hash != self.commit_hash:
                 self.commit_hash = commit_hash
                 self.users = None

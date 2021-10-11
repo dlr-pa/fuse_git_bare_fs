@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-23 (last change).
+:Date: 2021-10-11 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -9,12 +9,16 @@ import subprocess
 import time
 
 from .read_write_lock import ReadWriteLock
+try:
+    from .repotools_dulwich import get_ref, get_blob_data
+except (ModuleNotFoundError, ImportError):
+    from .repotools_git import get_ref, get_blob_data
 
 
 class SimpleFileCache():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-23
+    :Date: 2021-10-11
     """
 
     def __init__(self,
@@ -68,31 +72,27 @@ class SimpleFileCache():
         ret = self.get_cached(
             repopath, path, size, offset, maxage=2*self.maxage)
         if ret is None:
-            cpi = subprocess.run(
-                ["git cat-file --batch"],
-                input=blob_hash,
-                stdout=subprocess.PIPE,
-                cwd=repopath, shell=True, timeout=3, check=True)
-            lcp = len(cpi.stdout)
+            data = get_blob_data(repopath, blob_hash)
+            lendata = len(data)
             if self.min_file_size <= st_size:
                 self.lock.acquire_read()
-                if self.actual_cache_size + lcp < self.max_cache_size:
+                if self.actual_cache_size + lendata < self.max_cache_size:
                     self.lock.release_read()
                     with self.lock.write_locked():
                         if repopath not in self.cache:
                             self.cache[repopath] = dict()
                         self.cache[repopath][path] = [time.time(),
-                                                      cpi.stdout,
-                                                      lcp,
+                                                      data,
+                                                      lendata,
                                                       st_size]
                         self.actual_cache_size += self.cache[repopath][path][2]
                 else:
                     self.lock.release_read()
-            startindex = lcp - 1 - st_size + offset
-            stopindex = lcp - 1
+            startindex = lendata - 1 - st_size + offset
+            stopindex = lendata - 1
             if size is not None:
-                stopindex = min(startindex + size, len(cpi.stdout) - 1)
-            return cpi.stdout[startindex:stopindex]
+                stopindex = min(startindex + size, lendata - 1)
+            return data[startindex:stopindex]
         return ret
 
     def _clear_repo_old(self, repopath):
