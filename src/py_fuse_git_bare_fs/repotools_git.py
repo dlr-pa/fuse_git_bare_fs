@@ -6,6 +6,7 @@
 """
 
 import subprocess
+import warnings
 
 
 def get_ref(src_dir, root_object):
@@ -50,3 +51,44 @@ def get_blob_data(src_dir, blob_hash):
             stdout=subprocess.PIPE,
             cwd=src_dir, shell=True, timeout=3, check=True)
     return cpi.stdout
+
+def get_repo_data(src_dir, root_object, time_regpat):
+    """
+    :param src_dir: path to the git repository as str
+    :param root_object: name of the branch as bytes
+    :return: commit hash, tree hash, time of last commit
+
+    Example:
+
+      import re
+      from py_fuse_git_bare_fs.repotools_git import get_repo_data
+      get_repo_data('.', b'master', re.compile(r' ([0-9]+) [+\-0-9]+$'))
+
+    :Author: Daniel Mohr
+    :Date: 2021-10-11
+    """
+    cpi = subprocess.run(
+        ["git cat-file --batch"], input=root_object,
+        stdout=subprocess.PIPE,
+        cwd=src_dir, shell=True, timeout=3, check=True)
+    if cpi.stdout.startswith(root_object):
+        # empty repo or root_object does not exists
+        msg = \
+            'root repository object "%s" in "%s" does not exists. ' % \
+            (root_object, src_dir)
+        msg += 'Mountpoint will be empty.'
+        warnings.warn(msg)
+        return False
+    splittedstdout = cpi.stdout.decode().split('\n')
+    commit_hash = splittedstdout[0].split()[0]
+    for data in splittedstdout:
+        if data.startswith('tree'):
+            tree_hash = data.split()[1]
+            break
+    for data in splittedstdout:
+        if data.startswith('committer'):
+            res = time_regpat.findall(data)
+            if res:
+                commit_time = int(res[0])
+                break
+    return (commit_hash, tree_hash, commit_time)

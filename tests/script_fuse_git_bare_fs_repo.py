@@ -313,6 +313,11 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
 
         This test creates a repo, put some files in and
         mount it, check for files.
+
+        You can run this test directly::
+
+          env python3 script_fuse_git_bare_fs_repo.py \
+            ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo_daemon2
         """
         # pylint: disable=invalid-name
         serverdir = 'server'

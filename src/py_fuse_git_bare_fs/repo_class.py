@@ -23,9 +23,9 @@ from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
 try:
-    from .repotools_dulwich import get_ref
-except ModuleNotFoundError:
-    from .repotools_git import get_ref
+    from .repotools_dulwich import get_ref, get_repo_data
+except (ModuleNotFoundError, ImportError):
+    from .repotools_git import get_ref, get_repo_data
 
 
 class RepoClass(_EmptyAttrMixin):
@@ -99,30 +99,14 @@ class RepoClass(_EmptyAttrMixin):
             self.time = None
             self.content_cache = dict()
             self.cache.clear_repo_old(self.src_dir)
-            cpi = subprocess.run(
-                ["git cat-file --batch"], input=self.root_object,
-                stdout=subprocess.PIPE,
-                cwd=self.src_dir, shell=True, timeout=3, check=True)
-            if cpi.stdout.startswith(self.root_object):
-                # empty repo or self.root_object does not exists
-                msg = \
-                    'root repository object "%s" in "%s" does not exists. ' % \
-                    (self.root_object, self.src_dir)
-                msg += 'Mountpoint will be empty.'
-                warnings.warn(msg)
-                return False
-            splittedstdout = cpi.stdout.decode().split('\n')
-            self.commit_hash = splittedstdout[0].split()[0]
-            for data in splittedstdout:
-                if data.startswith('tree'):
-                    self.tree_hash = data.split()[1]
-                    break
-            for data in splittedstdout:
-                if data.startswith('committer'):
-                    res = self.time_regpat.findall(data)
-                    if res:
-                        self.time = int(res[0])
-                        break
+            repo_data = get_repo_data(
+                self.src_dir,
+                self.root_object,
+                self.time_regpat)
+            if isinstance(repo_data, tuple):
+                (self.commit_hash, self.tree_hash, self.time) = repo_data
+            else:
+                return repo_data
         return True
 
     def _git_cat_file(self, git_object):
