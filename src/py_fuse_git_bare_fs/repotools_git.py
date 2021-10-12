@@ -1,10 +1,11 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11 (last change).
+:Date: 2021-10-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
+import os
 import subprocess
 import warnings
 
@@ -59,6 +60,8 @@ def get_repo_data(src_dir, root_object, time_regpat):
     """
     :param src_dir: path to the git repository as str
     :param root_object: name of the branch as bytes
+    :param time_regpat: compiled search pattern from re, e. g.
+                        re.compile(r' ([0-9]+) [0-9+-]+$')
     :return: commit hash, tree hash, time of last commit
 
     Example:
@@ -96,6 +99,7 @@ def get_repo_data(src_dir, root_object, time_regpat):
                 break
     return (commit_hash, tree_hash, commit_time)
 
+
 def get_size_of_blob(src_dir, blob_hash):
     """
     :param src_dir: path to the git repository as str
@@ -116,3 +120,60 @@ def get_size_of_blob(src_dir, blob_hash):
         stdout=subprocess.PIPE,
         cwd=src_dir, shell=True, timeout=3, check=True)
     return int(cpi.stdout.decode())
+
+
+def _git_cat_file(src_dir, git_object):
+    cpi = subprocess.run(
+        ['git cat-file -p ' + git_object],
+        stdout=subprocess.PIPE,
+        cwd=src_dir, shell=True, timeout=3, check=True)
+    return cpi.stdout.decode()
+
+
+def get_tree(src_dir, tree_hash, tree_content_regpat):
+    """
+    :param src_dir: path to the git repository as str
+    :param tree_hash: has of the tree as str
+    :param tree_content_regpat:
+        compiled search pattern from re, e. g.
+        re.compile(r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
+    :return: tree of the repo as a dict
+
+    Example:
+
+      import re
+      from py_fuse_git_bare_fs.repotools_git import get_tree
+      get_tree(
+        '.',
+        'b213332fda65de4d2848a98e01f43d689cccbe6d',
+        re.compile(r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$'))
+
+    :Author: Daniel Mohr
+    :Date: 2021-10-12
+    """
+    tree = dict()
+    # tree[path] =
+    #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
+    trees = [('/', tree_hash)]  # (name, hash)
+    tree['/'] = dict()
+    while bool(trees):
+        act_path, act_tree_hash = trees.pop(0)
+        tree[act_path]['listdir'] = []
+        tree[act_path]['blobs'] = dict()
+        git_objects = _git_cat_file(src_dir, act_tree_hash).split('\n')
+        for line in git_objects:
+            if len(line) < 8:
+                continue
+            res = tree_content_regpat.findall(line)
+            if res:
+                (obj_mode, obj_type, obj_hash, obj_name) = res[0]
+                if obj_type == 'blob':
+                    tree[act_path]['listdir'].append(obj_name)
+                    tree[act_path]['blobs'][obj_name] = {
+                        'mode': obj_mode, 'hash': obj_hash}
+                elif obj_type == 'tree':
+                    tree[act_path]['listdir'].append(obj_name)
+                    obj_path = os.path.join(act_path, obj_name)
+                    trees.append((obj_path, obj_hash))
+                    tree[obj_path] = dict()
+    return tree

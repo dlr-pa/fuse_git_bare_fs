@@ -5,6 +5,7 @@
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
+import os
 import warnings
 
 import dulwich.errors
@@ -104,6 +105,7 @@ def get_repo_data(src_dir, root_object, time_regpat=None):
     commit_time = gitobj.commit_time
     return (commit_hash, tree_hash, commit_time)
 
+
 def get_size_of_blob(src_dir, blob_hash):
     """
     :param src_dir: path to the git repository as str
@@ -123,3 +125,59 @@ def get_size_of_blob(src_dir, blob_hash):
     except dulwich.errors.NotGitRepository:
         raise FileNotFoundError(src_dir)
     return repo.get_object(blob_hash).raw_length()
+
+
+def get_tree(src_dir, tree_hash, tree_content_regpat=None):
+    """
+    :param src_dir: path to the git repository as str
+    :param tree_hash: has of the tree as str
+    :param tree_content_regpat:
+        compiled search pattern from re, e. g.
+        re.compile(r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
+    :return: tree of the repo as a dict
+
+    Example:
+
+      from py_fuse_git_bare_fs.repotools_git import get_tree
+      get_tree(
+        '.',
+        'b213332fda65de4d2848a98e01f43d689cccbe6d')
+
+    :Author: Daniel Mohr
+    :Date: 2021-10-12
+    """
+    # to be compatible to py_fuse_git_bare_fs.repotools_git.get_repo_data
+    # we need the parameter/argument tree_content_regpat:
+    # pylint: disable=unused-argument
+    try:
+        repo = dulwich.repo.Repo(src_dir)
+    except dulwich.errors.NotGitRepository:
+        raise FileNotFoundError(src_dir)
+    tree = dict()
+    # tree[path] =
+    #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
+    dulwichmode2gitmode = {0o100644: '100644',
+                           0o100755: '100755',
+                           0o120000: '120000'}
+    trees = [('/', tree_hash.encode())]  # (name, hash)
+    tree['/'] = dict()
+    while bool(trees):
+        act_path, act_tree_hash = trees.pop(0)
+        tree[act_path]['listdir'] = []
+        tree[act_path]['blobs'] = dict()
+        treelist = repo.get_object(act_tree_hash).items()
+        for entry in treelist:
+            obj_type = repo.get_object(entry.sha).type_name
+            obj_hash = entry.sha
+            obj_name = entry.path.decode()
+            if obj_type == b'blob':
+                obj_mode = dulwichmode2gitmode[entry.mode]
+                tree[act_path]['listdir'].append(obj_name)
+                tree[act_path]['blobs'][obj_name] = {
+                    'mode': obj_mode, 'hash': obj_hash.decode()}
+            elif obj_type == b'tree':
+                tree[act_path]['listdir'].append(obj_name)
+                obj_path = os.path.join(act_path, obj_name)
+                trees.append((obj_path, obj_hash))
+                tree[obj_path] = dict()
+    return tree
