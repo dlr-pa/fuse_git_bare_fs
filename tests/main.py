@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-26
+:Date: 2021-10-12
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 aggregation of tests
@@ -72,7 +72,7 @@ def module(suite):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-04-14
+    :Date: 2021-10-12
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     add tests for the module
@@ -83,6 +83,10 @@ def module(suite):
     # py_fuse_git_bare_fs.repo_class
     suite.addTest(loader.loadTestsFromName(
         'tests.py_fuse_git_bare_fs_repo_class'))
+    suite.addTest(loader.loadTestsFromName(
+        'tests.py_fuse_git_bare_fs_repotools_dulwich'))
+    suite.addTest(loader.loadTestsFromName(
+        'tests.py_fuse_git_bare_fs_repotools_git'))
 
 
 def scripts(suite):

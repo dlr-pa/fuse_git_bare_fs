@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-29
+:Date: 2021-10-12
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the class RepoClass in the module py_fuse_git_bare_fs
@@ -22,8 +22,14 @@ import subprocess
 import tempfile
 import unittest
 
+try:
+    from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
+except ModuleNotFoundError:
+    from prepare_simple_test_environment import PrepareSimpleTestEnvironment
 
-class PyFuseGitBareFsRepoClass(unittest.TestCase):
+
+class PyFuseGitBareFsRepoClass(
+        unittest.TestCase, PrepareSimpleTestEnvironment):
     """
     :Author: Daniel Mohr
     :Date: 2021-03-29
@@ -32,7 +38,7 @@ class PyFuseGitBareFsRepoClass(unittest.TestCase):
     def test_repo_class(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-29
+        :Date: 2021-10-12
 
         This test creates a repo, put some files in and
         check how it is handled by py_fuse_git_bare_fs.repo_class.
@@ -49,24 +55,8 @@ class PyFuseGitBareFsRepoClass(unittest.TestCase):
                 repo = RepoClass(
                     os.path.join(tmpdir, serverdir, reponame), b'master')
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
             # run tests
             repo = RepoClass(
                 os.path.join(tmpdir, serverdir, reponame), b'master')

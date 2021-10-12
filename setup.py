@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11
+:Date: 2021-10-12
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -106,6 +106,8 @@ class TestWithPytest(Command):
         if self.pytestverbose:
             pyargs += ['--verbose']
         pyargs += ['tests/py_fuse_git_bare_fs_repo_class.py']
+        pyargs += ['tests/py_fuse_git_bare_fs_repotools_dulwich.py']
+        pyargs += ['tests/py_fuse_git_bare_fs_repotools_git.py']
         if self.src == 'installed':
             pyargs += ['tests/script_fuse_git_bare_fs_repo.py']
             pyargs += ['tests/script_fuse_git_bare_fs_tree.py']
@@ -300,7 +302,7 @@ REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2021.10.11',
+    version='2021.10.12',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,

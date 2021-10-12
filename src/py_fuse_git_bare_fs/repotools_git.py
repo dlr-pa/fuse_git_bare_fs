@@ -21,7 +21,7 @@ def get_ref(src_dir, root_object):
     Example:
 
       from py_fuse_git_bare_fs.repotools_git import get_ref
-      get_ref('.', b'master')
+      commit_hash = get_ref('.', b'master')
 
     :Author: Daniel Mohr
     :Date: 2021-10-08

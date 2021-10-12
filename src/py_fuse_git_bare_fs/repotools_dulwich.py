@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11 (last change).
+:Date: 2021-10-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -26,9 +26,10 @@ def get_ref(src_dir, root_object):
           from py_fuse_git_bare_fs.repotools_dulwich import get_ref
       except (ModuleNotFoundError, ImportError):
           from py_fuse_git_bare_fs.repotools_git import get_ref
+      commit_hash = get_ref('.', b'master')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-12
     """
     refs_root_object = b'refs/heads/' + root_object
     try:
@@ -38,7 +39,7 @@ def get_ref(src_dir, root_object):
     refs = repo.get_refs()
     if refs_root_object in refs:
         return repo.get_refs()[refs_root_object].decode()
-    return root_object + b' missing'
+    return (root_object + b' missing').decode()
 
 
 def get_blob_data(src_dir, blob_hash):
@@ -53,9 +54,12 @@ def get_blob_data(src_dir, blob_hash):
       get_blob_data('.', b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-12
     """
-    repo = dulwich.repo.Repo(src_dir)
+    try:
+        repo = dulwich.repo.Repo(src_dir)
+    except dulwich.errors.NotGitRepository:
+        raise FileNotFoundError(src_dir)
     # repo.get_object(blob_hash).type_name == b'blob'
     data = repo.get_object(blob_hash).data
     return blob_hash + b' ' + b'blob' + b' ' + str(len(data)).encode() + \
