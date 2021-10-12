@@ -167,6 +167,7 @@ class PyFuseGitBareFsRepotoolsDulwich(
         :Author: Daniel Mohr
         :Date: 2021-10-12
 
+        This tests runs only if the python module dulwich is available.
         It tests the tool/function get_size_of_blob from the module
         py_fuse_git_bare_fs.repotools_dulwich
 
@@ -205,6 +206,7 @@ class PyFuseGitBareFsRepotoolsDulwich(
         :Author: Daniel Mohr
         :Date: 2021-10-12
 
+        This tests runs only if the python module dulwich is available.
         It tests the tool/function get_tree from the module
         py_fuse_git_bare_fs.repotools_dulwich
 
@@ -213,6 +215,12 @@ class PyFuseGitBareFsRepotoolsDulwich(
           env python3 py_fuse_git_bare_fs_repotools_dulwich.py \
             PyFuseGitBareFsRepotoolsDulwich.test_get_tree
         """
+        # pylint: disable = unused-variable, unused-import
+        try:
+            import dulwich
+        except ModuleNotFoundError:
+            self.skipTest('python module dulwich not available')
+            return
         import re
         from py_fuse_git_bare_fs.repotools_dulwich import get_tree
         serverdir = 'server'
