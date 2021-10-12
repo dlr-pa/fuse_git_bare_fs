@@ -153,7 +153,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
         pytest-3 -k test_fuse_git_bare_fs_tree_gitolite3 \
           script_fuse_git_bare_fs_tree_gitolite.py
         """
-        # pylint: disable=invalid-name
+        # pylint: disable = invalid-name
         serverdir = 'server'
         mountpointdir = 'mountpoint'
         with tempfile.TemporaryDirectory() as tmpdir:

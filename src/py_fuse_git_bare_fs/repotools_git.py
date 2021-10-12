@@ -65,7 +65,7 @@ def get_repo_data(src_dir, root_object, time_regpat):
 
       import re
       from py_fuse_git_bare_fs.repotools_git import get_repo_data
-      get_repo_data('.', b'master', re.compile(r' ([0-9]+) [+\-0-9]+$'))
+      get_repo_data('.', b'master', re.compile(r' ([0-9]+) [+0-9+-]+$'))
 
     :Author: Daniel Mohr
     :Date: 2021-10-11

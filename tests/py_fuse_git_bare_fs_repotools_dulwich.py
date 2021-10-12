@@ -35,6 +35,7 @@ class PyFuseGitBareFsRepotoolsDulwich(
     :Author: Daniel Mohr
     :Date: 2021-10-12
     """
+    # pylint: disable = bad-option-value, import-outside-toplevel
 
     def test_get_ref(self):
         """
@@ -45,7 +46,7 @@ class PyFuseGitBareFsRepotoolsDulwich(
         It tests the tool/function get_ref from the module
         py_fuse_git_bare_fs.repotools_dulwich
         """
-        # pylint: disable=unused-variable
+        # pylint: disable = unused-variable, unused-import
         try:
             import dulwich
         except ModuleNotFoundError:
@@ -86,7 +87,7 @@ class PyFuseGitBareFsRepotoolsDulwich(
           env python3 py_fuse_git_bare_fs_repotools_dulwich.py \
             PyFuseGitBareFsRepotoolsDulwich.test_repotools_dulwich_get_blob_data
         """
-        # pylint: disable=unused-variable
+        # pylint: disable = unused-variable, unused-import
         try:
             import dulwich
         except ModuleNotFoundError:
@@ -127,7 +128,7 @@ class PyFuseGitBareFsRepotoolsDulwich(
           env python3 py_fuse_git_bare_fs_repotools_dulwich.py \
             PyFuseGitBareFsRepotoolsDulwich.test_repotools_dulwich_get_repo_data
         """
-        # pylint: disable=unused-variable
+        # pylint: disable = unused-variable, unused-import
         try:
             import dulwich
         except ModuleNotFoundError:

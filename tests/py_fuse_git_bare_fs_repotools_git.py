@@ -32,6 +32,7 @@ class PyFuseGitBareFsRepotoolsGit(
     :Author: Daniel Mohr
     :Date: 2021-10-12
     """
+    # pylint: disable = bad-option-value, import-outside-toplevel
 
     def test_get_ref(self):
         """
@@ -121,7 +122,7 @@ class PyFuseGitBareFsRepotoolsGit(
             with self.assertRaises(FileNotFoundError):
                 info = get_repo_data(
                     os.path.join(tmpdir, serverdir, reponame),
-                    b'master', re.compile(r' ([0-9]+) [+\-0-9]+$'))
+                    b'master', re.compile(r' ([0-9]+) [0-9+-]+$'))
             # prepare test environment
             self._prepare_simple_test_environment1(
                 tmpdir, serverdir, clientdir, mountpointdir, reponame)
@@ -129,7 +130,7 @@ class PyFuseGitBareFsRepotoolsGit(
             # run tests
             info = get_repo_data(
                 os.path.join(tmpdir, serverdir, reponame),
-                b'master', re.compile(r' ([0-9]+) [+\-0-9]+$'))
+                b'master', re.compile(r' ([0-9]+) [0-9+-]+$'))
             self.assertIsInstance(info, tuple)
             self.assertEqual(
                 info[1], 'b213332fda65de4d2848a98e01f43d689cccbe6d')
@@ -139,7 +140,7 @@ class PyFuseGitBareFsRepotoolsGit(
             with self.assertWarns(UserWarning):
                 info = get_repo_data(
                     os.path.join(tmpdir, serverdir, reponame),
-                    b'main', re.compile(r' ([0-9]+) [+\-0-9]+$'))
+                    b'main', re.compile(r' ([0-9]+) [0-9+-]+$'))
             self.assertFalse(info)
 
 

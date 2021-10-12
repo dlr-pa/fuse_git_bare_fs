@@ -37,7 +37,7 @@ class RepoClass(_EmptyAttrMixin):
     https://git-scm.com/docs/git-cat-file
     """
     # pylint: disable=too-many-instance-attributes
-    time_regpat = re.compile(r' ([0-9]+) [+\-0-9]+$')
+    time_regpat = re.compile(r' ([0-9]+) [0-9+-]+$')
     tree_content_regpat = re.compile(
         r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$')
     annex_object_regpat = re.compile(

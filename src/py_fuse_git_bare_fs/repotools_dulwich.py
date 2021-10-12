@@ -81,6 +81,9 @@ def get_repo_data(src_dir, root_object, time_regpat=None):
     :Author: Daniel Mohr
     :Date: 2021-10-11
     """
+    # to be compatible to py_fuse_git_bare_fs.repotools_git.get_repo_data
+    # we need the parameter/argument time_regpat:
+    # pylint: disable=unused-argument
     refs_root_object = b'refs/heads/' + root_object
     try:
         repo = dulwich.repo.Repo(src_dir)
