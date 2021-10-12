@@ -149,6 +149,7 @@ def get_tree(src_dir, tree_hash, tree_content_regpat=None):
     # to be compatible to py_fuse_git_bare_fs.repotools_git.get_repo_data
     # we need the parameter/argument tree_content_regpat:
     # pylint: disable=unused-argument
+    # pylint: disable=too-many-locals
     try:
         repo = dulwich.repo.Repo(src_dir)
     except dulwich.errors.NotGitRepository:
