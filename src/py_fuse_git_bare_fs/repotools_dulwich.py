@@ -103,3 +103,23 @@ def get_repo_data(src_dir, root_object, time_regpat=None):
     tree_hash = gitobj.tree.decode()
     commit_time = gitobj.commit_time
     return (commit_hash, tree_hash, commit_time)
+
+def get_size_of_blob(src_dir, blob_hash):
+    """
+    :param src_dir: path to the git repository as str
+    :param blob_hash: has of the blob as bytes
+    :return: integer of the amount of bytes of the blob
+
+    Example:
+
+      from py_fuse_git_bare_fs.repotools_dulwich import get_size_of_blob
+      get_size_of_blob('.', b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
+
+    :Author: Daniel Mohr
+    :Date: 2021-10-12
+    """
+    try:
+        repo = dulwich.repo.Repo(src_dir)
+    except dulwich.errors.NotGitRepository:
+        raise FileNotFoundError(src_dir)
+    return repo.get_object(blob_hash).raw_length()

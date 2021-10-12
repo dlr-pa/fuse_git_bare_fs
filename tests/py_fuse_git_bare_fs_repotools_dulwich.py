@@ -162,6 +162,44 @@ class PyFuseGitBareFsRepotoolsDulwich(
                     os.path.join(tmpdir, serverdir, reponame), b'main')
             self.assertFalse(info)
 
+    def test_get_size_of_blob(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-10-12
+
+        It tests the tool/function get_size_of_blob from the module
+        py_fuse_git_bare_fs.repotools_dulwich
+
+        you can run only one test, e. g.:
+
+          env python3 py_fuse_git_bare_fs_repotools_dulwich.py \
+            PyFuseGitBareFsRepotoolsDulwich.test_get_size_of_blob
+        """
+        # pylint: disable = unused-variable, unused-import
+        try:
+            import dulwich
+        except ModuleNotFoundError:
+            self.skipTest('python module dulwich not available')
+            return
+        from py_fuse_git_bare_fs.repotools_dulwich import get_size_of_blob
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self.assertRaises(FileNotFoundError):
+                info = get_size_of_blob(
+                    os.path.join(tmpdir, serverdir, reponame),
+                    b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
+            # prepare test environment
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
+            # run tests
+            self.assertEqual(
+                get_size_of_blob(os.path.join(tmpdir, serverdir, reponame),
+                                 b'2e65efe2a145dda7ee51d1741299f848e5bf752e'),
+                1)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -143,6 +143,38 @@ class PyFuseGitBareFsRepotoolsGit(
                     b'main', re.compile(r' ([0-9]+) [0-9+-]+$'))
             self.assertFalse(info)
 
+    def test_get_size_of_blob(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2021-10-12
+
+        It tests the tool/function get_size_of_blob from the module
+        py_fuse_git_bare_fs.repotools_git
+
+        you can run only one test, e. g.:
+
+          env python3 py_fuse_git_bare_fs_repotools_git.py \
+            PyFuseGitBareFsRepotoolsGit.test_get_size_of_blob
+        """
+        from py_fuse_git_bare_fs.repotools_git import get_size_of_blob
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self.assertRaises(FileNotFoundError):
+                info = get_size_of_blob(
+                    os.path.join(tmpdir, serverdir, reponame),
+                    b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
+            # prepare test environment
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
+            # run tests
+            self.assertEqual(
+                get_size_of_blob(os.path.join(tmpdir, serverdir, reponame),
+                                 b'2e65efe2a145dda7ee51d1741299f848e5bf752e'),
+                1)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

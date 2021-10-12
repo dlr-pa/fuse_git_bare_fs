@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11 (last change).
+:Date: 2021-10-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -23,15 +23,15 @@ from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
 try:
-    from .repotools_dulwich import get_ref, get_repo_data
+    from .repotools_dulwich import get_ref, get_repo_data, get_size_of_blob
 except (ModuleNotFoundError, ImportError):
-    from .repotools_git import get_ref, get_repo_data
+    from .repotools_git import get_ref, get_repo_data, get_size_of_blob
 
 
 class RepoClass(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-08
+    :Date: 2021-10-12
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -147,13 +147,9 @@ class RepoClass(_EmptyAttrMixin):
 
     def _get_size_of_blob(self, head, tail):
         if 'st_size' not in self.tree[head]['blobs'][tail]:
-            cpi = subprocess.run(
-                ["git cat-file --batch-check='%(objectsize)'"],
-                input=self.tree[head]['blobs'][tail]['hash'].encode(),
-                stdout=subprocess.PIPE,
-                cwd=self.src_dir, shell=True, timeout=3, check=True)
-            self.tree[head]['blobs'][tail]['st_size'] = \
-                int(cpi.stdout.decode())
+            self.tree[head]['blobs'][tail]['st_size'] = get_size_of_blob(
+                self.src_dir,
+                self.tree[head]['blobs'][tail]['hash'].encode())
 
     def readdir(self, path):
         """
