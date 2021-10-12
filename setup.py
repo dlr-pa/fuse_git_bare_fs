@@ -302,7 +302,7 @@ REQUIRED_MODULES += ['xdist']
 # optional modules to use the python module dulwich instead of the
 # command line tool git, which is used via shell and subprocess and
 # the starting process is therefore slow:
-#REQUIRED_MODULES += ['dulwich']
+# REQUIRED_MODULES += ['dulwich']
 
 setup(
     name='fuse_git_bare_fs',
