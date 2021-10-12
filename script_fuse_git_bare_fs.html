@@ -213,8 +213,8 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </td></tr>
 <tr><td class="option-group">
 <kbd>-file_st_modes</kbd></td>
-<td><p class="first">Set the file modes used to provide the files. The default 33204, 33277, 41471, 16893 reflect the modes used by git. The values are for normal file, executable file, symbolic link and for a directory. For example if other users should not be allowed to read something you can set: 33184 33256 41471 16888. Normally these permission modes are ignored by fuse. Therefore you have to set the parameter “-default_permissions”. If you want to use this with “-o” flag, set: -o file_st_modes=33184=33256=41471=16888. Example: fuse_git_bare_fs -o “repo,file_st_modes=33184=33256=41471=16888” foo bar</p>
-<p class="last">Default: [33204, 33277, 41471, 16893]</p>
+<td><p class="first">Set the file modes used to provide the files. The default 33188, 33261, 41471, 16877 reflect the modes used by git. The values are for normal file, executable file, symbolic link and for a directory. For example if other users should not be allowed to read something you can set: 33184 33256 41471 16872. Normally these permission modes are ignored by fuse. Therefore you have to set the parameter “-default_permissions”. If you want to use this with “-o” flag, set: -o file_st_modes=33184=33256=41471=16872. Example: fuse_git_bare_fs -o “repo,file_st_modes=33184=33256=41471=16872” foo bar</p>
+<p class="last">Default: [33188, 33261, 41471, 16877]</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>-uid</kbd></td>
@@ -319,8 +319,8 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </td></tr>
 <tr><td class="option-group">
 <kbd>-file_st_modes</kbd></td>
-<td><p class="first">Set the file modes used to provide the files. The default 33204, 33277, 41471, 16893 reflect the modes used by git. The values are for normal file, executable file, symbolic link and for a directory. For example if other users should not be allowed to read something you can set: 33184 33256 41471 16888. Normally these permission modes are ignored by fuse. Therefore you have to set the parameter “-default_permissions”. If you want to use this with “-o” flag, set: -o file_st_modes=33184=33256=41471=16888. Example: fuse_git_bare_fs -o “repo,file_st_modes=33184=33256=41471=16888” foo bar</p>
-<p class="last">Default: [33204, 33277, 41471, 16893]</p>
+<td><p class="first">Set the file modes used to provide the files. The default 33188, 33261, 41471, 16877 reflect the modes used by git. The values are for normal file, executable file, symbolic link and for a directory. For example if other users should not be allowed to read something you can set: 33184 33256 41471 16872. Normally these permission modes are ignored by fuse. Therefore you have to set the parameter “-default_permissions”. If you want to use this with “-o” flag, set: -o file_st_modes=33184=33256=41471=16872. Example: fuse_git_bare_fs -o “repo,file_st_modes=33184=33256=41471=16872” foo bar</p>
+<p class="last">Default: [33188, 33261, 41471, 16877]</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd>-uid</kbd></td>
@@ -387,7 +387,7 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </div>
 </div>
 <p>Author: Daniel Mohr
-Date: 2021-10-06
+Date: 2021-10-12
 License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
 </div>
 </div>
