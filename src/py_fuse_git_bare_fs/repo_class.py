@@ -14,7 +14,6 @@ import hashlib
 import os
 import os.path
 import re
-import subprocess
 import time
 import warnings
 
@@ -23,9 +22,11 @@ from .read_write_lock import ReadWriteLock
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
 try:
-    from .repotools_dulwich import get_ref, get_repo_data, get_size_of_blob
+    from .repotools_dulwich import \
+     get_ref, get_repo_data, get_size_of_blob, get_tree
 except (ModuleNotFoundError, ImportError):
-    from .repotools_git import get_ref, get_repo_data, get_size_of_blob
+    from .repotools_git import \
+     get_ref, get_repo_data, get_size_of_blob, get_tree
 
 
 class RepoClass(_EmptyAttrMixin):
@@ -46,7 +47,7 @@ class RepoClass(_EmptyAttrMixin):
     # 100644 normal file
     # 100755 executable file
     # 120000 symbolic link
-    gitmode2st_mode = {'100644': 33204, '100755': 33277, '120000': 41471}
+    gitmode2st_mode = {'100644': 33188, '100755': 33261, '120000': 41471}
     st_uid_st_gid = (os.geteuid(), os.getegid())
 
     def __init__(self, src_dir, root_object=b'master',
@@ -109,41 +110,13 @@ class RepoClass(_EmptyAttrMixin):
                 return repo_data
         return True
 
-    def _git_cat_file(self, git_object):
-        cpi = subprocess.run(
-            ['git cat-file -p ' + git_object],
-            stdout=subprocess.PIPE,
-            cwd=self.src_dir, shell=True, timeout=3, check=True)
-        return cpi.stdout.decode()
-
     def _read_tree(self, update_cache=None):
         if not self._update_cache(update_cache=update_cache):
             return
-        self.tree = dict()
         # self.tree[path] =
         #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
-        trees = [('/', self.tree_hash)]  # (name, hash)
-        self.tree['/'] = dict()
-        while bool(trees):
-            act_path, act_tree_hash = trees.pop(0)
-            self.tree[act_path]['listdir'] = []
-            self.tree[act_path]['blobs'] = dict()
-            git_objects = self._git_cat_file(act_tree_hash).split('\n')
-            for line in git_objects:
-                if len(line) < 8:
-                    continue
-                res = self.tree_content_regpat.findall(line)
-                if res:
-                    (obj_mode, obj_type, obj_hash, obj_name) = res[0]
-                    if obj_type == 'blob':
-                        self.tree[act_path]['listdir'].append(obj_name)
-                        self.tree[act_path]['blobs'][obj_name] = {
-                            'mode': obj_mode, 'hash': obj_hash}
-                    elif obj_type == 'tree':
-                        self.tree[act_path]['listdir'].append(obj_name)
-                        obj_path = os.path.join(act_path, obj_name)
-                        trees.append((obj_path, obj_hash))
-                        self.tree[obj_path] = dict()
+        self.tree = get_tree(
+            self.src_dir, self.tree_hash, self.tree_content_regpat)
 
     def _get_size_of_blob(self, head, tail):
         if 'st_size' not in self.tree[head]['blobs'][tail]:

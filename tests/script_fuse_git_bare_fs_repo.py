@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-05
+:Date: 2021-10-12
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs repo'
@@ -31,7 +31,7 @@ import unittest
 class ScriptFuseGitBareFsRepo(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-05
+    :Date: 2021-10-12
     """
 
     def test_fuse_git_bare_fs_repo1(self):
@@ -100,7 +100,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-05
+        :Date: 2021-10-12
 
         This test creates a repo, put some files in and
         mount it, check for files.
@@ -157,11 +157,11 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
             self.assertEqual(cp_ls_stdout[0], b'total 0')
             self.assertTrue(
-                bool(re.findall(b'-rw-rw-r-- 0 .+ a', cp_ls_stdout[1])))
+                bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
             self.assertTrue(
-                bool(re.findall(b'-rw-rw-r-- 0 .+ b', cp_ls_stdout[2])))
+                bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
             self.assertTrue(
-                bool(re.findall(b'drwxrwxr-x 0 4096 .+ d', cp_ls_stdout[3])))
+                bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
             self.assertTrue(
                 bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
             cpi.terminate()
@@ -232,16 +232,16 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 file_status[filename] = os.lstat(
                     os.path.join(tmpdir, mountpointdir, filename))
             for filename in ['.', 'd']:
-                self.assertEqual(file_status[filename].st_mode, 16893)
+                self.assertEqual(file_status[filename].st_mode, 16877)
                 self.assertEqual(file_status[filename].st_size, 4096)
             for filename in ['a', 'b']:
-                self.assertEqual(file_status[filename].st_mode, 33204)
+                self.assertEqual(file_status[filename].st_mode, 33188)
                 self.assertEqual(file_status[filename].st_size, 2)
             for filename in ['l']:
                 self.assertEqual(file_status[filename].st_mode, 41471)
                 self.assertEqual(file_status[filename].st_size, 1)
             for filename in ['d/c']:
-                self.assertEqual(file_status[filename].st_mode, 33204)
+                self.assertEqual(file_status[filename].st_mode, 33188)
                 self.assertEqual(file_status[filename].st_size, 4)
             for filename in ['.', 'a', 'b', 'l', 'd', 'd/c']:
                 self.assertEqual(file_status[filename].st_uid, os.geteuid())

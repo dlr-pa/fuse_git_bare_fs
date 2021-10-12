@@ -32,7 +32,7 @@ class PyFuseGitBareFsRepoClass(
         unittest.TestCase, PrepareSimpleTestEnvironment):
     """
     :Author: Daniel Mohr
-    :Date: 2021-03-29
+    :Date: 2021-10-12
     """
 
     def test_repo_class(self):
@@ -66,16 +66,16 @@ class PyFuseGitBareFsRepoClass(
             for filename in ['/a', '/b', '/l', '/d', '/d/c']:
                 file_status[filename] = repo.getattr(filename)
             for filename in ['/d']:
-                self.assertEqual(file_status[filename]['st_mode'], 16893)
+                self.assertEqual(file_status[filename]['st_mode'], 16877)
                 self.assertEqual(file_status[filename]['st_size'], 4096)
             for filename in ['/a', '/b']:
-                self.assertEqual(file_status[filename]['st_mode'], 33204)
+                self.assertEqual(file_status[filename]['st_mode'], 33188)
                 self.assertEqual(file_status[filename]['st_size'], 2)
             for filename in ['/l']:
                 self.assertEqual(file_status[filename]['st_mode'], 41471)
                 self.assertEqual(file_status[filename]['st_size'], 1)
             for filename in ['/d/c']:
-                self.assertEqual(file_status[filename]['st_mode'], 33204)
+                self.assertEqual(file_status[filename]['st_mode'], 33188)
                 self.assertEqual(file_status[filename]['st_size'], 4)
             for filename in ['/a', '/b', '/l', '/d', '/d/c']:
                 self.assertEqual(file_status[filename]['st_uid'], os.geteuid())

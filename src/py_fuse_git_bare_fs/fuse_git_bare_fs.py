@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06 (last change).
+:Date: 2021-10-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -123,12 +123,12 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-10-06 (last change).
+    :Date: 2021-10-12 (last change).
     """
     # pylint: disable=too-many-statements
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-10-06\n'
+    epilog += 'Date: 2021-10-12\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     description = '"fuse_git_bare_fs" is a tool to mount the working '
@@ -208,21 +208,21 @@ def my_argument_parser():
     common_parser.add_argument(
         '-file_st_modes',
         nargs=4,
-        default=[33204, 33277, 41471, 16893],
+        default=[33188, 33261, 41471, 16877],
         type=int,
         required=False,
         help='Set the file modes used to provide the files. '
-        'The default 33204, 33277, 41471, 16893 reflect the modes used '
+        'The default 33188, 33261, 41471, 16877 reflect the modes used '
         'by git. The values are for normal file, executable file, '
         'symbolic link and for a directory. For example if other users should '
         'not be allowed to read something you can set: '
-        '33184 33256 41471 16888. '
+        '33184 33256 41471 16872. '
         'Normally these permission modes are ignored by fuse. '
         'Therefore you have to set the parameter "-default_permissions". '
         'If you want to use this with "-o" flag, set: '
-        '-o file_st_modes=33184=33256=41471=16888. '
+        '-o file_st_modes=33184=33256=41471=16872. '
         'Example: fuse_git_bare_fs '
-        '-o "repo,file_st_modes=33184=33256=41471=16888" foo bar',
+        '-o "repo,file_st_modes=33184=33256=41471=16872" foo bar',
         metavar=('file', 'executable', 'link', 'directory'))
     common_parser.add_argument(
         '-uid',
