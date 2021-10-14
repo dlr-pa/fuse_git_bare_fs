@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11 (last change).
+:Date: 2021-10-14 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,7 +22,7 @@ except (ModuleNotFoundError, ImportError):
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-14
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -155,7 +155,7 @@ class UserRepos():
     def get_repos(self, user=None):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-06
+        :Date: 2021-10-14
         """
         # pylint: disable=too-many-branches
         if (not self._cache_up_to_date()) or (self.repos is None):
@@ -198,9 +198,10 @@ class UserRepos():
             if user not in self.userrepoaccess:
                 self.userrepoaccess[user] = []
                 for reponame in self.repos:
+                    # we check only for read access
                     cpi = subprocess.run(
                         [self.gitolite_cmd + ' access -q ' +
-                         reponame + ' ' + user],
+                         reponame + ' ' + user + ' R'],
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                         cwd=self.adminrepo, shell=True,
                         timeout=3, check=False)
