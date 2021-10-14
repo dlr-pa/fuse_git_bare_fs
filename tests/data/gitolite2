@@ -1,5 +1,19 @@
 #!/bin/bash
 
+function test_access() {
+    r="$1"
+    u="$2"
+    if [ "$3" = "repo2" ]; then
+	if [ "$4" = "user1" ]; then
+	    return 0
+	elif [ "$4" = "user2" ]; then
+	    return 1
+	fi
+    else
+	return 0
+    fi
+}
+
 if [ "$1" = "list-users" ]; then
     echo user1
     echo user2
@@ -7,13 +21,21 @@ elif [ "$1" = "list-phy-repos" ]; then
     echo "repo2"
     echo "repo3"
 elif [ "$1" = "access" ]; then
-    if [ "$3" = "repo2" ]; then
-	if [ "$4" = "user1" ]; then
-	    exit 0
-	elif [ "$4" = "user2" ]; then
-	    exit 1
-	fi
+    if [ "$2" = "%" ]; then
+	repo="$2"
+	user="$3"
+	for repo in $(< /dev/stdin); do
+	    test_access "$repo" "$user"
+	    if [ $? = 1 ]; then
+		echo $repo $user DENIED by definition
+	    else
+		echo $repo $user OK
+	    fi
+	done
     else
-	exit 0
+	repo="$3"
+	user="$4"
+	test_access "$repo" "$user"
+	exit $?
     fi
 fi

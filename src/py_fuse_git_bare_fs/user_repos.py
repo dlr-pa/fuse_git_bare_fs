@@ -197,15 +197,18 @@ class UserRepos():
         with self.lock.read_locked():
             if user not in self.userrepoaccess:
                 self.userrepoaccess[user] = []
-                for reponame in self.repos:
-                    # we check only for read access
-                    cpi = subprocess.run(
-                        [self.gitolite_cmd + ' access -q ' +
-                         reponame + ' ' + user + ' R'],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                        cwd=self.adminrepo, shell=True,
-                        timeout=3, check=False)
-                    if cpi.returncode == 0:  # access
-                        self.userrepoaccess[user].append(reponame)
+                list_of_repos = list(self.repos.keys())
+                cpi = subprocess.run(
+                    [self.gitolite_cmd + ' access % ' + user + ' R'],
+                    input=('\n'.join(list_of_repos)).encode(),
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    cwd=self.adminrepo, shell=True,
+                    timeout=3, check=False)
+                cpi_stdout_splitted = cpi.stdout.split(b'\n')
+                if 1 + len(list_of_repos) == len(cpi_stdout_splitted):
+                    for i in range(len(list_of_repos)):
+                        if b'DENIED' not in cpi_stdout_splitted[i]:
+                            self.userrepoaccess[user].append(
+                                list_of_repos[i])
             ret = self.userrepoaccess[user]
         return ret
