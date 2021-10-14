@@ -34,9 +34,9 @@ elif [ "$1" = "access" ]; then
 	for repo in $(< /dev/stdin); do
 	    test_access "$repo" "$user"
 	    if [ $? = 1 ]; then
-		echo $repo $user DENIED by definition
+		echo "$repo" "$user" DENIED by definition
 	    else
-		echo $repo $user OK
+		echo "$repo" "$user" OK
 	    fi
 	done
     else

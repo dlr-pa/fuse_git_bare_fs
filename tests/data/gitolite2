@@ -3,10 +3,10 @@
 function test_access() {
     r="$1"
     u="$2"
-    if [ "$3" = "repo2" ]; then
-	if [ "$4" = "user1" ]; then
+    if [ "$r" = "repo2" ]; then
+	if [ "$u" = "user1" ]; then
 	    return 0
-	elif [ "$4" = "user2" ]; then
+	elif [ "$u" = "user2" ]; then
 	    return 1
 	fi
     else
@@ -27,9 +27,9 @@ elif [ "$1" = "access" ]; then
 	for repo in $(< /dev/stdin); do
 	    test_access "$repo" "$user"
 	    if [ $? = 1 ]; then
-		echo $repo $user DENIED by definition
+		echo "$repo" "$user" DENIED by definition
 	    else
-		echo $repo $user OK
+		echo "$repo" "$user" OK
 	    fi
 	done
     else
