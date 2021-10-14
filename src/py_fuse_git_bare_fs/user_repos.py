@@ -212,10 +212,8 @@ class UserRepos():
                     timeout=3, check=False)
                 cpi_stdout_splitted = cpi.stdout.split(b'\n')
                 if 1 + len(list_of_repos) == len(cpi_stdout_splitted):
-                    # pylint: disable=consider-using-enumerate
-                    for i in range(len(list_of_repos)):
+                    for i, reponame in enumerate(list_of_repos):
                         if b'DENIED' not in cpi_stdout_splitted[i]:
-                            self.userrepoaccess[user].append(
-                                list_of_repos[i])
+                            self.userrepoaccess[user].append(reponame)
             ret = self.userrepoaccess[user]
         return ret
