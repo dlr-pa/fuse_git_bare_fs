@@ -209,7 +209,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
         :Date: 2021-04-26
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
-          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -346,7 +346,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
         :Date: 2021-06-15
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
-          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon3
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon3
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -441,7 +441,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
         :Date: 2021-06-15
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
-          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -511,7 +511,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
         :Date: 2021-06-15
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
-          script_fuse_git_bare_fs_tree_gitolite.test_fuse_git_bare_fs_tree_gitolite_daemon5
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon5
         """
         # pylint: disable=invalid-name
         serverdir = 'server'

@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11 (last change).
+:Date: 2021-10-14 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -19,10 +19,19 @@ except (ModuleNotFoundError, ImportError):
     from .repotools_git import get_ref
 
 
+def _filter_user_names(username):
+    return (username != 'admin') and bool(username) and \
+        (not username.startswith('@'))
+
+
+def _filter_repo_names(reponame):
+    return (reponame != 'gitolite-admin') and bool(reponame)
+
+
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-14
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -130,7 +139,7 @@ class UserRepos():
     def get_users(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-16
+        :Date: 2021-10-14
         """
         # userlist=$(gitolite list-users | grep -v @ | sort -u)
         if (not self._cache_up_to_date()) or (self.users is None):
@@ -140,12 +149,10 @@ class UserRepos():
                     [self.gitolite_cmd + ' list-users'],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     cwd=self.adminrepo, shell=True, timeout=3, check=True)
-                self.users = []
-                for line in cpi.stdout.split(b'\n'):
-                    username = line.strip().decode()
-                    if ((username != 'admin') and bool(username) and
-                            (not username.startswith('@'))):
-                        self.users.append(username)
+                self.users = list(
+                    filter(_filter_user_names,
+                           [line.strip().decode()
+                            for line in cpi.stdout.split(b'\n')]))
                 if self.users_from_file is not None:
                     self.users = list(self.users_from_file.union(self.users))
         with self.lock.read_locked():
@@ -155,7 +162,7 @@ class UserRepos():
     def get_repos(self, user=None):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-06
+        :Date: 2021-10-14
         """
         # pylint: disable=too-many-branches
         if (not self._cache_up_to_date()) or (self.repos is None):
@@ -165,11 +172,10 @@ class UserRepos():
                     [self.gitolite_cmd + ' list-phy-repos'],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     cwd=self.adminrepo, shell=True, timeout=3, check=True)
-                repos = []
-                for line in cpi.stdout.split(b'\n'):
-                    reponame = line.strip().decode()
-                    if (reponame != 'gitolite-admin') and bool(reponame):
-                        repos.append(reponame)
+                repos = list(
+                    filter(_filter_repo_names,
+                           [line.strip().decode()
+                            for line in cpi.stdout.split(b'\n')]))
                 if self.repos is None:
                     self.repos = dict()
                     for reponame in repos:
@@ -197,14 +203,19 @@ class UserRepos():
         with self.lock.read_locked():
             if user not in self.userrepoaccess:
                 self.userrepoaccess[user] = []
-                for reponame in self.repos:
-                    cpi = subprocess.run(
-                        [self.gitolite_cmd + ' access -q ' +
-                         reponame + ' ' + user],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                        cwd=self.adminrepo, shell=True,
-                        timeout=3, check=False)
-                    if cpi.returncode == 0:  # access
-                        self.userrepoaccess[user].append(reponame)
+                list_of_repos = list(self.repos.keys())
+                cpi = subprocess.run(
+                    [self.gitolite_cmd + ' access % ' + user + ' R'],
+                    input=('\n'.join(list_of_repos)).encode(),
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    cwd=self.adminrepo, shell=True,
+                    timeout=3, check=False)
+                cpi_stdout_splitted = cpi.stdout.split(b'\n')
+                if 1 + len(list_of_repos) == len(cpi_stdout_splitted):
+                    # pylint: disable=consider-using-enumerate
+                    for i in range(len(list_of_repos)):
+                        if b'DENIED' not in cpi_stdout_splitted[i]:
+                            self.userrepoaccess[user].append(
+                                list_of_repos[i])
             ret = self.userrepoaccess[user]
         return ret
