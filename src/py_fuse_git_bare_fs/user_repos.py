@@ -19,6 +19,15 @@ except (ModuleNotFoundError, ImportError):
     from .repotools_git import get_ref
 
 
+def _filter_user_names(username):
+    return (username != 'admin') and bool(username) and \
+        (not username.startswith('@'))
+
+
+def _filter_repo_names(reponame):
+    return (reponame != 'gitolite-admin') and bool(reponame)
+
+
 class UserRepos():
     """
     :Author: Daniel Mohr
@@ -130,7 +139,7 @@ class UserRepos():
     def get_users(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-16
+        :Date: 2021-10-14
         """
         # userlist=$(gitolite list-users | grep -v @ | sort -u)
         if (not self._cache_up_to_date()) or (self.users is None):
@@ -140,12 +149,10 @@ class UserRepos():
                     [self.gitolite_cmd + ' list-users'],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     cwd=self.adminrepo, shell=True, timeout=3, check=True)
-                self.users = []
-                for line in cpi.stdout.split(b'\n'):
-                    username = line.strip().decode()
-                    if ((username != 'admin') and bool(username) and
-                            (not username.startswith('@'))):
-                        self.users.append(username)
+                self.users = list(
+                    filter(_filter_user_names,
+                           [line.strip().decode()
+                            for line in cpi.stdout.split(b'\n')]))
                 if self.users_from_file is not None:
                     self.users = list(self.users_from_file.union(self.users))
         with self.lock.read_locked():
@@ -165,11 +172,10 @@ class UserRepos():
                     [self.gitolite_cmd + ' list-phy-repos'],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     cwd=self.adminrepo, shell=True, timeout=3, check=True)
-                repos = []
-                for line in cpi.stdout.split(b'\n'):
-                    reponame = line.strip().decode()
-                    if (reponame != 'gitolite-admin') and bool(reponame):
-                        repos.append(reponame)
+                repos = list(
+                    filter(_filter_repo_names,
+                           [line.strip().decode()
+                            for line in cpi.stdout.split(b'\n')]))
                 if self.repos is None:
                     self.repos = dict()
                     for reponame in repos:
