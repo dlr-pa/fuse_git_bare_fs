@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06 (last change).
+:Date: 2022-01-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -34,7 +34,7 @@ def _extract_repopath_from_path(actual_repo, path):
 class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-06
+    :Date: 2022-01-12
 
     read only access to working trees of git bare repositories
     """
@@ -60,7 +60,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
-                 simple_file_handler=None, file_st_modes=None, nofail=False):
+                 simple_file_handler=None, file_st_modes=None, nofail=False,
+                 log=None):
         self.src_dir = src_dir
         self.root_object = root_object
         self.cache = SimpleFileCache(max_cache_size=max_cache_size)
@@ -73,6 +74,8 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             self._empty_dir_attr['st_mode'] = self.file_st_modes[3]
             self._empty_file_attr['st_mode'] = self.file_st_modes[0]
         self.nofail = nofail
+        if log is not None:
+            self.log = log
         self.repos = dict()
         self._lock = ReadWriteLock()
         dt0 = time.time()

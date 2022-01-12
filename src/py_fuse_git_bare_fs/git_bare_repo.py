@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06 (last change).
+:Date: 2022-01-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 class _GitBareRepoMixin():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-06
+    :Date: 2022-01-12
 
     read only access to the working tree of a git bare repository
     """
@@ -47,7 +47,8 @@ class _GitBareRepoMixin():
     #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
-                 simple_file_handler=None, file_st_modes=None, nofail=False):
+                 simple_file_handler=None, file_st_modes=None, nofail=False,
+                 log=None):
         self.src_dir = src_dir
         self.root_object = root_object
         if simple_file_handler is None:
@@ -55,6 +56,8 @@ class _GitBareRepoMixin():
         else:
             self.simple_file_handler = simple_file_handler
         self.nofail = nofail
+        if log is not None:
+            self.log = log
         if self.nofail:
             # pylint: disable=broad-except
             try:

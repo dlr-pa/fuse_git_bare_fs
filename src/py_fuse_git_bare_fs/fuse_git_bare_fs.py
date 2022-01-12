@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12 (last change).
+:Date: 2022-01-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,15 +18,38 @@ except ModuleNotFoundError:
     import fuse as fusepy
 
 
+def _get_log(logfile):
+    """
+    :Author: Daniel Mohr
+    :Email: daniel.mohr@dlr.de
+    :Date: 2022-01-12 (last change).
+    """
+    # pylint: disable = import-outside-toplevel
+    log = None
+    if logfile is not None:
+        import logging
+        import logging.handlers
+        log = logging.getLogger('fuse_git_bare_fs')
+        file_handler = logging.handlers.WatchedFileHandler(
+            args.logfile[0])  # not thread safe
+        file_handler.setFormatter(
+            logging.Formatter('%(asctime)s %(levelname)s %(message)s',
+                              datefmt='%Y-%m-%d %H:%M:%S'))
+        log.addHandler(file_handler)
+    return log
+
+
 def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-10-06 (last change).
+    :Date: 2022-01-12 (last change).
     """
     # pylint: disable = bad-option-value, import-outside-toplevel
+    log = _get_log(args.logfile)
     operations_instance = None
-    if args.daemon:  # running in foreground
+    if args.daemon or (args.logfile is not None):
+        # running in foreground or logging to a file
         import logging
         from .git_bare_repo import GitBareRepoLogging
         logging.basicConfig(level=logging.DEBUG)
@@ -34,7 +57,8 @@ def fuse_git_bare_fs_repo(args):
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0],
-            file_st_modes=args.file_st_modes)
+            file_st_modes=args.file_st_modes,
+            log=log)
     else:
         from .git_bare_repo import GitBareRepo
         operations_instance = GitBareRepo(
@@ -56,7 +80,7 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-10-06 (last change).
+    :Date: 2022-01-12 (last change).
     """
     # pylint: disable=bad-option-value,import-outside-toplevel
     if (not os.path.isdir(args.target_dir)) and args.nofail:
@@ -64,8 +88,10 @@ def fuse_git_bare_fs_tree(args):
         msg += 'try running without "-nofail" to get precise error'
         warnings.warn(msg)
         sys.exit(0)
+    log = _get_log(args.logfile)
     operations_instance = None
-    if args.daemon:  # running in foreground
+    if args.daemon or (args.logfile is not None):
+        # running in foreground or logging to a file
         import logging
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite import \
@@ -79,7 +105,8 @@ def fuse_git_bare_fs_tree(args):
                 args.gitolite_cmd[0],
                 args.gitolite_user_file[0],
                 args.max_cache_size[0],
-                file_st_modes=args.file_st_modes)
+                file_st_modes=args.file_st_modes,
+                log=log)
         else:
             from .git_bare_repo_tree import GitBareRepoTreeLogging
             logging.basicConfig(level=logging.DEBUG)
@@ -87,7 +114,8 @@ def fuse_git_bare_fs_tree(args):
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0],
-                file_st_modes=args.file_st_modes)
+                file_st_modes=args.file_st_modes,
+                log=log)
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite \
@@ -123,7 +151,7 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-10-12 (last change).
+    :Date: 2022-01-12 (last change).
     """
     # pylint: disable=too-many-statements
     epilog = ''
@@ -188,6 +216,19 @@ def my_argument_parser():
         action='store_false',
         help='If given, go to background and work as a daemon. '
         'To unmount you can do: fusermount -u target_dir')
+    common_parser.add_argument(
+        '-logfile',
+        nargs=1,
+        default=None,
+        type=str,
+        required=False,
+        dest='logfile',
+        help='If given, the log output is stored in this file. '
+        'If running as a daemon this could be done, but is not common. '
+        'It is only for debugging. '
+        'Maybe there is too much information stored. '
+        'Further the used WatchedFileHandler is not thread safe.',
+        metavar='f')
     common_parser.add_argument(
         '-threads',
         action='store_false',
