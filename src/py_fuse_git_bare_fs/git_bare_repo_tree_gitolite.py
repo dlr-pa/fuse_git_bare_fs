@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-06 (last change).
+:Date: 2022-01-12 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -31,10 +31,11 @@ def _extract_repopath_from_path(actual_user, actual_repo, path):
 class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-06
+    :Date: 2022-01-12
 
     read only access to working trees of git bare repositories
     """
+    # pylint: disable=too-many-instance-attributes
 
     # disable unused operations to avoid unnecessary errors:
     access = None
@@ -58,7 +59,8 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
                  htaccess_template=None,
                  gitolite_cmd='gitolite', gitolite_user_file=None,
                  max_cache_size=1073741824,
-                 simple_file_handler=None, file_st_modes=None, nofail=False):
+                 simple_file_handler=None, file_st_modes=None, nofail=False,
+                 log=None):
         # pylint: disable=too-many-arguments
         self.src_dir = src_dir
         self.root_object = root_object
@@ -75,6 +77,8 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
             self._empty_dir_attr['st_mode'] = file_st_modes[3]
             self._empty_file_attr['st_mode'] = file_st_modes[0]
         self.nofail = nofail
+        if log is not None:
+            self.log = log
         if self.nofail:
             # pylint: disable=broad-except
             try:
