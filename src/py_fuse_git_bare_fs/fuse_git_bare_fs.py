@@ -31,7 +31,7 @@ def _get_log(logfile):
         import logging.handlers
         log = logging.getLogger('fuse_git_bare_fs')
         file_handler = logging.handlers.WatchedFileHandler(
-            args.logfile[0])  # not thread safe
+            logfile[0])  # not thread safe
         file_handler.setFormatter(
             logging.Formatter('%(asctime)s %(levelname)s %(message)s',
                               datefmt='%Y-%m-%d %H:%M:%S'))
