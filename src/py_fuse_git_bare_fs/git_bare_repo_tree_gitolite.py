@@ -35,6 +35,7 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
 
     read only access to working trees of git bare repositories
     """
+    # pylint: disable=too-many-instance-attributes
 
     # disable unused operations to avoid unnecessary errors:
     access = None
