@@ -28,6 +28,20 @@ import time
 import unittest
 
 
+def _terminate_wait_kill(cpi, timeout=3, sleepbefore=None, sleepafter=None):
+    """
+    :Author: Daniel Mohr
+    :Date: 2022-01-13
+    """
+    if sleepbefore is not None:
+        time.sleep(sleepbefore)
+    cpi.terminate()
+    cpi.wait(timeout=timeout)
+    cpi.kill()
+    if sleepafter is not None:
+        time.sleep(sleepafter)
+
+
 class ScriptFuseGitBareFsRepo(unittest.TestCase):
     """
     :Author: Daniel Mohr
@@ -91,9 +105,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 data = fd.read()
             self.assertEqual(data, 'a\n')
             # clean up
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
+            _terminate_wait_kill(cpi)
             cpi.stdout.close()
             cpi.stderr.close()
 
@@ -164,9 +176,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
             self.assertTrue(
                 bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
+            _terminate_wait_kill(cpi)
             cpistdout, cpistderr = cpi.communicate()
             self.assertFalse(
                 bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
@@ -221,11 +231,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            time.sleep(3)
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpistdout, cpistderr = cpi.communicate()
+            _terminate_wait_kill(cpi, sleepbefore=3)
+            _, cpistderr = cpi.communicate()
             self.assertEqual(1, cpi.returncode)  # error return
             self.assertTrue(cpistderr.decode().startswith(
                 'fuse: bad mount point'))
@@ -238,10 +245,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            time.sleep(3)
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
+            _terminate_wait_kill(cpi, sleepbefore=3)
             cpistdout, cpistderr = cpi.communicate()
             self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(bool(re.findall(
@@ -257,10 +261,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            time.sleep(3)
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
+            _terminate_wait_kill(cpi, sleepbefore=3)
             self.assertEqual(0, cpi.returncode)  # no error return
             cpi.stdout.close()
             cpi.stderr.close()
@@ -313,11 +314,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            time.sleep(3)
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpistdout, cpistderr = cpi.communicate()
+            _terminate_wait_kill(cpi, sleepbefore=3)
+            _, cpistderr = cpi.communicate()
             self.assertEqual(1, cpi.returncode)  # error return
             cpi.stdout.close()
             cpi.stderr.close()
@@ -333,10 +331,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
-            time.sleep(3)
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
+            _terminate_wait_kill(cpi, sleepbefore=3)
             cpistdout, cpistderr = cpi.communicate()
             self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(bool(re.findall(
@@ -361,9 +356,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 # typical it needs less than 0.4 seconds
                 if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                     break
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
+            _terminate_wait_kill(cpi)
             self.assertEqual(0, cpi.returncode)  # no error return
             cpi.stdout.close()
             cpi.stderr.close()
@@ -684,7 +677,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run test: nofail
-            cpi = subprocess.run(
+            subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo ' +
                  '-daemon -nofail -logfile ' +
                  os.path.join(tmpdir, logfile) + ' ' +
