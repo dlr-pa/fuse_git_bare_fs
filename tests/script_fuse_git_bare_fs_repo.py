@@ -246,7 +246,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
             _terminate_wait_kill(cpi, sleepbefore=3)
-            cpistdout, cpistderr = cpi.communicate()
+            _, cpistderr = cpi.communicate()
             self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(bool(re.findall(
                 b'UserWarning: mount fail, try running without', cpistderr)))
@@ -332,7 +332,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir)
             _terminate_wait_kill(cpi, sleepbefore=3)
-            cpistdout, cpistderr = cpi.communicate()
+            _, cpistderr = cpi.communicate()
             self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(bool(re.findall(
                 b'UserWarning: mount fail, try running without', cpistderr)))
@@ -693,7 +693,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             # run test: no error
             for dirpath in [mountpointdir]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
-            cpi = subprocess.run(
+            subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo ' +
                  '-daemon -nofail -logfile ' +
                  os.path.join(tmpdir, logfile) + ' ' +
