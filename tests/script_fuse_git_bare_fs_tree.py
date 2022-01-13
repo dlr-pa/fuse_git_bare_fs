@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12
+:Date: 2022-01-13
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree'
@@ -73,7 +73,7 @@ def _prepare_test_environment(serverdir, clientdir, mountpointdir,
 class ScriptFuseGitBareFsTree(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2022-01-13
     """
 
     def test_fuse_git_bare_fs_tree1(self):
@@ -256,7 +256,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
             cpi.stdout.close()
             cpi.stderr.close()
 
-    def test_fuse_git_bare_fs_tree_daemon(self):
+    def test_fuse_git_bare_fs_tree_daemon1(self):
         """
         :Author: Daniel Mohr
         :Date: 2021-04-26
@@ -304,6 +304,68 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+
+    def test_fuse_git_bare_fs_tree_daemon2(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2022-01-13
+
+        env python3 script_fuse_git_bare_fs_tree.py \
+          ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon2
+        """
+        # pylint: disable=invalid-name
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        logfile = 'log.txt'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir, mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            subprocess.run(
+                ['git init --bare ' + reponame + '.git'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run tests
+            subprocess.run(
+                ['fuse_git_bare_fs tree -daemon -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 serverdir + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, reponame))),
+                {'a', 'b', 'd', 'l'})
+            # remove mount
+            subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            # check log
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
+            with open(os.path.join(tmpdir, logfile)) as fd:
+                data = fd.read()
+            self.assertFalse(
+                bool(re.findall('error', data, flags=re.IGNORECASE)),
+                msg='stdout logs errror(s):\n' + data)
 
 
 if __name__ == '__main__':

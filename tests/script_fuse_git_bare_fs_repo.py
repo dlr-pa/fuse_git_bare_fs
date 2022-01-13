@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12
+:Date: 2022-01-13
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs repo'
@@ -31,7 +31,7 @@ import unittest
 class ScriptFuseGitBareFsRepo(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2022-01-13
     """
 
     def test_fuse_git_bare_fs_repo1(self):
@@ -176,6 +176,203 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 msg='stderr logs errror(s):\n' + cpistderr.decode())
             cpi.stdout.close()
             cpi.stderr.close()
+
+    def test_fuse_git_bare_fs_repo3(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2022-01-13
+
+        This test creates a repo, put some files in and
+        mount it to non existing directory and check the flag '-nofail'.
+
+        env python3 script_fuse_git_bare_fs_repo.py \
+          ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo3
+
+        pytest-3 -k test_fuse_git_bare_fs_repo3 script_fuse_git_bare_fs_repo.py
+        """
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            subprocess.run(
+                ['git init --bare ' + reponame],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run test: error
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            time.sleep(3)
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpistdout, cpistderr = cpi.communicate()
+            self.assertEqual(1, cpi.returncode) # error return
+            self.assertTrue(cpistderr.decode().startswith(
+                'fuse: bad mount point'))
+            cpi.stdout.close()
+            cpi.stderr.close()
+            # run test: nofail
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo -nofail ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            time.sleep(3)
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpistdout, cpistderr = cpi.communicate()
+            self.assertEqual(0, cpi.returncode) # no error return
+            self.assertTrue(bool(re.findall(
+                b'UserWarning: mount fail, try running without', cpistderr)))
+            cpi.stdout.close()
+            cpi.stderr.close()
+            # run test: no error
+            for dirpath in [mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            time.sleep(3)
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            self.assertEqual(0, cpi.returncode) # no error return
+            cpi.stdout.close()
+            cpi.stderr.close()
+
+    def test_fuse_git_bare_fs_repo4(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2022-01-13
+
+        This test creates a repo, put some files in and
+        mount it to non existing directory and check the flag '-logfile'.
+
+        env python3 script_fuse_git_bare_fs_repo.py \
+          ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo3
+
+        pytest-3 -k test_fuse_git_bare_fs_repo3 script_fuse_git_bare_fs_repo.py
+        """
+        # logfile
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        logfile = 'log.txt'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            subprocess.run(
+                ['git init --bare ' + reponame],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run test: error
+            self.assertFalse(os.path.isfile(os.path.join(serverdir, logfile)))
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            time.sleep(3)
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpistdout, cpistderr = cpi.communicate()
+            self.assertEqual(1, cpi.returncode) # error return
+            cpi.stdout.close()
+            cpi.stderr.close()
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) == 0)
+            os.remove(os.path.join(tmpdir, logfile))
+            # run test: nofail
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo -nofail -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            time.sleep(3)
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            cpistdout, cpistderr = cpi.communicate()
+            self.assertEqual(0, cpi.returncode) # no error return
+            self.assertTrue(bool(re.findall(
+                b'UserWarning: mount fail, try running without', cpistderr)))
+            cpi.stdout.close()
+            cpi.stderr.close()
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
+            os.remove(os.path.join(tmpdir, logfile))
+            # run test: no error
+            for dirpath in [mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            cpi = subprocess.Popen(
+                ['exec ' + 'fuse_git_bare_fs repo -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir)
+            dt0 = time.time()
+            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                # typical it needs less than 0.4 seconds
+                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                    break
+            cpi.terminate()
+            cpi.wait(timeout=3)
+            cpi.kill()
+            self.assertEqual(0, cpi.returncode) # no error return
+            cpi.stdout.close()
+            cpi.stderr.close()
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
+            with open(os.path.join(tmpdir, logfile)) as fd:
+                data = fd.read()
+            self.assertFalse(
+                bool(re.findall('error', data, flags=re.IGNORECASE)),
+                msg='stdout logs errror(s):\n' + data)
 
     def test_fuse_git_bare_fs_repo_daemon1(self):
         """
@@ -366,6 +563,159 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 set(['f']))
             # remove mount
+            subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+
+    def test_fuse_git_bare_fs_repo_daemon3(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2022-01-13
+
+        This test creates a repo, put some files in and
+        mount it to non existing directory and check the flag '-nofail'.
+
+        You can run this test directly::
+
+          env python3 script_fuse_git_bare_fs_repo.py \
+            ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo_daemon3
+        """
+        # pylint: disable=invalid-name
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            subprocess.run(
+                ['git init --bare ' + reponame],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run test: error
+            cpi = subprocess.run(
+                ['fuse_git_bare_fs repo -root_object foo -daemon ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=False)
+            time.sleep(1)
+            self.assertEqual(1, cpi.returncode) # error return
+            # run test: nofail
+            cpi = subprocess.run(
+                ['fuse_git_bare_fs repo -root_object foo -daemon -nofail ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            time.sleep(3)
+            # run test: no error
+            for dirpath in [mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            cpi = subprocess.run(
+                ['fuse_git_bare_fs repo -root_object foo -daemon -nofail ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            time.sleep(3)
+            subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+
+    def test_fuse_git_bare_fs_repo_daemon4(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2022-01-13
+
+        This test creates a repo, put some files in and
+        mount it to non existing directory and check the flag '-logfile'.
+
+        You can run this test directly::
+
+          env python3 script_fuse_git_bare_fs_repo.py \
+            ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo_daemon4
+        """
+        # pylint: disable=invalid-name
+        serverdir = 'server'
+        clientdir = 'client'
+        mountpointdir = 'mountpoint'
+        reponame = 'repo1'
+        logfile = 'log.txt'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for dirpath in [serverdir, clientdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            subprocess.run(
+                ['git init --bare ' + reponame],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, serverdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['git clone ../' + os.path.join(serverdir, reponame)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir),
+                timeout=3, check=True)
+            subprocess.run(
+                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
+                 'git add a b l d/c; git commit -m init; git push'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
+                timeout=3, check=True)
+            # run test: nofail
+            cpi = subprocess.run(
+                ['fuse_git_bare_fs repo -root_object foo ' +
+                 '-daemon -nofail -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            time.sleep(3)
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
+            os.remove(os.path.join(tmpdir, logfile))
+            # run test: no error
+            for dirpath in [mountpointdir]:
+                os.mkdir(os.path.join(tmpdir, dirpath))
+            cpi = subprocess.run(
+                ['fuse_git_bare_fs repo -root_object foo ' +
+                 '-daemon -nofail -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 os.path.join(serverdir, reponame) + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            time.sleep(3)
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
+            with open(os.path.join(tmpdir, logfile)) as fd:
+                data = fd.read()
+            self.assertFalse(
+                bool(re.findall('error', data, flags=re.IGNORECASE)),
+                msg='stdout logs errror(s):\n' + data)
             subprocess.run(
                 ['fusermount -u ' + mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
