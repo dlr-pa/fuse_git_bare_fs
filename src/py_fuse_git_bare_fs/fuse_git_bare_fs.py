@@ -48,12 +48,14 @@ def fuse_git_bare_fs_repo(args):
     :Date: 2022-01-13 (last change).
     """
     # pylint: disable = bad-option-value, import-outside-toplevel
+    log = _get_log(args.logfile)
     if (not os.path.isdir(args.target_dir)) and args.nofail:
         msg = 'mount fail, '
         msg += 'try running without "-nofail" to get precise error'
+        if log is not None:
+            log.warning(msg)
         warnings.warn(msg)
         sys.exit(0)
-    log = _get_log(args.logfile)
     operations_instance = None
     if args.daemon or (args.logfile is not None):
         # running in foreground or logging to a file
@@ -87,15 +89,17 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2022-01-12 (last change).
+    :Date: 2022-01-13 (last change).
     """
     # pylint: disable=bad-option-value,import-outside-toplevel
+    log = _get_log(args.logfile)
     if (not os.path.isdir(args.target_dir)) and args.nofail:
         msg = 'mount fail, '
         msg += 'try running without "-nofail" to get precise error'
+        if log is not None:
+            log.warning(msg)
         warnings.warn(msg)
         sys.exit(0)
-    log = _get_log(args.logfile)
     operations_instance = None
     if args.daemon or (args.logfile is not None):
         # running in foreground or logging to a file
