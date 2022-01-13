@@ -226,7 +226,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.wait(timeout=3)
             cpi.kill()
             cpistdout, cpistderr = cpi.communicate()
-            self.assertEqual(1, cpi.returncode) # error return
+            self.assertEqual(1, cpi.returncode)  # error return
             self.assertTrue(cpistderr.decode().startswith(
                 'fuse: bad mount point'))
             cpi.stdout.close()
@@ -243,7 +243,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.wait(timeout=3)
             cpi.kill()
             cpistdout, cpistderr = cpi.communicate()
-            self.assertEqual(0, cpi.returncode) # no error return
+            self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(bool(re.findall(
                 b'UserWarning: mount fail, try running without', cpistderr)))
             cpi.stdout.close()
@@ -261,7 +261,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.terminate()
             cpi.wait(timeout=3)
             cpi.kill()
-            self.assertEqual(0, cpi.returncode) # no error return
+            self.assertEqual(0, cpi.returncode)  # no error return
             cpi.stdout.close()
             cpi.stderr.close()
 
@@ -318,11 +318,12 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.wait(timeout=3)
             cpi.kill()
             cpistdout, cpistderr = cpi.communicate()
-            self.assertEqual(1, cpi.returncode) # error return
+            self.assertEqual(1, cpi.returncode)  # error return
             cpi.stdout.close()
             cpi.stderr.close()
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
-            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) == 0)
+            self.assertTrue(os.path.getsize(
+                os.path.join(tmpdir, logfile)) == 0)
             os.remove(os.path.join(tmpdir, logfile))
             # run test: nofail
             cpi = subprocess.Popen(
@@ -337,7 +338,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.wait(timeout=3)
             cpi.kill()
             cpistdout, cpistderr = cpi.communicate()
-            self.assertEqual(0, cpi.returncode) # no error return
+            self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(bool(re.findall(
                 b'UserWarning: mount fail, try running without', cpistderr)))
             cpi.stdout.close()
@@ -363,7 +364,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.terminate()
             cpi.wait(timeout=3)
             cpi.kill()
-            self.assertEqual(0, cpi.returncode) # no error return
+            self.assertEqual(0, cpi.returncode)  # no error return
             cpi.stdout.close()
             cpi.stderr.close()
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
@@ -616,7 +617,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 shell=True, cwd=tmpdir,
                 timeout=3, check=False)
             time.sleep(1)
-            self.assertEqual(1, cpi.returncode) # error return
+            self.assertEqual(1, cpi.returncode)  # error return
             # run test: nofail
             cpi = subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo -daemon -nofail ' +
