@@ -320,8 +320,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             cpi.stdout.close()
             cpi.stderr.close()
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
-            self.assertTrue(os.path.getsize(
-                os.path.join(tmpdir, logfile)) == 0)
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
             os.remove(os.path.join(tmpdir, logfile))
             # run test: nofail
             cpi = subprocess.Popen(
