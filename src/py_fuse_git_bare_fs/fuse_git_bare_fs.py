@@ -123,7 +123,8 @@ def fuse_git_bare_fs_tree(args):
             logging.basicConfig(level=logging.DEBUG)
             if log is not None:
                 log.debug(
-                    'set operations_instance to GitBareRepoTreeGitoliteLogging')
+                    'set operations_instance to '
+                    'GitBareRepoTreeGitoliteLogging')
             operations_instance = GitBareRepoTreeGitoliteLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
