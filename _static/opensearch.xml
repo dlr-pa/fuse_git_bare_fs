@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
   <ShortName>fuse_git_bare_fs</ShortName>
-  <Description>Search fuse_git_bare_fs 2021-06-25 documentation</Description>
+  <Description>Search fuse_git_bare_fs 2022-01-13 documentation</Description>
   <InputEncoding>utf-8</InputEncoding>
   <Url type="text/html" method="get"
        template="https://dlr-pa.github.io/fuse_git_bare_fs//search.html?q={searchTerms}&amp;check_keywords=yes&amp;area=default"/>
-  <LongName>fuse_git_bare_fs 2021-06-25 documentation</LongName>
+  <LongName>fuse_git_bare_fs 2022-01-13 documentation</LongName>
   
 </OpenSearchDescription>

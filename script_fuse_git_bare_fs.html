@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>command line script: fuse_git_bare_fs &#8212; fuse_git_bare_fs 2021-06-25 documentation</title>
+    <title>command line script: fuse_git_bare_fs &#8212; fuse_git_bare_fs 2022-01-13 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -15,7 +15,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="search" type="application/opensearchdescription+xml"
-          title="Search within fuse_git_bare_fs 2021-06-25 documentation"
+          title="Search within fuse_git_bare_fs 2022-01-13 documentation"
           href="_static/opensearch.xml"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="INSTALL.html" title="INSTALL: fuse_git_bare_fs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2021-06-25 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2022-01-13 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -197,7 +197,7 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </td></tr>
 <tr><td class="option-group">
 <kbd>-logfile</kbd></td>
-<td>If given, the log output is stored in this file. If running as a daemon this could be done, but is not common. It is only for debugging. Maybe there is too much information stored. Further the used WatchedFileHandler is not thread safe.</td></tr>
+<td>If given, the log output is stored in this file. If running as a daemon this could be done, but is not common. It is only for debugging. Maybe there is too much information stored. Further the used WatchedFileHandler is not thread safe. The initial file permission is read and write for the owner, but if the file is recreated (e. g. logging after file delete) the file permission is read for everyone and write for owner and group.</td></tr>
 <tr><td class="option-group">
 <kbd>-threads</kbd></td>
 <td><p class="first">If given, the fuse mount will be threaded. This is not tested.</p>
@@ -306,7 +306,7 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </td></tr>
 <tr><td class="option-group">
 <kbd>-logfile</kbd></td>
-<td>If given, the log output is stored in this file. If running as a daemon this could be done, but is not common. It is only for debugging. Maybe there is too much information stored. Further the used WatchedFileHandler is not thread safe.</td></tr>
+<td>If given, the log output is stored in this file. If running as a daemon this could be done, but is not common. It is only for debugging. Maybe there is too much information stored. Further the used WatchedFileHandler is not thread safe. The initial file permission is read and write for the owner, but if the file is recreated (e. g. logging after file delete) the file permission is read for everyone and write for owner and group.</td></tr>
 <tr><td class="option-group">
 <kbd>-threads</kbd></td>
 <td><p class="first">If given, the fuse mount will be threaded. This is not tested.</p>
@@ -393,7 +393,7 @@ you can add the following line to your ‘/etc/fstab’ (cf. <a class="reference
 </div>
 </div>
 <p>Author: Daniel Mohr
-Date: 2021-10-12
+Date: 2022-01-13
 License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
 </div>
 </div>
@@ -462,11 +462,11 @@ License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.</p>
         <li class="right" >
           <a href="INSTALL.html" title="INSTALL: fuse_git_bare_fs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2021-06-25 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2022-01-13 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Daniel Mohr.
+        &#169; Copyright 2021, 2022, Daniel Mohr.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
     </div>
   </body>
