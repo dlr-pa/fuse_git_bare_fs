@@ -72,7 +72,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'fuse_git_bare_fs'
-copyright = '2021, Daniel Mohr'
+copyright = '2021, 2022, Daniel Mohr'
 author = 'Daniel Mohr'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -80,7 +80,7 @@ author = 'Daniel Mohr'
 # built documents.
 #
 # The short X.Y version.
-version = '2021-06-25'
+version = '2022-01-13'
 # The full version, including alpha/beta/rc tags.
 release = version
 
