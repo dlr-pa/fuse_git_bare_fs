@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-12 (last change).
+:Date: 2022-01-13 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -22,13 +22,14 @@ def _get_log(logfile):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2022-01-12 (last change).
+    :Date: 2022-01-13 (last change).
     """
     # pylint: disable = import-outside-toplevel
     log = None
     if logfile is not None:
         import logging
         import logging.handlers
+        import stat
         log = logging.getLogger('fuse_git_bare_fs')
         file_handler = logging.handlers.WatchedFileHandler(
             logfile[0])  # not thread safe
@@ -36,6 +37,7 @@ def _get_log(logfile):
             logging.Formatter('%(asctime)s %(levelname)s %(message)s',
                               datefmt='%Y-%m-%d %H:%M:%S'))
         log.addHandler(file_handler)
+        os.chmod(logfile[0], stat.S_IRUSR | stat.S_IWUSR)
     return log
 
 
@@ -43,10 +45,17 @@ def fuse_git_bare_fs_repo(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2022-01-12 (last change).
+    :Date: 2022-01-13 (last change).
     """
     # pylint: disable = bad-option-value, import-outside-toplevel
     log = _get_log(args.logfile)
+    if (not os.path.isdir(args.target_dir)) and args.nofail:
+        msg = 'mount fail, '
+        msg += 'try running without "-nofail" to get precise error'
+        if log is not None:
+            log.warning(msg)
+        warnings.warn(msg)
+        sys.exit(0)
     operations_instance = None
     if args.daemon or (args.logfile is not None):
         # running in foreground or logging to a file
@@ -80,15 +89,17 @@ def fuse_git_bare_fs_tree(args):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2022-01-12 (last change).
+    :Date: 2022-01-13 (last change).
     """
     # pylint: disable=bad-option-value,import-outside-toplevel
+    log = _get_log(args.logfile)
     if (not os.path.isdir(args.target_dir)) and args.nofail:
         msg = 'mount fail, '
         msg += 'try running without "-nofail" to get precise error'
+        if log is not None:
+            log.warning(msg)
         warnings.warn(msg)
         sys.exit(0)
-    log = _get_log(args.logfile)
     operations_instance = None
     if args.daemon or (args.logfile is not None):
         # running in foreground or logging to a file
@@ -151,12 +162,12 @@ def my_argument_parser():
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2022-01-12 (last change).
+    :Date: 2022-01-13 (last change).
     """
     # pylint: disable=too-many-statements
     epilog = ''
     epilog += 'Author: Daniel Mohr\n'
-    epilog += 'Date: 2021-10-12\n'
+    epilog += 'Date: 2022-01-13\n'
     epilog += 'License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.'
     epilog += '\n\n'
     description = '"fuse_git_bare_fs" is a tool to mount the working '
@@ -227,7 +238,11 @@ def my_argument_parser():
         'If running as a daemon this could be done, but is not common. '
         'It is only for debugging. '
         'Maybe there is too much information stored. '
-        'Further the used WatchedFileHandler is not thread safe.',
+        'Further the used WatchedFileHandler is not thread safe. '
+        'The initial file permission is read and write for the owner, '
+        'but if the file is recreated (e. g. logging after file delete) '
+        'the file permission is read for everyone and '
+        'write for owner and group.',
         metavar='f')
     common_parser.add_argument(
         '-threads',
