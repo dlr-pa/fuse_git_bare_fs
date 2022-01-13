@@ -38,6 +38,9 @@ def _get_log(logfile):
                               datefmt='%Y-%m-%d %H:%M:%S'))
         log.addHandler(file_handler)
         os.chmod(logfile[0], stat.S_IRUSR | stat.S_IWUSR)
+        log.setLevel(logging.DEBUG)
+        log.debug(' '.join(sys.argv))
+        log.debug(os.environ)
     return log
 
 
@@ -62,20 +65,30 @@ def fuse_git_bare_fs_repo(args):
         import logging
         from .git_bare_repo import GitBareRepoLogging
         logging.basicConfig(level=logging.DEBUG)
+        if log is not None:
+            log.debug('set operations_instance to GitBareRepoLogging')
         operations_instance = GitBareRepoLogging(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0],
             file_st_modes=args.file_st_modes,
             log=log)
+        if log is not None:
+            log.debug('operations_instance = GitBareRepoLogging')
     else:
         from .git_bare_repo import GitBareRepo
+        if log is not None:
+            log.debug('set operations_instance to GitBareRepo')
         operations_instance = GitBareRepo(
             os.path.abspath(args.src_dir),
             args.root_object[0].encode(),
             args.max_cache_size[0],
             file_st_modes=args.file_st_modes,
             nofail=args.nofail)
+        if log is not None:
+            log.debug('operations_instance = GitBareRepo')
+    if log is not None:
+        log.debug('start fusepy.FUSE')
     fusepy.FUSE(
         operations_instance,
         args.target_dir,
@@ -108,6 +121,9 @@ def fuse_git_bare_fs_tree(args):
             from .git_bare_repo_tree_gitolite import \
                 GitBareRepoTreeGitoliteLogging
             logging.basicConfig(level=logging.DEBUG)
+            if log is not None:
+                log.debug(
+                    'set operations_instance to GitBareRepoTreeGitoliteLogging')
             operations_instance = GitBareRepoTreeGitoliteLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
@@ -118,19 +134,28 @@ def fuse_git_bare_fs_tree(args):
                 args.max_cache_size[0],
                 file_st_modes=args.file_st_modes,
                 log=log)
+            if log is not None:
+                log.debug(
+                    'operations_instance = GitBareRepoTreeGitoliteLogging')
         else:
             from .git_bare_repo_tree import GitBareRepoTreeLogging
             logging.basicConfig(level=logging.DEBUG)
+            if log is not None:
+                log.debug('set operations_instance to GitBareRepoTreeLogging')
             operations_instance = GitBareRepoTreeLogging(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0],
                 file_st_modes=args.file_st_modes,
                 log=log)
+            if log is not None:
+                log.debug('operations_instance = GitBareRepoTreeLogging')
     else:
         if args.get_user_list_from_gitolite:
             from .git_bare_repo_tree_gitolite \
                 import GitBareRepoTreeGitolite
+            if log is not None:
+                log.debug('set operations_instance to GitBareRepoTreeGitolite')
             operations_instance = GitBareRepoTreeGitolite(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
@@ -141,14 +166,22 @@ def fuse_git_bare_fs_tree(args):
                 args.max_cache_size[0],
                 file_st_modes=args.file_st_modes,
                 nofail=args.nofail)
+            if log is not None:
+                log.debug('operations_instance = GitBareRepoTreeGitolite')
         else:
             from .git_bare_repo_tree import GitBareRepoTree
+            if log is not None:
+                log.debug('set operations_instance to GitBareRepoTree')
             operations_instance = GitBareRepoTree(
                 os.path.abspath(args.src_dir),
                 args.root_object[0].encode(),
                 args.max_cache_size[0],
                 file_st_modes=args.file_st_modes,
                 nofail=args.nofail)
+            if log is not None:
+                log.debug('operations_instance = GitBareRepoTree')
+    if log is not None:
+        log.debug('start fusepy.FUSE')
     fusepy.FUSE(
         operations_instance,
         args.target_dir,
