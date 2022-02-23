@@ -239,7 +239,7 @@ class RepoClass(_EmptyAttrMixin):
                         st_mode = stat.st_mode  # default to be overwritten
                         # we have to decide if
                         # apath is normal file or executable
-                        if stat.st_mode & os.X_OK:  # executable
+                        if os.access(apath, os.X_OK):  # executable
                             st_mode = self.gitmode2st_mode['100755']
                         else:  # assume normal file
                             st_mode = self.gitmode2st_mode['100644']
