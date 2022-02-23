@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12 (last change).
+:Date: 2022-02-23 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -32,7 +32,7 @@ except (ModuleNotFoundError, ImportError):
 class RepoClass(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2022-02-23
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -171,7 +171,7 @@ class RepoClass(_EmptyAttrMixin):
     def getattr(self, path):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-06
+        :Date: 2022-02-23
 
         get attributes of the path
         """
@@ -235,7 +235,13 @@ class RepoClass(_EmptyAttrMixin):
                     if apath is not None:
                         # git annex file stored locally
                         stat = os.lstat(apath)
-                        st_mode = stat.st_mode
+                        st_mode = stat.st_mode  # default to be overwritten
+                        # we have to decide if
+                        # apath is normal file or executable
+                        if stat.st_mode & os.X_OK:  # executable
+                            st_mode = self.gitmode2st_mode['100755']
+                        else:  # assume normal file
+                            st_mode = self.gitmode2st_mode['100644']
                         st_size = stat.st_size
             ret['st_mode'] = st_mode
             ret['st_size'] = st_size
