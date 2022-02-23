@@ -175,6 +175,7 @@ class RepoClass(_EmptyAttrMixin):
 
         get attributes of the path
         """
+        # pylint: disable=too-many-branches,too-many-statements
         updated_cache = False
         if not self._cache_up_to_date():
             updated_cache = True
