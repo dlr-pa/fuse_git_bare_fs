@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12
+:Date: 2022-02-03
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree' regarding git-annex files
@@ -33,13 +33,13 @@ import unittest
 class ScriptFuseGitBareFsTreeAnnex(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2022-02-23
     """
 
     def test_fuse_git_bare_fs_tree_annex(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2022-02-23
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -98,7 +98,7 @@ class ScriptFuseGitBareFsTreeAnnex(unittest.TestCase):
             self.assertEqual(data, 'f1\n')
             # check f2 is executable:
             self.assertEqual(os.lstat(os.path.join(repo2, 'f2')).st_mode,
-                             33133)
+                             33261)
             # check f3 is symbolic link:
             self.assertEqual(
                 os.lstat(os.path.join(repo2, 'f3')).st_mode, 41471)
