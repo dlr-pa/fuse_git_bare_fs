@@ -1,4 +1,36 @@
 #!/bin/bash
+# this is a simple script to emulate gitolite in a specific use case
+# this script is use for testing
+#
+# available commands: list-users, list-phy-repos, access
+#
+# gitolite list-users
+# list the users
+#
+# gitolite list-phy-repos
+# lists the available repos
+#
+# gitolite access [repo name] [user name]
+# returns 1 or 0 depending
+# if user [user name] has access to the repository [repo name]
+#
+# echo [repo name] | gitolite access % [user name]
+# Returns a string to describe if user has access or not.
+# This may be not the same as gitolite would return.
+# But it contains 'DENIED' if the user has no access. This is the only
+# documented word of the output of gitolite.
+# You can give many repos as input, e. g.:
+# echo -e "foo\nrepo1\nrepo2\nrepo3" | ~/git_repos/github.com/dlr-pa/fuse_git_bare_fs/tests/data/gitolite access % user1
+#
+# the following access is implemented (2 repositories and 2 users):
+#
+# +-------+-------+-------+
+# |       | user1 | user2 |
+# +=======+=======+=======+
+# | repo2 |   x   |   o   |
+# +-------+-------+-------+
+# | repo3 |   x   |   o   |
+# +-------+-------+-------+
 
 function test_access() {
     r="$1"
@@ -9,8 +41,14 @@ function test_access() {
 	elif [ "$u" = "user2" ]; then
 	    return 1
 	fi
+    elif [ "$r" = "repo3" ]; then
+	if [ "$u" = "user1" ]; then
+	    return 0
+	elif [ "$u" = "user2" ]; then
+	    return 1
+	fi
     else
-	return 0
+	return 1
     fi
 }
 
@@ -20,6 +58,7 @@ if [ "$1" = "list-users" ]; then
 elif [ "$1" = "list-phy-repos" ]; then
     echo "repo2"
     echo "repo3"
+    echo "repo4"
 elif [ "$1" = "access" ]; then
     if [ "$2" = "%" ]; then
 	repo="$2"
