@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-05
+:Date: 2022-02-24
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree -get_user_list_from_gitolite'
@@ -33,7 +33,7 @@ import unittest
 class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-05
+    :Date: 2022-02-24
     """
 
     def test_fuse_git_bare_fs_tree_gitolite1(self):
@@ -206,7 +206,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2022-02-24
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
@@ -249,7 +249,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
-                {'.htaccess', 'repo1', 'repo2', 'repo3'})
+                {'.htaccess', 'repo1', 'repo2'})
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user2'))),
@@ -438,7 +438,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon4(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-15
+        :Date: 2022-02-24
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon4
@@ -483,6 +483,10 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
                 {'.htaccess', 'repo2', 'repo3'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user2'))),
+                {'.htaccess'})
             # repo1 now known by simulated gitolite command
             shutil.copy(os.path.join(tmpdir, 'gitolite'),
                         os.path.join(tmpdir, 'gitolite1'))
@@ -497,7 +501,11 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
-                {'.htaccess', 'repo1', 'repo2', 'repo3'})
+                {'.htaccess', 'repo1', 'repo2'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user2'))),
+                {'.htaccess', 'repo3'})
             # remove mount
             subprocess.run(
                 ['fusermount -u ' + mountpointdir],
@@ -508,7 +516,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon5(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-15
+        :Date: 2022-02-24
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon5
@@ -552,6 +560,10 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
                 {'.htaccess', 'repo2', 'repo3'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user2'))),
+                {'.htaccess'})
             # repo1 now known by simulated gitolite command
             shutil.copy(os.path.join(tmpdir, 'gitolite'),
                         os.path.join(tmpdir, 'gitolite1'))
@@ -559,7 +571,22 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, 'user1'))),
-                {'.htaccess', 'repo1', 'repo2', 'repo3'})
+                {'.htaccess', 'repo1', 'repo2'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user2'))),
+                {'.htaccess', 'repo3'})
+            # back to gitolite2
+            shutil.copy(os.path.join(tmpdir, 'gitolite2'),
+                        os.path.join(tmpdir, 'gitolite1'))
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user1'))),
+                {'.htaccess', 'repo2', 'repo3'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir, 'user2'))),
+                {'.htaccess'})
             # remove mount
             subprocess.run(
                 ['fusermount -u ' + mountpointdir],
