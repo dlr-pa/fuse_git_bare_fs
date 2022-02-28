@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-12 (last change).
+:Date: 2022-02-28 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -31,7 +31,7 @@ def _extract_repopath_from_path(actual_user, actual_repo, path):
 class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-12
+    :Date: 2022-02-28
 
     read only access to working trees of git bare repositories
     """
@@ -112,7 +112,10 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
             res = re.findall(r'^\/' + repopath + r'$|^\/' +
                              repopath + r'\/', path)
             if res:
-                actual_repo = repo
+                if repo in self.repos.get_repos(user=actual_user):
+                    # user has access to this repo and we can return it
+                    actual_repo = repo
+                # else: use has no access, but we can stop search
                 break
         return actual_repo
 
@@ -147,7 +150,8 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         if actual_repo is None:  # check if path is part of repo path
             part_of_repo_path = False
             for repo in self.repos.get_repos():
-                if repo.startswith(path[2+len(actual_user):]):
+                if (repo.startswith(path[2+len(actual_user):]) and
+                        (repo != path[2+len(actual_user):])):
                     part_of_repo_path = True
                     break
             if part_of_repo_path:
@@ -276,9 +280,6 @@ class _GitBareRepoTreeGitoliteMixin(_EmptyAttrMixin):
         :Date: 2021-04-24
 
         This is not implemented at the moment.
-
-        The arguments are not used, but can be given to be compatible to
-        typical open functions.
         """
         # pylint: disable=unused-argument,no-self-use
         raise fusepy.FuseOSError(errno.EROFS)
