@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-13
+:Date: 2022-06-27
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree'
@@ -21,8 +21,10 @@ Or you can run only one test, e. g.::
 """
 
 import os
+import shutil
 import re
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -73,7 +75,7 @@ def _prepare_test_environment(serverdir, clientdir, mountpointdir,
 class ScriptFuseGitBareFsTree(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-13
+    :Date: 2022-06-27
     """
 
     def test_fuse_git_bare_fs_tree1(self):
@@ -352,6 +354,63 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
                 set(os.listdir(
                     os.path.join(tmpdir, mountpointdir, reponame))),
                 {'a', 'b', 'd', 'l'})
+            # remove mount
+            subprocess.run(
+                ['fusermount -u ' + mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            # check log
+            self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
+            self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
+            with open(os.path.join(tmpdir, logfile)) as fd:
+                data = fd.read()
+            self.assertFalse(
+                bool(re.findall('error', data, flags=re.IGNORECASE)),
+                msg='stdout logs errror(s):\n' + data)
+
+    def test_fuse_git_bare_fs_tree_daemon3(self):
+        """
+        :Author: Daniel Mohr
+        :Date: 2022-06-27
+
+        env python3 script_fuse_git_bare_fs_tree.py \
+          ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon3
+        """
+        # pylint: disable=invalid-name
+        serverdir = 'server'
+        mountpointdir = 'mountpoint'
+        logfile = 'log.txt'
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
+            for file_name in ['gitolite']:
+                src_file_name = os.path.join('data', file_name)
+                if not os.path.isfile(src_file_name):
+                    src_file_name = os.path.join(os.path.dirname(
+                        sys.modules['tests'].__file__), 'data', file_name)
+                shutil.copy(src_file_name, os.path.join(tmpdir, file_name))
+            subprocess.run(
+                [os.path.join(tmpdir, 'gitolite') + ' createenv'],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            # run tests
+            subprocess.run(
+                ['fuse_git_bare_fs tree -daemon -logfile ' +
+                 os.path.join(tmpdir, logfile) + ' ' +
+                 serverdir + ' ' +
+                 mountpointdir],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                shell=True, cwd=tmpdir,
+                timeout=3, check=True)
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, serverdir))),
+                {'repo1.git', 'repo2.git', 'repo3.git', 'gitolite-admin.git'})
+            self.assertEqual(
+                set(os.listdir(
+                    os.path.join(tmpdir, mountpointdir))),
+                {'repo1', 'repo2', 'repo3'})
             # remove mount
             subprocess.run(
                 ['fusermount -u ' + mountpointdir],
