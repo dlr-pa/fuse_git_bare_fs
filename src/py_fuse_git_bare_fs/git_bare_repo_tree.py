@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-12 (last change).
+:Date: 2022-01-12, 2022-06-27 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -34,7 +34,7 @@ def _extract_repopath_from_path(actual_repo, path):
 class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-12
+    :Date: 2022-01-12, 2022-06-27
 
     read only access to working trees of git bare repositories
     """
@@ -128,12 +128,18 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
                 if dirname.endswith('.git'):
                     if dirname == '.git':
                         reposrcname = dirpath[1 + len(self.src_dir):]
-                        repos[reposrcname] = [reposrcname, None]
-                        break
+                        if reposrcname[-1] == '/':
+                            reposrcname = reposrcname[:-1]
+                        if reposrcname != 'gitolite-admin':
+                            repos[reposrcname] = [reposrcname, None]
+                            break
                     reposrcname = os.path.join(
                         dirpath, dirname)[1 + len(self.src_dir):]
                     reponame = reposrcname[:-4]
-                    repos[reponame] = [reposrcname, None]
+                    if reponame[-1] == '/':
+                        reponame = reponame[:-1]
+                    if reponame != 'gitolite-admin':
+                        repos[reponame] = [reposrcname, None]
         return repos
 
     def _extract_repo_from_path(self, path):
