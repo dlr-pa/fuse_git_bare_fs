@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-02-28
+:Date: 2023-03-31
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree -get_user_list_from_gitolite'
@@ -30,16 +30,36 @@ import time
 import unittest
 
 
+def _terminate_wait_kill(cpi, timeout=3, sleepbefore=None, sleepafter=None):
+    """
+    :Author: Daniel Mohr
+    :Date: 2022-01-13
+    """
+    if sleepbefore is not None:
+        time.sleep(sleepbefore)
+    cpi.terminate()
+    cpi.wait(timeout=timeout)
+    cpi.kill()
+    if sleepafter is not None:
+        time.sleep(sleepafter)
+
+
 class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2022-02-28
+    :Date: 2023-03-31
     """
 
     def test_fuse_git_bare_fs_tree_gitolite1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2023-03-31
+
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite1
+
+        pytest-3 -k test_fuse_git_bare_fs_tree_gitolite1 \
+          script_fuse_git_bare_fs_tree_gitolite.py
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -61,30 +81,32 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess '
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cpi = subprocess.Popen(
-                call_cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-                time.sleep(0.1)
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir))),
-                {'user1', 'user2'})
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpi.stdout.close()
-            cpi.stderr.close()
+            with subprocess.Popen(
+                    call_cmd,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                    time.sleep(0.1)
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir))),
+                    {'user1', 'user2'})
+                _terminate_wait_kill(cpi)
 
     def test_fuse_git_bare_fs_tree_gitolite2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-10
+        :Date: 2023-03-31
+
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite2
+
+        pytest-3 -k test_fuse_git_bare_fs_tree_gitolite2 \
+          script_fuse_git_bare_fs_tree_gitolite.py
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -108,43 +130,41 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' -gitolite_user_file ' + os.path.join(tmpdir, 'users')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cpi = subprocess.Popen(
-                call_cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-                time.sleep(0.1)
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'user1', 'user2'})
-            with open(os.path.join(tmpdir, 'users'), 'w') as fd:
-                fd.write('foo\nbar\nbaz')
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'user1', 'user2', 'foo', 'bar', 'baz'})
-            with open(os.path.join(tmpdir, 'users'), 'w') as fd:
-                fd.write('bar\nbaz')
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'user1', 'user2', 'bar', 'baz'})
-            os.remove(os.path.join(tmpdir, 'users'))
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'user1', 'user2'})
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpi.stdout.close()
-            cpi.stderr.close()
+            with subprocess.Popen(
+                    call_cmd,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                    time.sleep(0.1)
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'user1', 'user2'})
+                joinedpath = os.path.join(tmpdir, 'users')
+                with open(joinedpath, mode='w', encoding='utf-8') as fd:
+                    fd.write('foo\nbar\nbaz')
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'user1', 'user2', 'foo', 'bar', 'baz'})
+                with open(joinedpath, mode='w', encoding='utf-8') as fd:
+                    fd.write('bar\nbaz')
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'user1', 'user2', 'bar', 'baz'})
+                os.remove(os.path.join(tmpdir, 'users'))
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'user1', 'user2'})
+                _terminate_wait_kill(cpi)
 
     def test_fuse_git_bare_fs_tree_gitolite3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-10
+        :Date: 2023-03-31
 
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
@@ -175,38 +195,35 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             call_cmd += ' -gitolite_cmd ' + os.path.join(tmpdir, 'gitolite')
             call_cmd += ' -gitolite_user_file ' + os.path.join(tmpdir, 'users')
             call_cmd += ' ' + serverdir + ' ' + mountpointdir
-            cpi = subprocess.Popen(
-                call_cmd,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-                time.sleep(0.1)
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'user1', 'user2'})
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, 'user1', 'repo2'))),
-                {'c'})
-            # read data
-            with open(os.path.join(
-                    tmpdir, mountpointdir, 'user1', 'repo2', 'c')) as fd:
-                data = fd.read()
-            self.assertEqual(data, 'c\n')
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpi.stdout.close()
-            cpi.stderr.close()
+            with subprocess.Popen(
+                    call_cmd,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                    time.sleep(0.1)
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'user1', 'user2'})
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir, 'user1', 'repo2'))),
+                    {'c'})
+                # read data
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, 'user1', 'repo2', 'c')
+                with open(joinedpath, encoding='utf-8') as fd:
+                    data = fd.read()
+                self.assertEqual(data, 'c\n')
+                _terminate_wait_kill(cpi)
 
     def test_fuse_git_bare_fs_tree_gitolite_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-02-24
+        :Date: 2023-03-31
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon1
@@ -255,12 +272,9 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir, 'user2'))),
                 {'.htaccess', 'repo3'})
             for username in ['user1', 'user2']:
-                with open(
-                        os.path.join(
-                            tmpdir,
-                            mountpointdir,
-                            username,
-                            '.htaccess')) as fd:
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, username, '.htaccess')
+                with open(joinedpath, encoding='utf-8') as fd:
                     data = fd.read()
                 self.assertEqual(data, 'Require user ' + username + '\n')
             self.assertEqual(
@@ -281,7 +295,10 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-10
+        :Date: 2023-03-23
+
+        env python3 script_fuse_git_bare_fs_tree_gitolite.py \
+          ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon2
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -319,12 +336,13 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2'})
-            with open(os.path.join(tmpdir, 'users'), 'w') as fd:
+            joinedpath = os.path.join(tmpdir, 'users')
+            with open(joinedpath, mode='w', encoding='utf-8') as fd:
                 fd.write('foo\nbar\nbaz')
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2', 'foo', 'bar', 'baz'})
-            with open(os.path.join(tmpdir, 'users'), 'w') as fd:
+            with open(joinedpath, mode='w', encoding='utf-8') as fd:
                 fd.write('bar\nbaz')
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
@@ -343,7 +361,7 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_gitolite_daemon3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-15
+        :Date: 2023-03-31
 
         env python3 script_fuse_git_bare_fs_tree_gitolite.py \
           ScriptFuseGitBareFsTreeGitolite.test_fuse_git_bare_fs_tree_gitolite_daemon3
@@ -384,9 +402,9 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2'})
             for username in ['user1', 'user2']:
-                with open(os.path.join(tmpdir, mountpointdir,
-                                       username, '.htaccess'),
-                          'r') as fd:
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, username, '.htaccess')
+                with open(joinedpath, mode='r', encoding='utf-8') as fd:
                     htaccess_content = fd.read().splitlines()
                 self.assertEqual(htaccess_content[0],
                                  'Require user ' + username)
@@ -397,8 +415,8 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
             # run tests
-            with open(os.path.join(tmpdir,
-                                   'htaccess_template.txt'), 'w') as fd:
+            joinedpath = os.path.join(tmpdir, 'htaccess_template.txt')
+            with open(joinedpath, mode='w', encoding='utf-8') as fd:
                 fd.write('# comment\n')
             call_cmd = 'fuse_git_bare_fs tree -daemon'
             call_cmd += ' -get_user_list_from_gitolite -provide_htaccess'
@@ -421,9 +439,9 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                     os.path.join(tmpdir, mountpointdir))),
                 {'user1', 'user2'})
             for username in ['user1', 'user2']:
-                with open(os.path.join(tmpdir, mountpointdir,
-                                       username, '.htaccess'),
-                          'r') as fd:
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, username, '.htaccess')
+                with open(joinedpath, mode='r', encoding='utf-8') as fd:
                     htaccess_content = fd.read().splitlines()
                 self.assertEqual(htaccess_content[0], '# comment')
                 self.assertEqual(htaccess_content[1],

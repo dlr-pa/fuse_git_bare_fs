@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12
+:Date: 2023-03-31
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the class RepoClass in the module py_fuse_git_bare_fs
@@ -32,16 +32,21 @@ class PyFuseGitBareFsRepoClass(
         unittest.TestCase, PrepareSimpleTestEnvironment):
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2023-03-31
     """
 
     def test_repo_class(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         check how it is handled by py_fuse_git_bare_fs.repo_class.
+
+        env python3 py_fuse_git_bare_fs_repo_class.py \
+          PyFuseGitBareFsRepoClass.test_repo_class
+
+        pytest-3 -k test_repo_class py_fuse_git_bare_fs_repo_class.py
         """
         # pylint: disable=too-many-statements
         # pylint: disable = bad-option-value, import-outside-toplevel
@@ -62,7 +67,7 @@ class PyFuseGitBareFsRepoClass(
                 os.path.join(tmpdir, serverdir, reponame), b'master')
             self.assertEqual(set(repo.readdir('/')),
                              {'.', '..', 'a', 'b', 'd', 'l'})
-            file_status = dict()
+            file_status = {}
             for filename in ['/a', '/b', '/l', '/d', '/d/c']:
                 file_status[filename] = repo.getattr(filename)
             for filename in ['/d']:
