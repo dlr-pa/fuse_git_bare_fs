@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-06-27
+:Date: 2023-03-31
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -15,7 +15,7 @@ class TestWithPytest(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-25
+    :Date: 2021-06-25, 2023-03-31
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with pytest
@@ -49,13 +49,13 @@ class TestWithPytest(Command):
     def finalize_options(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-02-04
+        :Date: 2021-02-04, 2023-03-31
         """
 
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-25
+        :Date: 2021-06-25, 2023-03-31
         """
         # pylint: disable=too-many-branches
         # env python3 setup.py run_pytest
@@ -76,7 +76,7 @@ class TestWithPytest(Command):
         if self.parallel:
             try:
                 # if available, using parallel test run
-                # pylint: disable=unused-variable
+                # pylint: disable=unused-variable,unused-import
                 import xdist
                 if os.name == 'posix':
                     # since we are only running seconds,
@@ -87,7 +87,7 @@ class TestWithPytest(Command):
                     nthreads = max(2, nthreads)  # at least two threads
                 else:
                     nthreads = max(2, int(0.5 * os.cpu_count()))
-                pyargs += ['-n %i' % nthreads]
+                pyargs += [f'-n {nthreads}']
             except (ModuleNotFoundError, ImportError):
                 pass
         if self.coverage:
@@ -205,7 +205,7 @@ class CheckModules(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@gmx.de
-    :Date: 2017-01-08
+    :Date: 2017-01-08, 2023-03-31
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     checking for modules need to run the software
@@ -229,25 +229,24 @@ class CheckModules(Command):
         print("checking for the modules mentioned in the 'setup.py':")
         for module in self.distribution.metadata.get_requires():
             if self.verbose:
-                print("try to load %s" % module)
+                print(f"try to load {module}")
             try:
                 importlib.import_module(module)
                 if self.verbose:
                     print("  loaded.")
             except ImportError:
                 i += 1
-                summary += "module '%s' is not available\n" % module
-                print("module '%s' is not available <---WARNING---" % module)
-        print(
-            "\nSummary\n%d modules are not available (not unique)\n%s\n" % (
-                i, summary))
+                summary += f"module '{module}' is not available\n"
+                print(f"module '{module}' is not available <---WARNING---")
+        print(f"\nSummary\n{i} modules are not available (not unique)\n" +
+              f"{summary}\n")
 
 
 class CheckModulesModulefinder(Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@gmx.de
-    :Date: 2017-01-08
+    :Date: 2017-01-08, 2023-03-31
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     checking for modules need to run the scripts (modulefinder)
@@ -265,7 +264,7 @@ class CheckModulesModulefinder(Command):
         # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
-            print("\nchecking for modules used in '%s':" % script)
+            print(f"\nchecking for modules used in '{script}':")
             finder = modulefinder.ModuleFinder()
             finder.run_script(script)
             finder.report()
@@ -306,7 +305,7 @@ REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2022.06.27',
+    version='2023.03.31',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,

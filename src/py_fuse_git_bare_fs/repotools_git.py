@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12 (last change).
+:Date: 2021-10-12, 2023-03-31 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -71,7 +71,7 @@ def get_repo_data(src_dir, root_object, time_regpat):
       get_repo_data('.', b'master', re.compile(r' ([0-9]+) [+0-9+-]+$'))
 
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-11, 2023-03-31
     """
     cpi = subprocess.run(
         ["git cat-file --batch"], input=root_object,
@@ -79,9 +79,8 @@ def get_repo_data(src_dir, root_object, time_regpat):
         cwd=src_dir, shell=True, timeout=3, check=True)
     if cpi.stdout.startswith(root_object):
         # empty repo or root_object does not exists
-        msg = \
-            'root repository object "%s" in "%s" does not exists. ' % \
-            (root_object, src_dir)
+        msg = f'root repository object "{root_object}" in "{src_dir}" ' + \
+            'does not exists.'
         msg += 'Mountpoint will be empty.'
         warnings.warn(msg)
         return False
@@ -149,17 +148,17 @@ def get_tree(src_dir, tree_hash, tree_content_regpat):
         re.compile(r'^([0-9]+) (commit|tree|blob|tag) ([0-9a-f]+)\t(.+)$'))
 
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2021-10-12, 2023-03-31
     """
-    tree = dict()
+    tree = {}
     # tree[path] =
     #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
     trees = [('/', tree_hash)]  # (name, hash)
-    tree['/'] = dict()
+    tree['/'] = {}
     while bool(trees):
         act_path, act_tree_hash = trees.pop(0)
         tree[act_path]['listdir'] = []
-        tree[act_path]['blobs'] = dict()
+        tree[act_path]['blobs'] = {}
         git_objects = _git_cat_file(src_dir, act_tree_hash).split('\n')
         for line in git_objects:
             if len(line) < 8:
@@ -175,5 +174,5 @@ def get_tree(src_dir, tree_hash, tree_content_regpat):
                     tree[act_path]['listdir'].append(obj_name)
                     obj_path = os.path.join(act_path, obj_name)
                     trees.append((obj_path, obj_hash))
-                    tree[obj_path] = dict()
+                    tree[obj_path] = {}
     return tree

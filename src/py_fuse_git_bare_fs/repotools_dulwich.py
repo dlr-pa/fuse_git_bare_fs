@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-12 (last change).
+:Date: 2021-10-12, 2023-03-31 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -30,13 +30,13 @@ def get_ref(src_dir, root_object):
       commit_hash = get_ref('.', b'master')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2021-10-12, 2023-03-31
     """
     refs_root_object = b'refs/heads/' + root_object
     try:
         repo = dulwich.repo.Repo(src_dir)
-    except dulwich.errors.NotGitRepository:
-        raise FileNotFoundError(src_dir)
+    except dulwich.errors.NotGitRepository as errmsg:
+        raise FileNotFoundError(src_dir) from errmsg
     refs = repo.get_refs()
     if refs_root_object in refs:
         return repo.get_refs()[refs_root_object].decode()
@@ -55,12 +55,12 @@ def get_blob_data(src_dir, blob_hash):
       get_blob_data('.', b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2021-10-12, 2023-03-31
     """
     try:
         repo = dulwich.repo.Repo(src_dir)
-    except dulwich.errors.NotGitRepository:
-        raise FileNotFoundError(src_dir)
+    except dulwich.errors.NotGitRepository as errmsg:
+        raise FileNotFoundError(src_dir) from errmsg
     # repo.get_object(blob_hash).type_name == b'blob'
     data = repo.get_object(blob_hash).data
     return blob_hash + b' ' + b'blob' + b' ' + str(len(data)).encode() + \
@@ -80,7 +80,7 @@ def get_repo_data(src_dir, root_object, time_regpat=None):
       get_repo_data('.', b'master')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-11, 2023-03-31
     """
     # to be compatible to py_fuse_git_bare_fs.repotools_git.get_repo_data
     # we need the parameter/argument time_regpat:
@@ -88,14 +88,13 @@ def get_repo_data(src_dir, root_object, time_regpat=None):
     refs_root_object = b'refs/heads/' + root_object
     try:
         repo = dulwich.repo.Repo(src_dir)
-    except dulwich.errors.NotGitRepository:
-        raise FileNotFoundError(src_dir)
+    except dulwich.errors.NotGitRepository as errmsg:
+        raise FileNotFoundError(src_dir) from errmsg
     refs = repo.get_refs()
     if refs_root_object not in refs:
         # empty repo or root_object does not exists
-        msg = \
-            'root repository object "%s" in "%s" does not exists. ' % \
-            (root_object, src_dir)
+        msg = f'root repository object "{root_object}" in "{src_dir}" ' + \
+            'does not exists.'
         msg += 'Mountpoint will be empty.'
         warnings.warn(msg)
         return False
@@ -118,12 +117,12 @@ def get_size_of_blob(src_dir, blob_hash):
       get_size_of_blob('.', b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2021-10-12, 2023-03-31
     """
     try:
         repo = dulwich.repo.Repo(src_dir)
-    except dulwich.errors.NotGitRepository:
-        raise FileNotFoundError(src_dir)
+    except dulwich.errors.NotGitRepository as errmsg:
+        raise FileNotFoundError(src_dir) from errmsg
     return repo.get_object(blob_hash).raw_length()
 
 
@@ -144,7 +143,7 @@ def get_tree(src_dir, tree_hash, tree_content_regpat=None):
         'b213332fda65de4d2848a98e01f43d689cccbe6d')
 
     :Author: Daniel Mohr
-    :Date: 2021-10-12
+    :Date: 2021-10-12, 2023-03-31
     """
     # to be compatible to py_fuse_git_bare_fs.repotools_git.get_repo_data
     # we need the parameter/argument tree_content_regpat:
@@ -152,20 +151,20 @@ def get_tree(src_dir, tree_hash, tree_content_regpat=None):
     # pylint: disable=too-many-locals
     try:
         repo = dulwich.repo.Repo(src_dir)
-    except dulwich.errors.NotGitRepository:
-        raise FileNotFoundError(src_dir)
-    tree = dict()
+    except dulwich.errors.NotGitRepository as errmsg:
+        raise FileNotFoundError(src_dir) from errmsg
+    tree = {}
     # tree[path] =
     #   {'listdir': [], 'blobs': {name: {'mode': str, 'hash': str}}}
     dulwichmode2gitmode = {0o100644: '100644',
                            0o100755: '100755',
                            0o120000: '120000'}
     trees = [('/', tree_hash.encode())]  # (name, hash)
-    tree['/'] = dict()
+    tree['/'] = {}
     while bool(trees):
         act_path, act_tree_hash = trees.pop(0)
         tree[act_path]['listdir'] = []
-        tree[act_path]['blobs'] = dict()
+        tree[act_path]['blobs'] = {}
         treelist = repo.get_object(act_tree_hash).items()
         for entry in treelist:
             obj_type = repo.get_object(entry.sha).type_name
@@ -180,5 +179,5 @@ def get_tree(src_dir, tree_hash, tree_content_regpat=None):
                 tree[act_path]['listdir'].append(obj_name)
                 obj_path = os.path.join(act_path, obj_name)
                 trees.append((obj_path, obj_hash))
-                tree[obj_path] = dict()
+                tree[obj_path] = {}
     return tree

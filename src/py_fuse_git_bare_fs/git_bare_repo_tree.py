@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-12, 2022-06-27 (last change).
+:Date: 2022-01-12, 2022-06-27, 2023-03-31 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -34,7 +34,7 @@ def _extract_repopath_from_path(actual_repo, path):
 class _GitBareRepoTreeMixin(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-12, 2022-06-27
+    :Date: 2022-01-12, 2022-06-27, 2023-03-31
 
     read only access to working trees of git bare repositories
     """
@@ -76,7 +76,7 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
         self.nofail = nofail
         if log is not None:
             self.log = log
-        self.repos = dict()
+        self.repos = {}
         self._lock = ReadWriteLock()
         dt0 = time.time()
         with self._lock.write_locked():
@@ -103,9 +103,9 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
             dt0 = time.time()
             repos = self._get_repos()
             with self._lock.write_locked():
-                for reponame in repos:  # add new found repos
+                for reponame, repo in repos.items():  # add new found repos
                     if reponame not in self.repos:
-                        self.repos[reponame] = repos[reponame]
+                        self.repos[reponame] = repo
                 for reponame in list(self.repos.keys()):
                     # remove obsolete repos
                     if reponame not in repos:
@@ -122,7 +122,7 @@ class _GitBareRepoTreeMixin(_EmptyAttrMixin):
           ...
           self._lock.release_write()
         """
-        repos = dict()
+        repos = {}
         for dirpath, dirnames, _ in os.walk(self.src_dir):
             for dirname in dirnames:
                 if dirname.endswith('.git'):

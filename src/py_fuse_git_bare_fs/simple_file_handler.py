@@ -31,7 +31,7 @@ class SimpleFileHandlerClass():
         with self.lock.write_locked():
             self.next_file_handler_number = 0
             self.file_handler = []
-            self.file_handler_repo = dict()
+            self.file_handler_repo = {}
 
     def get(self, repo):
         """

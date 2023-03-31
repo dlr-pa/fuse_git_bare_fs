@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-11 (last change).
+:Date: 2021-10-11, 2023-03-31 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -18,7 +18,7 @@ except (ModuleNotFoundError, ImportError):
 class SimpleFileCache():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-11
+    :Date: 2021-10-11, 2023-03-31
     """
 
     def __init__(self,
@@ -34,7 +34,7 @@ class SimpleFileCache():
         self.maxage = maxage
         self.actual_cache_size = 0
         with self.lock.write_locked():
-            self.cache = dict()
+            self.cache = {}
 
     def get_cached(self, repopath, path, size, offset, maxage=0.5):
         """
@@ -80,7 +80,7 @@ class SimpleFileCache():
                     self.lock.release_read()
                     with self.lock.write_locked():
                         if repopath not in self.cache:
-                            self.cache[repopath] = dict()
+                            self.cache[repopath] = {}
                         self.cache[repopath][path] = [time.time(),
                                                       data,
                                                       lendata,
