@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-13
+:Date: 2023-03-31
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs repo'
@@ -51,7 +51,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-05
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         mount it, check for files.
@@ -86,33 +86,32 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run tests
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'a', 'b', 'd', 'l'})
-            # read data
-            with open(os.path.join(tmpdir, mountpointdir, 'a')) as fd:
-                data = fd.read()
-            self.assertEqual(data, 'a\n')
-            # clean up
-            _terminate_wait_kill(cpi)
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'a', 'b', 'd', 'l'})
+                # read data
+                joinedpath = os.path.join(tmpdir, mountpointdir, 'a')
+                with open(joinedpath, encoding='utf-8') as fd:
+                    data = fd.read()
+                self.assertEqual(data, 'a\n')
+                # clean up
+                _terminate_wait_kill(cpi)
 
     def test_fuse_git_bare_fs_repo2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         mount it, check for files.
@@ -147,50 +146,48 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run tests
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            cp_ls = subprocess.run(
-                ['ls -g -G'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, mountpointdir),
-                timeout=3, check=True)
-            self.assertEqual(
-                set(os.listdir(os.path.join(tmpdir, mountpointdir))),
-                {'a', 'b', 'd', 'l'})
-            cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
-            self.assertEqual(cp_ls_stdout[0], b'total 0')
-            self.assertTrue(
-                bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
-            self.assertTrue(
-                bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
-            self.assertTrue(
-                bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
-            self.assertTrue(
-                bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
-            _terminate_wait_kill(cpi)
-            cpistdout, cpistderr = cpi.communicate()
-            self.assertFalse(
-                bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
-                msg='stdout logs errror(s):\n' + cpistdout.decode())
-            self.assertFalse(
-                bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
-                msg='stderr logs errror(s):\n' + cpistderr.decode())
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                cp_ls = subprocess.run(
+                    ['ls -g -G'],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    shell=True, cwd=os.path.join(tmpdir, mountpointdir),
+                    timeout=3, check=True)
+                self.assertEqual(
+                    set(os.listdir(os.path.join(tmpdir, mountpointdir))),
+                    {'a', 'b', 'd', 'l'})
+                cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
+                self.assertEqual(cp_ls_stdout[0], b'total 0')
+                self.assertTrue(
+                    bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
+                self.assertTrue(
+                    bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
+                self.assertTrue(
+                    bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
+                self.assertTrue(
+                    bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
+                _terminate_wait_kill(cpi)
+                cpistdout, cpistderr = cpi.communicate()
+                self.assertFalse(
+                    bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
+                    msg='stdout logs errror(s):\n' + cpistdout.decode())
+                self.assertFalse(
+                    bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
+                    msg='stderr logs errror(s):\n' + cpistderr.decode())
 
     def test_fuse_git_bare_fs_repo3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-01-13
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-nofail'.
@@ -225,59 +222,54 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
                 timeout=3, check=True)
             # run test: error
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            _terminate_wait_kill(cpi, sleepbefore=3)
-            _, cpistderr = cpi.communicate()
-            self.assertEqual(1, cpi.returncode)  # error return
-            self.assertTrue(cpistderr.decode().startswith(
-                'fuse: bad mount point'))
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                _terminate_wait_kill(cpi, sleepbefore=3)
+                _, cpistderr = cpi.communicate()
+                self.assertEqual(1, cpi.returncode)  # error return
+                self.assertTrue(cpistderr.decode().startswith(
+                    'fuse: bad mount point'))
             # run test: nofail
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo -nofail ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            _terminate_wait_kill(cpi, sleepbefore=3)
-            _, cpistderr = cpi.communicate()
-            self.assertEqual(0, cpi.returncode)  # no error return
-            self.assertTrue(bool(re.findall(
-                b'UserWarning: mount fail, try running without', cpistderr)))
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                _terminate_wait_kill(cpi, sleepbefore=3)
+                _, cpistderr = cpi.communicate()
+                self.assertEqual(0, cpi.returncode)  # no error return
+                self.assertTrue(bool(re.findall(
+                    b'UserWarning: mount fail, try running without',
+                    cpistderr)))
             # run test: no error
             for dirpath in [mountpointdir]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            _terminate_wait_kill(cpi, sleepbefore=3)
-            self.assertEqual(0, cpi.returncode)  # no error return
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                _terminate_wait_kill(cpi, sleepbefore=3)
+                self.assertEqual(0, cpi.returncode)  # no error return
 
     def test_fuse_git_bare_fs_repo4(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-01-13
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-logfile'.
 
         env python3 script_fuse_git_bare_fs_repo.py \
-          ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo3
+          ScriptFuseGitBareFsRepo.test_fuse_git_bare_fs_repo4
 
-        pytest-3 -k test_fuse_git_bare_fs_repo3 script_fuse_git_bare_fs_repo.py
+        pytest-3 -k test_fuse_git_bare_fs_repo4 script_fuse_git_bare_fs_repo.py
         """
         # logfile
         serverdir = 'server'
@@ -307,61 +299,57 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 timeout=3, check=True)
             # run test: error
             self.assertFalse(os.path.isfile(os.path.join(serverdir, logfile)))
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo -logfile ' +
                  os.path.join(tmpdir, logfile) + ' ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            _terminate_wait_kill(cpi, sleepbefore=3)
-            _, cpistderr = cpi.communicate()
-            self.assertEqual(1, cpi.returncode)  # error return
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                _terminate_wait_kill(cpi, sleepbefore=3)
+                _, cpistderr = cpi.communicate()
+                self.assertEqual(1, cpi.returncode)  # error return
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
             os.remove(os.path.join(tmpdir, logfile))
             # run test: nofail
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo -nofail -logfile ' +
                  os.path.join(tmpdir, logfile) + ' ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            _terminate_wait_kill(cpi, sleepbefore=3)
-            _, cpistderr = cpi.communicate()
-            self.assertEqual(0, cpi.returncode)  # no error return
-            self.assertTrue(bool(re.findall(
-                b'UserWarning: mount fail, try running without', cpistderr)))
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                _terminate_wait_kill(cpi, sleepbefore=3)
+                _, cpistderr = cpi.communicate()
+                self.assertEqual(0, cpi.returncode)  # no error return
+                self.assertTrue(bool(re.findall(
+                    b'UserWarning: mount fail, try running without',
+                    cpistderr)))
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
             os.remove(os.path.join(tmpdir, logfile))
             # run test: no error
             for dirpath in [mountpointdir]:
                 os.mkdir(os.path.join(tmpdir, dirpath))
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo -logfile ' +
                  os.path.join(tmpdir, logfile) + ' ' +
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            _terminate_wait_kill(cpi)
-            self.assertEqual(0, cpi.returncode)  # no error return
-            cpi.stdout.close()
-            cpi.stderr.close()
+                shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                _terminate_wait_kill(cpi)
+                self.assertEqual(0, cpi.returncode)  # no error return
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
-            with open(os.path.join(tmpdir, logfile)) as fd:
+            with open(os.path.join(tmpdir, logfile), encoding='utf-8') as fd:
                 data = fd.read()
             self.assertFalse(
                 bool(re.findall('error', data, flags=re.IGNORECASE)),
@@ -370,7 +358,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         mount it, check for fiels.
@@ -417,7 +405,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             self.assertEqual(
                 set(os.listdir(os.path.join(tmpdir, mountpointdir))),
                 {'a', 'b', 'd', 'l'})
-            file_status = dict()
+            file_status = {}
             for filename in ['.', 'a', 'b', 'l', 'd', 'd/c']:
                 file_status[filename] = os.lstat(
                     os.path.join(tmpdir, mountpointdir, filename))
@@ -437,15 +425,18 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 self.assertEqual(file_status[filename].st_uid, os.geteuid())
                 self.assertEqual(file_status[filename].st_gid, os.getegid())
             for filename in ['a', 'b']:
-                with open(os.path.join(tmpdir, mountpointdir, filename)) as fd:
+                joinedpath = os.path.join(tmpdir, mountpointdir, filename)
+                with open(joinedpath, encoding='utf-8') as fd:
                     data = fd.read()
                 self.assertEqual(data, filename + '\n')
             for filename in ['l']:
-                with open(os.path.join(tmpdir, mountpointdir, filename)) as fd:
+                joinedpath = os.path.join(tmpdir, mountpointdir, filename)
+                with open(joinedpath, encoding='utf-8') as fd:
                     data = fd.read()
                 self.assertEqual(data, 'a\n')
             for filename in ['d/c']:
-                with open(os.path.join(tmpdir, mountpointdir, filename)) as fd:
+                joinedpath = os.path.join(tmpdir, mountpointdir, filename)
+                with open(joinedpath, encoding='utf-8') as fd:
                     data = fd.read()
                 self.assertEqual(data, 'abc\n')
             with self.assertRaises(FileNotFoundError):
@@ -474,7 +465,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             self.assertEqual(file_status.st_size, 3)
             self.assertEqual(file_status.st_uid, os.geteuid())
             self.assertEqual(file_status.st_gid, os.getegid())
-            with open(os.path.join(tmpdir, mountpointdir, 'bar')) as fd:
+            joinedpath = os.path.join(tmpdir, mountpointdir, 'bar')
+            with open(joinedpath, encoding='utf-8') as fd:
                 data = fd.read()
             self.assertEqual(data, 'abc\n')
             # adapt data
@@ -486,7 +478,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 timeout=3, check=True)
             # further tests:
             # read (but did getattr before; should be tested on module)
-            with open(os.path.join(tmpdir, mountpointdir, 'baz')) as fd:
+            joinedpath = os.path.join(tmpdir, mountpointdir, 'baz')
+            with open(joinedpath, encoding='utf-8') as fd:
                 data = fd.read()
             self.assertEqual(data, 'abc..xyz\n')
             # remove mount
@@ -639,7 +632,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon4(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-01-13
+        :Date: 2023-03-31
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-logfile'.
@@ -704,7 +697,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
             time.sleep(3)
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
-            with open(os.path.join(tmpdir, logfile)) as fd:
+            with open(os.path.join(tmpdir, logfile), encoding='utf-8') as fd:
                 data = fd.read()
             self.assertFalse(
                 bool(re.findall('error', data, flags=re.IGNORECASE)),
