@@ -45,7 +45,7 @@ def _terminate_wait_kill(cpi, timeout=3, sleepbefore=None, sleepafter=None):
 class ScriptFuseGitBareFsRepo(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-13
+    :Date: 2023-03-31
     """
 
     def test_fuse_git_bare_fs_repo1(self):

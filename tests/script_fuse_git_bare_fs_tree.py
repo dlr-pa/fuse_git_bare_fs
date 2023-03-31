@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-06-27
+:Date: 2023-03-31
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree'
@@ -75,7 +75,7 @@ def _prepare_test_environment(serverdir, clientdir, mountpointdir,
 class ScriptFuseGitBareFsTree(unittest.TestCase):
     """
     :Author: Daniel Mohr
-    :Date: 2022-06-27
+    :Date: 2023-03-31
     """
 
     def test_fuse_git_bare_fs_tree1(self):
@@ -372,10 +372,12 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_daemon3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-06-27
+        :Date: 2023-03-31
 
         env python3 script_fuse_git_bare_fs_tree.py \
           ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon3
+
+        pytest-3 -k test_fuse_git_bare_fs_tree_daemon3 script_fuse_git_bare_fs_tree.py
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -420,7 +422,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
             # check log
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
-            with open(os.path.join(tmpdir, logfile)) as fd:
+            with open(os.path.join(tmpdir, logfile), encoding='utf-8') as fd:
                 data = fd.read()
             self.assertFalse(
                 bool(re.findall('error', data, flags=re.IGNORECASE)),
