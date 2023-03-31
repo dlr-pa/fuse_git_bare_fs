@@ -93,7 +93,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
-                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
                     if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                         break
@@ -153,7 +154,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
-                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
                     if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                         break
@@ -172,9 +174,11 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                 self.assertTrue(
                     bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
                 self.assertTrue(
-                    bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
+                    bool(re.findall(b'drwxr-xr-x 0 4096 .+ d',
+                                    cp_ls_stdout[3])))
                 self.assertTrue(
-                    bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
+                    bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a',
+                                    cp_ls_stdout[4])))
                 _terminate_wait_kill(cpi)
                 cpistdout, cpistderr = cpi.communicate()
                 self.assertFalse(

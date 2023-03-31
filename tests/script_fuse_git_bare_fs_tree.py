@@ -146,7 +146,8 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
-                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
                     if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                         break
@@ -397,7 +398,8 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         env python3 script_fuse_git_bare_fs_tree.py \
           ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon3
 
-        pytest-3 -k test_fuse_git_bare_fs_tree_daemon3 script_fuse_git_bare_fs_tree.py
+        pytest-3 -k test_fuse_git_bare_fs_tree_daemon3 \
+          script_fuse_git_bare_fs_tree.py
         """
         # pylint: disable=invalid-name
         serverdir = 'server'

@@ -86,7 +86,8 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
-                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
                     if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                         break
@@ -200,7 +201,8 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                     shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
-                while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
                     if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                         break
@@ -210,7 +212,8 @@ class ScriptFuseGitBareFsTreeGitolite(unittest.TestCase):
                     {'user1', 'user2'})
                 self.assertEqual(
                     set(os.listdir(
-                        os.path.join(tmpdir, mountpointdir, 'user1', 'repo2'))),
+                        os.path.join(
+                            tmpdir, mountpointdir, 'user1', 'repo2'))),
                     {'c'})
                 # read data
                 joinedpath = os.path.join(
