@@ -91,7 +91,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
                 while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
@@ -151,7 +151,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
                 while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
                     # typical it needs less than 0.4 seconds
@@ -227,7 +227,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 _terminate_wait_kill(cpi, sleepbefore=3)
                 _, cpistderr = cpi.communicate()
                 self.assertEqual(1, cpi.returncode)  # error return
@@ -239,7 +239,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 _terminate_wait_kill(cpi, sleepbefore=3)
                 _, cpistderr = cpi.communicate()
                 self.assertEqual(0, cpi.returncode)  # no error return
@@ -254,7 +254,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 _terminate_wait_kill(cpi, sleepbefore=3)
                 self.assertEqual(0, cpi.returncode)  # no error return
 
@@ -305,7 +305,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 _terminate_wait_kill(cpi, sleepbefore=3)
                 _, cpistderr = cpi.communicate()
                 self.assertEqual(1, cpi.returncode)  # error return
@@ -319,7 +319,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 _terminate_wait_kill(cpi, sleepbefore=3)
                 _, cpistderr = cpi.communicate()
                 self.assertEqual(0, cpi.returncode)  # no error return
@@ -338,7 +338,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
                  os.path.join(serverdir, reponame) + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir) as cpi:
+                    shell=True, cwd=tmpdir) as cpi:
                 dt0 = time.time()
                 while time.time() - dt0 < 3:
                     # wait up to 3 seconds for mounting
