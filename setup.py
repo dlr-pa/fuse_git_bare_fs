@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2023-03-31
+:Date: 2023-04-03
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -49,7 +49,7 @@ class TestWithPytest(Command):
     def finalize_options(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-02-04, 2023-03-31
+        :Date: 2021-02-04
         """
 
     def run(self):
@@ -305,7 +305,7 @@ REQUIRED_MODULES += ['xdist']
 
 setup(
     name='fuse_git_bare_fs',
-    version='2023.03.31',
+    version='2023.04.03',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
