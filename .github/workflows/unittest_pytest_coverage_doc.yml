@@ -136,7 +136,7 @@ jobs:
   deploy_pages:
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     runs-on: ubuntu-latest
-    needs: [ubuntu-1804_test_doc, ubuntu-2004_test_doc, ubuntu-2204_test_doc, opensuse_leap_154_test]
+    needs: [ubuntu-2004_test_doc, ubuntu-2204_test_doc, opensuse_leap_154_test]
     steps:
     - uses: actions/checkout@v2
     - name: apt-get update
