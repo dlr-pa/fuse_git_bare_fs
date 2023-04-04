@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2023-03-31
+:Date: 2023-03-31, 2023-04-04
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree'
@@ -29,19 +29,10 @@ import tempfile
 import time
 import unittest
 
-
-def _terminate_wait_kill(cpi, timeout=3, sleepbefore=None, sleepafter=None):
-    """
-    :Author: Daniel Mohr
-    :Date: 2022-01-13
-    """
-    if sleepbefore is not None:
-        time.sleep(sleepbefore)
-    cpi.terminate()
-    cpi.wait(timeout=timeout)
-    cpi.kill()
-    if sleepafter is not None:
-        time.sleep(sleepafter)
+try:
+    from .terminate_wait_kill import _terminate_wait_kill
+except ModuleNotFoundError:
+    from terminate_wait_kill import _terminate_wait_kill
 
 
 def _prepare_test_environment(serverdir, clientdir, mountpointdir,
