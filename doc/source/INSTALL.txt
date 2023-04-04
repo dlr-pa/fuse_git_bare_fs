@@ -2,7 +2,7 @@
 INSTALL: fuse_git_bare_fs
 =========================
 
-:Version: 2021-08-09
+:Version: 2023-04-04
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
 
@@ -201,7 +201,7 @@ Keep in mind to have the right paths.
   For example::
 
     export PATH=$PATH:~/.local/bin
-    export PYTHONPATH=~/.local/lib/python3.6
+    export PYTHONPATH=~/.local/lib/python3.10
 
 
 after you install
@@ -234,9 +234,30 @@ This command has a few interesting parameters, e. g.::
 hints
 =====
 
+The github workflows run tests on different platforms and show how you can
+install `fuse_git_bare_fs`.
+
 Ubuntu 18.04
 ------------
 
 You can find most necessary modules in the package management of Ubuntu 18.04, e. g. ::
 
     sudo app install python3-fusepy
+
+Ubuntu 20.04, 22.04 and Debian
+------------------------------
+
+You can find most necessary modules in the package management of Ubuntu 18.04, e. g. ::
+
+    sudo app install python3-fusepy fuse
+
+To use everything including testing and generating documentation, you need:
+
+    sudo app install pep8 pylint3 python3-recommonmark python3-pytest python3-dulwich python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra python3-pip fuse
+
+opensuse/leap 15.5
+------------------
+
+You can find most necessary modules in the package management, e. g. ::
+
+    sudo app install git-annex python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex git python3-pip fuse
