@@ -16,14 +16,7 @@ Or you can run only one test, e. g.:
     PyFuseGitBareFsRepotoolsGit.test_repotools_git_get_ref
 """
 
-import os
-import tempfile
 import unittest
-
-try:
-    from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
-except ModuleNotFoundError:
-    from prepare_simple_test_environment import PrepareSimpleTestEnvironment
 
 try:
     from .py_fuse_git_bare_fs_repotools_dulwich_git import \
@@ -34,8 +27,7 @@ except ModuleNotFoundError:
 
 
 class PyFuseGitBareFsRepotoolsGit(
-        unittest.TestCase, PrepareSimpleTestEnvironment,
-        PyFuseGitBareFsRepotoolsDulwichGitMixIn):
+        unittest.TestCase, PyFuseGitBareFsRepotoolsDulwichGitMixIn):
     """
     :Author: Daniel Mohr
     :Date: 2021-10-12, 2023-04-04
@@ -45,36 +37,17 @@ class PyFuseGitBareFsRepotoolsGit(
     def test_get_ref(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2021-10-12, 2023-04-04
 
         It tests the tool/function get_ref from the module
         py_fuse_git_bare_fs.repotools_git
         """
-        from py_fuse_git_bare_fs.repotools_git import get_ref
-        serverdir = 'server'
-        clientdir = 'client'
-        mountpointdir = 'mountpoint'
-        reponame = 'repo1'
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with self.assertRaises(FileNotFoundError):
-                commit_hash = get_ref(
-                    os.path.join(tmpdir, serverdir, reponame), b'master')
-            # prepare test environment
-            self._prepare_simple_test_environment1(
-                tmpdir, serverdir, clientdir, mountpointdir, reponame)
-            # run tests
-            commit_hash = get_ref(
-                os.path.join(tmpdir, serverdir, reponame), b'master')
-            self.assertIsInstance(commit_hash, str)
-            commit_hash = get_ref(
-                os.path.join(tmpdir, serverdir, reponame), b'main')
-            self.assertIsInstance(commit_hash, str)
-            self.assertEqual(commit_hash, 'main missing')
+        self._test_get_ref('git')
 
     def test_get_blob_data(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2021-10-12, 2023-04-04
 
         It tests the tool/function get_blob_data from the module
         py_fuse_git_bare_fs.repotools_git
@@ -84,32 +57,12 @@ class PyFuseGitBareFsRepotoolsGit(
           env python3 py_fuse_git_bare_fs_repotools_git.py \
             PyFuseGitBareFsRepotoolsGit.test_repotools_git_get_blob_data
         """
-        from py_fuse_git_bare_fs.repotools_git import get_blob_data
-        serverdir = 'server'
-        clientdir = 'client'
-        mountpointdir = 'mountpoint'
-        reponame = 'repo1'
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with self.assertRaises(FileNotFoundError):
-                commit_hash = get_blob_data(
-                    os.path.join(tmpdir, serverdir, reponame),
-                    b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
-                print('\n\n', commit_hash, '\n\n')
-            # prepare test environment
-            self._prepare_simple_test_environment1(
-                tmpdir, serverdir, clientdir, mountpointdir, reponame)
-            # run tests
-            data = get_blob_data(
-                os.path.join(tmpdir, serverdir, reponame),
-                b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
-            self.assertEqual(
-                data,
-                b'2e65efe2a145dda7ee51d1741299f848e5bf752e blob 1\na\n')
+        self._test_get_blob_data('git')
 
     def test_get_repo_data(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2021-10-12, 2023-04-04
 
         It tests the tool/function get_repo_data from the module
         py_fuse_git_bare_fs.repotools_git
@@ -119,42 +72,12 @@ class PyFuseGitBareFsRepotoolsGit(
           env python3 py_fuse_git_bare_fs_repotools_git.py \
             PyFuseGitBareFsRepotoolsGit.test_repotools_git_get_repo_data
         """
-        import re
-        import time
-        from py_fuse_git_bare_fs.repotools_git import get_repo_data
-        serverdir = 'server'
-        clientdir = 'client'
-        mountpointdir = 'mountpoint'
-        reponame = 'repo1'
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with self.assertRaises(FileNotFoundError):
-                info = get_repo_data(
-                    os.path.join(tmpdir, serverdir, reponame),
-                    b'master', re.compile(r' ([0-9]+) [0-9+-]+$'))
-            # prepare test environment
-            self._prepare_simple_test_environment1(
-                tmpdir, serverdir, clientdir, mountpointdir, reponame)
-            act_time = int(time.time())
-            # run tests
-            info = get_repo_data(
-                os.path.join(tmpdir, serverdir, reponame),
-                b'master', re.compile(r' ([0-9]+) [0-9+-]+$'))
-            self.assertIsInstance(info, tuple)
-            self.assertEqual(
-                info[1], 'b213332fda65de4d2848a98e01f43d689cccbe6d')
-            self.assertTrue(info[2] - 1 <= act_time)
-            self.assertTrue(info[2] >= act_time - 1)
-            info = True
-            with self.assertWarns(UserWarning):
-                info = get_repo_data(
-                    os.path.join(tmpdir, serverdir, reponame),
-                    b'main', re.compile(r' ([0-9]+) [0-9+-]+$'))
-            self.assertFalse(info)
+        self._test_get_repo_data('git')
 
     def test_get_size_of_blob(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2021-10-12, 2023-04-04
 
         It tests the tool/function get_size_of_blob from the module
         py_fuse_git_bare_fs.repotools_git
@@ -164,24 +87,7 @@ class PyFuseGitBareFsRepotoolsGit(
           env python3 py_fuse_git_bare_fs_repotools_git.py \
             PyFuseGitBareFsRepotoolsGit.test_get_size_of_blob
         """
-        from py_fuse_git_bare_fs.repotools_git import get_size_of_blob
-        serverdir = 'server'
-        clientdir = 'client'
-        mountpointdir = 'mountpoint'
-        reponame = 'repo1'
-        with tempfile.TemporaryDirectory() as tmpdir:
-            with self.assertRaises(FileNotFoundError):
-                get_size_of_blob(
-                    os.path.join(tmpdir, serverdir, reponame),
-                    b'2e65efe2a145dda7ee51d1741299f848e5bf752e')
-            # prepare test environment
-            self._prepare_simple_test_environment1(
-                tmpdir, serverdir, clientdir, mountpointdir, reponame)
-            # run tests
-            self.assertEqual(
-                get_size_of_blob(os.path.join(tmpdir, serverdir, reponame),
-                                 b'2e65efe2a145dda7ee51d1741299f848e5bf752e'),
-                1)
+        self._test_get_size_of_blob('git')
 
     def test_get_tree(self):
         """
