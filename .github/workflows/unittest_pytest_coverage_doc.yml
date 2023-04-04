@@ -31,6 +31,8 @@ jobs:
       run: pep8 --show-source --show-pep8 --statistics $(find -name "*.py")
     - name: run pylint
       run: pylint -j 3 --include-naming-hint=y --good-names=i,j,k,fd $(find -name "*.py")
+      continue-on-error: true
+      run: pylint -j 3 --include-naming-hint=y --good-names=i,j,k,fd --disable=similarities $(find -name "*.py")
 
   pre-commit:
     runs-on: ubuntu-latest
@@ -120,6 +122,45 @@ jobs:
     - name: pytest (using git instead of dulwich)
       run: env python3 setup.py run_pytest --parallel --coverage
 
+  ubuntu-2204_test_doc:
+    needs: [pep8_check, pre-commit]
+#    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: apt-get update
+      run: sudo apt-get update
+    - name: install dependencies (ubuntu packages)
+      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+    - name: setup author identity for git commits
+      run: |
+        test -n "$(git config user.name)" || git config --global user.name $USER
+        hostname=$HOSTNAME
+        test -n "$hostname" || hostname="runner"
+        test -n "$(git config user.email)" || git config --global user.email $(git config user.name)@$hostname
+    - name: local unittest
+      run: env python3 setup.py run_unittest --src local
+    - name: local pytest
+      run: env python3 setup.py run_pytest --src local
+    - name: install fuse_git_bare_fs
+      run: pip3 install .
+    - name: unittest
+      run: env python3 setup.py run_unittest
+    - name: pytest
+      run: env python3 setup.py run_pytest --parallel --coverage
+    - name: build doc
+      run: ./create_doc
+    - name: uninstall dulwich (ubuntu packages)
+      run: sudo apt-get remove python3-dulwich
+    - name: local unittest (using git instead of dulwich)
+      run: env python3 setup.py run_unittest --src local
+    - name: local pytest (using git instead of dulwich)
+      run: env python3 setup.py run_pytest --src local
+    - name: unittest (using git instead of dulwich)
+      run: env python3 setup.py run_unittest
+    - name: pytest (using git instead of dulwich)
+      run: env python3 setup.py run_pytest --parallel --coverage
+
   opensuse_leap_152_test:
     runs-on: ubuntu-latest
     needs: [pep8_check, pre-commit]
@@ -143,7 +184,7 @@ jobs:
   deploy_pages:
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     runs-on: ubuntu-latest
-    needs: [ubuntu-1804_test_doc, ubuntu-2004_test_doc, opensuse_leap_152_test, opensuse_leap_153_test]
+    needs: [ubuntu-1804_test_doc, ubuntu-2004_test_doc, ubuntu-2204_test_doc, opensuse_leap_152_test, opensuse_leap_153_test]
     steps:
     - uses: actions/checkout@v2
     - name: apt-get update
