@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-12, 2022-06-27, 2023-03-31 (last change).
+:Date: 2022-01-12, 2022-06-27, 2023-03-31, 2023-04-04 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -17,6 +17,7 @@ from .read_write_lock import ReadWriteLock
 from .repo_class import RepoClass
 from .simple_file_cache import SimpleFileCache
 from .simple_file_handler import SimpleFileHandlerClass
+from .used_fs_operations_mixin import _UsedFsOperationsMixin
 
 try:
     import fusepy  # https://github.com/fusepy/fusepy
@@ -31,33 +32,15 @@ def _extract_repopath_from_path(actual_repo, path):
     return repopath
 
 
-class _GitBareRepoTreeMixin(_EmptyAttrMixin):
+class _GitBareRepoTreeMixin(_EmptyAttrMixin, _UsedFsOperationsMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-12, 2022-06-27, 2023-03-31
+    :Date: 2022-01-12, 2022-06-27, 2023-03-31, 2023-04-04
 
     read only access to working trees of git bare repositories
     """
     # pylint: disable=too-many-instance-attributes,too-many-arguments
     # /usr/lib/python3/dist-packages/fusepy.py
-
-    # disable unused operations to avoid unnecessary errors:
-    access = None
-    flush = None
-    getxattr = None
-    ioctl = None
-    listxattr = None
-    opendir = None
-    releasedir = None
-    statfs = None
-    # we only use/provide:
-    #  getattr
-    #  read
-    #  readdir
-    #  readlink
-    #  open
-    #  release
-    #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
                  simple_file_handler=None, file_st_modes=None, nofail=False,
