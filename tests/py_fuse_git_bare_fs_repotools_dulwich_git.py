@@ -10,7 +10,7 @@ import tempfile
 
 try:
     from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from prepare_simple_test_environment import PrepareSimpleTestEnvironment
 
 
@@ -40,7 +40,7 @@ class PyFuseGitBareFsRepotoolsDulwichGitMixIn(PrepareSimpleTestEnvironment):
             # pylint: disable = unused-variable, unused-import
             try:
                 import dulwich
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 self.skipTest('python module dulwich not available')
                 return
             from py_fuse_git_bare_fs.repotools_dulwich import get_ref
@@ -82,7 +82,7 @@ class PyFuseGitBareFsRepotoolsDulwichGitMixIn(PrepareSimpleTestEnvironment):
             # pylint: disable = unused-variable, unused-import
             try:
                 import dulwich
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 self.skipTest('python module dulwich not available')
                 return
             import re
@@ -127,7 +127,7 @@ class PyFuseGitBareFsRepotoolsDulwichGitMixIn(PrepareSimpleTestEnvironment):
             # pylint: disable = unused-variable, unused-import
             try:
                 import dulwich
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 self.skipTest('python module dulwich not available')
                 return
             import re
@@ -182,7 +182,7 @@ class PyFuseGitBareFsRepotoolsDulwichGitMixIn(PrepareSimpleTestEnvironment):
             # pylint: disable = unused-variable, unused-import
             try:
                 import dulwich
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 self.skipTest('python module dulwich not available')
                 return
             from py_fuse_git_bare_fs.repotools_dulwich import get_size_of_blob
@@ -222,7 +222,7 @@ class PyFuseGitBareFsRepotoolsDulwichGitMixIn(PrepareSimpleTestEnvironment):
             # pylint: disable = unused-variable, unused-import
             try:
                 import dulwich
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 self.skipTest('python module dulwich not available')
                 return
             import re

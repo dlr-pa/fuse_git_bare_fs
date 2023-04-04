@@ -31,13 +31,18 @@ import unittest
 
 try:
     from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from prepare_simple_test_environment import PrepareSimpleTestEnvironment
 
 try:
     from .terminate_wait_kill import _terminate_wait_kill
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from terminate_wait_kill import _terminate_wait_kill
+
+try:
+    from .list_dir_compare import ListDirCompare
+except (ModuleNotFoundError, ImportError):
+    from list_dir_compare import ListDirCompare
 
 
 def _prepare_test_environment(serverdir, clientdir, mountpointdir,
@@ -82,10 +87,11 @@ def _prepare_test_environment(serverdir, clientdir, mountpointdir,
         timeout=3, check=True)
 
 
-class ScriptFuseGitBareFsTree(unittest.TestCase, PrepareSimpleTestEnvironment):
+class ScriptFuseGitBareFsTree(
+        unittest.TestCase, PrepareSimpleTestEnvironment, ListDirCompare):
     """
     :Author: Daniel Mohr
-    :Date: 2023-03-31
+    :Date: 2023-03-31, 2023-04-04
     """
 
     def test_fuse_git_bare_fs_tree1(self):
@@ -157,7 +163,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase, PrepareSimpleTestEnvironment):
     def test_fuse_git_bare_fs_tree2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         env python3 script_fuse_git_bare_fs_tree.py \
           ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree2
@@ -186,32 +192,23 @@ class ScriptFuseGitBareFsTree(unittest.TestCase, PrepareSimpleTestEnvironment):
                     # typical it needs less than 0.4 seconds
                     if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
                         break
-                self.assertEqual(
-                    set(os.listdir(
-                        os.path.join(tmpdir, mountpointdir, reponame1))),
-                    {'a', 'b', 'd', 'l'})
+                self._list_dir_compare(
+                    os.path.join(tmpdir, mountpointdir, reponame1),
+                    {'a', 'b', 'd', 'l'},
+                    [b'total 0',
+                     b'-rw-r--r-- 0 .+ a',
+                     b'-rw-r--r-- 0 .+ b',
+                     b'drwxr-xr-x 0 4096 .+ d',
+                     b'lrwxrwxrwx 0 .+ l -> a'])
                 self.assertEqual(
                     set(os.listdir(
                         os.path.join(tmpdir, mountpointdir, reponame2))),
                     {'2'})
-                cp_ls = subprocess.run(
-                    ['ls -g -G'],
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                    shell=True,
-                    cwd=os.path.join(tmpdir, mountpointdir, reponame1),
-                    timeout=3, check=True)
-                cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
-                self.assertEqual(cp_ls_stdout[0], b'total 0')
-                self.assertTrue(
-                    bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
-                self.assertTrue(
-                    bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
-                self.assertTrue(
-                    bool(re.findall(b'drwxr-xr-x 0 4096 .+ d',
-                                    cp_ls_stdout[3])))
-                self.assertTrue(
-                    bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a',
-                                    cp_ls_stdout[4])))
+                self._list_dir_compare(
+                    os.path.join(tmpdir, mountpointdir, reponame2),
+                    {'2'},
+                    [b'total 0',
+                     b'-rw-r--r-- 0 .+ 2'])
                 # read data
                 joinedpath = os.path.join(
                     tmpdir, mountpointdir, reponame1, 'a')

@@ -21,7 +21,7 @@ import unittest
 try:
     from .py_fuse_git_bare_fs_repotools_dulwich_git import \
         PyFuseGitBareFsRepotoolsDulwichGitMixIn
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from py_fuse_git_bare_fs_repotools_dulwich_git import \
         PyFuseGitBareFsRepotoolsDulwichGitMixIn
 

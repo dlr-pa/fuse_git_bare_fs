@@ -31,7 +31,7 @@ import unittest
 
 try:
     from .terminate_wait_kill import _terminate_wait_kill
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from terminate_wait_kill import _terminate_wait_kill
 
 

@@ -24,7 +24,7 @@ import unittest
 
 try:
     from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from prepare_simple_test_environment import PrepareSimpleTestEnvironment
 
 
@@ -107,7 +107,7 @@ class PyFuseGitBareFsRepoClass(
             try:
                 # pylint: disable = bad-option-value, import-outside-toplevel
                 import fusepy
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 # pylint: disable = bad-option-value, import-outside-toplevel
                 import fuse as fusepy
             with self.assertRaises(fusepy.FuseOSError):
