@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-04-17 (last change).
+:Date: 2021-04-17, 2023-04-03 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -12,7 +12,7 @@ import threading
 class ReadWriteLock():
     """
     :Author: Daniel Mohr
-    :Date: 2021-04-17
+    :Date: 2021-04-17, 2023-04-03
     """
 
     def __init__(self):
@@ -37,31 +37,29 @@ class ReadWriteLock():
     def acquire_read(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-17
+        :Date: 2021-04-17, 2023-04-03
 
         Locks a read.
         """
-        self.block_read_lock.acquire()
-        self.read_lock.acquire()
-        self.value += 1
-        if self.value == 1:
-            self.write_lock.acquire()
-        self.read_lock.release()
-        self.block_read_lock.release()
+        with self.block_read_lock:
+            with self.read_lock:
+                self.value += 1
+                if self.value == 1:
+                    # pylint: disable=consider-using-with
+                    self.write_lock.acquire()
 
     def release_read(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-17
+        :Date: 2021-04-17, 2023-04-03
 
         Release a read.
         """
         assert self.value > 0
-        self.read_lock.acquire()
-        self.value -= 1
-        if self.value == 0:
-            self.write_lock.release()
-        self.read_lock.release()
+        with self.read_lock:
+            self.value -= 1
+            if self.value == 0:
+                self.write_lock.release()
 
     @contextmanager
     def read_locked(self):
@@ -83,13 +81,13 @@ class ReadWriteLock():
     def acquire_write(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-17
+        :Date: 2021-04-17, 2023-04-03
 
         Locks a write.
         """
-        self.block_read_lock.acquire()
-        self.write_lock.acquire()
-        self.block_read_lock.release()
+        with self.block_read_lock:
+            # pylint: disable=consider-using-with
+            self.write_lock.acquire()
 
     def release_write(self):
         """

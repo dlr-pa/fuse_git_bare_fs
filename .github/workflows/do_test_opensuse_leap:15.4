@@ -1,0 +1,27 @@
+#!/bin/sh -l
+set -e -x
+cd /app/
+
+zypper --non-interactive install git-annex python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex git python3-pip fuse
+
+env python3 -V
+
+git config --global user.name "tester"
+test -n "$hostname" || hostname="runner"
+git config --global user.email "$(git config user.name)@$hostname"
+
+env python3 setup.py run_unittest --src local
+
+env python3 setup.py run_pytest --src local
+
+pip3 install .
+
+env python3 setup.py run_unittest
+
+env python3 setup.py run_pytest --parallel --coverage
+
+zypper --non-interactive remove python3-dulwich
+
+env python3 setup.py run_unittest
+
+env python3 setup.py run_pytest --parallel --coverage

@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-06-27
+:Date: 2023-03-31, 2023-04-04
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs tree'
@@ -28,6 +28,21 @@ import sys
 import tempfile
 import time
 import unittest
+
+try:
+    from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
+except (ModuleNotFoundError, ImportError):
+    from prepare_simple_test_environment import PrepareSimpleTestEnvironment
+
+try:
+    from .terminate_wait_kill import _terminate_wait_kill
+except (ModuleNotFoundError, ImportError):
+    from terminate_wait_kill import _terminate_wait_kill
+
+try:
+    from .list_dir_compare import ListDirCompare
+except (ModuleNotFoundError, ImportError):
+    from list_dir_compare import ListDirCompare
 
 
 def _prepare_test_environment(serverdir, clientdir, mountpointdir,
@@ -72,16 +87,22 @@ def _prepare_test_environment(serverdir, clientdir, mountpointdir,
         timeout=3, check=True)
 
 
-class ScriptFuseGitBareFsTree(unittest.TestCase):
+class ScriptFuseGitBareFsTree(
+        unittest.TestCase, PrepareSimpleTestEnvironment, ListDirCompare):
     """
     :Author: Daniel Mohr
-    :Date: 2022-06-27
+    :Date: 2023-03-31, 2023-04-04
     """
 
     def test_fuse_git_bare_fs_tree1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2023-03-31
+
+        env python3 script_fuse_git_bare_fs_tree.py \
+          ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree1
+
+        pytest-3 -k test_fuse_git_bare_fs_tree1 script_fuse_git_bare_fs_tree.py
         """
         serverdir = 'server'
         clientdir = 'client'
@@ -89,66 +110,67 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         reponame1 = 'repo1'
         reponame2 = 'foo/repo2'
         with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
             _prepare_test_environment(serverdir, clientdir, mountpointdir,
                                       reponame1, reponame2, tmpdir)
             # run tests (bare repositories)
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' +
                  serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame1))),
-                {'a', 'b', 'd', 'l'})
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame2))),
-                {'2'})
-            # read data
-            with open(os.path.join(
-                    tmpdir, mountpointdir, reponame1, 'a')) as fd:
-                data = fd.read()
-            self.assertEqual(data, 'a\n')
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpi.stdout.close()
-            cpi.stderr.close()
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir, reponame1))),
+                    {'a', 'b', 'd', 'l'})
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir, reponame2))),
+                    {'2'})
+                # read data
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, reponame1, 'a')
+                with open(joinedpath, encoding='utf-8') as fd:
+                    data = fd.read()
+                self.assertEqual(data, 'a\n')
+                _terminate_wait_kill(cpi)
             # run tests (non bare repositories)
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' +
                  clientdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame1))),
-                {'a', 'b', 'd', 'l'})
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpi.stdout.close()
-            cpi.stderr.close()
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir, reponame1))),
+                    {'a', 'b', 'd', 'l'})
+                _terminate_wait_kill(cpi)
 
     def test_fuse_git_bare_fs_tree2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-12
+        :Date: 2023-03-31, 2023-04-04
+
+        env python3 script_fuse_git_bare_fs_tree.py \
+          ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree2
+
+        pytest-3 -k test_fuse_git_bare_fs_tree2 script_fuse_git_bare_fs_tree.py
         """
-        # pylint: disable=too-many-statements
+        # pylint: disable=too-many-statements,too-many-locals
         serverdir = 'server'
         clientdir = 'client'
         mountpointdir = 'mountpoint'
@@ -158,110 +180,103 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
             _prepare_test_environment(serverdir, clientdir, mountpointdir,
                                       reponame1, reponame2, tmpdir)
             # run tests (bare repositories)
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' +
                  serverdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame1))),
-                {'a', 'b', 'd', 'l'})
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame2))),
-                {'2'})
-            cp_ls = subprocess.run(
-                ['ls -g -G'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, mountpointdir, reponame1),
-                timeout=3, check=True)
-            cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
-            self.assertEqual(cp_ls_stdout[0], b'total 0')
-            self.assertTrue(
-                bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
-            self.assertTrue(
-                bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
-            self.assertTrue(
-                bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
-            self.assertTrue(
-                bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
-            # read data
-            with open(os.path.join(
-                    tmpdir, mountpointdir, reponame1, 'a')) as fd:
-                data = fd.read()
-            self.assertEqual(data, 'a\n')
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpistdout, cpistderr = cpi.communicate()
-            self.assertFalse(
-                bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
-                msg='stdout logs errror(s):\n' + cpistdout.decode())
-            self.assertFalse(
-                bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
-                msg='stderr logs errror(s):\n' + cpistderr.decode())
-            cpi.stdout.close()
-            cpi.stderr.close()
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                self._list_dir_compare(
+                    os.path.join(tmpdir, mountpointdir, reponame1),
+                    {'a', 'b', 'd', 'l'},
+                    [b'total 0',
+                     b'-rw-r--r-- 0 .+ a',
+                     b'-rw-r--r-- 0 .+ b',
+                     b'drwxr-xr-x 0 4096 .+ d',
+                     b'lrwxrwxrwx 0 .+ l -> a'])
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir, reponame2))),
+                    {'2'})
+                self._list_dir_compare(
+                    os.path.join(tmpdir, mountpointdir, reponame2),
+                    {'2'},
+                    [b'total 0',
+                     b'-rw-r--r-- 0 .+ 2'])
+                # read data
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, reponame1, 'a')
+                with open(joinedpath, encoding='utf-8') as fd:
+                    data = fd.read()
+                self.assertEqual(data, 'a\n')
+                _terminate_wait_kill(cpi)
+                cpistdout, cpistderr = cpi.communicate()
+                self.assertFalse(
+                    bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
+                    msg='stdout logs errror(s):\n' + cpistdout.decode())
+                self.assertFalse(
+                    bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
+                    msg='stderr logs errror(s):\n' + cpistderr.decode())
             # run tests (non bare repositories)
-            cpi = subprocess.Popen(
+            with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs tree ' +
                  clientdir + ' ' +
                  mountpointdir],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=tmpdir)
-            dt0 = time.time()
-            while time.time() - dt0 < 3:  # wait up to 3 seconds for mounting
-                # typical it needs less than 0.4 seconds
-                if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
-                    break
-            self.assertEqual(
-                set(os.listdir(
-                    os.path.join(tmpdir, mountpointdir, reponame1))),
-                {'a', 'b', 'd', 'l'})
-            cp_ls = subprocess.run(
-                ['ls -g -G'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, mountpointdir, reponame1),
-                timeout=3, check=True)
-            cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
-            self.assertEqual(cp_ls_stdout[0], b'total 0')
-            self.assertTrue(
-                bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
-            self.assertTrue(
-                bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
-            self.assertTrue(
-                bool(re.findall(b'drwxr-xr-x 0 4096 .+ d', cp_ls_stdout[3])))
-            self.assertTrue(
-                bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a', cp_ls_stdout[4])))
-            # read data
-            with open(os.path.join(
-                    tmpdir, mountpointdir, reponame1, 'a')) as fd:
-                data = fd.read()
-            self.assertEqual(data, 'a\n')
-            cpi.terminate()
-            cpi.wait(timeout=3)
-            cpi.kill()
-            cpistdout, cpistderr = cpi.communicate()
-            self.assertFalse(
-                bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
-                msg='stdout logs errror(s):\n' + cpistdout.decode())
-            self.assertFalse(
-                bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
-                msg='stderr logs errror(s):\n' + cpistderr.decode())
-            cpi.stdout.close()
-            cpi.stderr.close()
+                    shell=True, cwd=tmpdir) as cpi:
+                dt0 = time.time()
+                while time.time() - dt0 < 3:
+                    # wait up to 3 seconds for mounting
+                    # typical it needs less than 0.4 seconds
+                    if bool(os.listdir(os.path.join(tmpdir, mountpointdir))):
+                        break
+                self.assertEqual(
+                    set(os.listdir(
+                        os.path.join(tmpdir, mountpointdir, reponame1))),
+                    {'a', 'b', 'd', 'l'})
+                cp_ls = subprocess.run(
+                    ['ls -g -G'],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    shell=True,
+                    cwd=os.path.join(tmpdir, mountpointdir, reponame1),
+                    timeout=3, check=True)
+                cp_ls_stdout = cp_ls.stdout.split(sep=b'\n')
+                self.assertEqual(cp_ls_stdout[0], b'total 0')
+                self.assertTrue(
+                    bool(re.findall(b'-rw-r--r-- 0 .+ a', cp_ls_stdout[1])))
+                self.assertTrue(
+                    bool(re.findall(b'-rw-r--r-- 0 .+ b', cp_ls_stdout[2])))
+                self.assertTrue(
+                    bool(re.findall(b'drwxr-xr-x 0 4096 .+ d',
+                                    cp_ls_stdout[3])))
+                self.assertTrue(
+                    bool(re.findall(b'lrwxrwxrwx 0 .+ l -> a',
+                                    cp_ls_stdout[4])))
+                # read data
+                joinedpath = os.path.join(
+                    tmpdir, mountpointdir, reponame1, 'a')
+                with open(joinedpath, encoding='utf-8') as fd:
+                    data = fd.read()
+                self.assertEqual(data, 'a\n')
+                _terminate_wait_kill(cpi)
+                cpistdout, cpistderr = cpi.communicate()
+                self.assertFalse(
+                    bool(re.findall(b'error', cpistdout, flags=re.IGNORECASE)),
+                    msg='stdout logs errror(s):\n' + cpistdout.decode())
+                self.assertFalse(
+                    bool(re.findall(b'error', cpistderr, flags=re.IGNORECASE)),
+                    msg='stderr logs errror(s):\n' + cpistderr.decode())
 
     def test_fuse_git_bare_fs_tree_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2021-04-26, 2023-04-04
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -270,24 +285,9 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                add_git=True)
             # run tests
             subprocess.run(
                 ['fuse_git_bare_fs tree -daemon ' +
@@ -310,7 +310,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_daemon2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-01-13
+        :Date: 2023-03-31, 2023-04-04
 
         env python3 script_fuse_git_bare_fs_tree.py \
           ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon2
@@ -323,24 +323,9 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         logfile = 'log.txt'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                add_git=True)
             # run tests
             subprocess.run(
                 ['fuse_git_bare_fs tree -daemon -logfile ' +
@@ -363,7 +348,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
             # check log
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
-            with open(os.path.join(tmpdir, logfile)) as fd:
+            with open(os.path.join(tmpdir, logfile), encoding='utf-8') as fd:
                 data = fd.read()
             self.assertFalse(
                 bool(re.findall('error', data, flags=re.IGNORECASE)),
@@ -372,10 +357,13 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_daemon3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-06-27
+        :Date: 2023-03-31
 
         env python3 script_fuse_git_bare_fs_tree.py \
           ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon3
+
+        pytest-3 -k test_fuse_git_bare_fs_tree_daemon3 \
+          script_fuse_git_bare_fs_tree.py
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -420,7 +408,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
             # check log
             self.assertTrue(os.path.isfile(os.path.join(tmpdir, logfile)))
             self.assertTrue(os.path.getsize(os.path.join(tmpdir, logfile)) > 0)
-            with open(os.path.join(tmpdir, logfile)) as fd:
+            with open(os.path.join(tmpdir, logfile), encoding='utf-8') as fd:
                 data = fd.read()
             self.assertFalse(
                 bool(re.findall('error', data, flags=re.IGNORECASE)),

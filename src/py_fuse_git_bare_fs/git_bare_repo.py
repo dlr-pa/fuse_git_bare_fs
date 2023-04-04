@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-01-12 (last change).
+:Date: 2022-01-12, 2023-04-04 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -11,6 +11,7 @@ import warnings
 
 from .repo_class import RepoClass
 from .simple_file_handler import SimpleFileHandlerClass
+from .used_fs_operations_mixin import _UsedFsOperationsMixin
 
 try:
     import fusepy  # https://github.com/fusepy/fusepy
@@ -18,33 +19,15 @@ except ModuleNotFoundError:
     import fuse as fusepy
 
 
-class _GitBareRepoMixin():
+class _GitBareRepoMixin(_UsedFsOperationsMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2022-01-12
+    :Date: 2022-01-12, 2023-04-04
 
     read only access to the working tree of a git bare repository
     """
     # pylint: disable=too-many-arguments
     # /usr/lib/python3/dist-packages/fusepy.py
-
-    # disable unused operations to avoid unnecessary errors:
-    access = None
-    flush = None
-    getxattr = None
-    ioctl = None
-    listxattr = None
-    opendir = None
-    releasedir = None
-    statfs = None
-    # we only use/provide:
-    #  getattr
-    #  read
-    #  readdir
-    #  readlink
-    #  open
-    #  release
-    #  utimens
 
     def __init__(self, src_dir, root_object, max_cache_size,
                  simple_file_handler=None, file_st_modes=None, nofail=False,

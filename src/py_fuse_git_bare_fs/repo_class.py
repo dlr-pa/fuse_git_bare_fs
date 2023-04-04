@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2022-02-23 (last change).
+:Date: 2022-02-23, 2023-03-31 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -32,7 +32,7 @@ except (ModuleNotFoundError, ImportError):
 class RepoClass(_EmptyAttrMixin):
     """
     :Author: Daniel Mohr
-    :Date: 2022-02-23
+    :Date: 2022-02-23, 2023-03-31
 
     https://git-scm.com/book/en/v2
     https://git-scm.com/docs/git-cat-file
@@ -65,7 +65,7 @@ class RepoClass(_EmptyAttrMixin):
             self.cache = SimpleFileCache(max_cache_size=max_cache_size)
         else:
             self.cache = cache
-        self.content_cache = dict()
+        self.content_cache = {}
         self.content_cache_size = 0
         if simple_file_handler is None:
             self.simple_file_handler = SimpleFileHandlerClass()
@@ -98,7 +98,7 @@ class RepoClass(_EmptyAttrMixin):
             self.commit_hash = None
             self.tree_hash = None
             self.time = None
-            self.content_cache = dict()
+            self.content_cache = {}
             self.cache.clear_repo_old(self.src_dir)
             repo_data = get_repo_data(
                 self.src_dir,
@@ -171,7 +171,7 @@ class RepoClass(_EmptyAttrMixin):
     def getattr(self, path):
         """
         :Author: Daniel Mohr
-        :Date: 2022-02-23
+        :Date: 2022-02-23, 2023-03-31
 
         get attributes of the path
         """
@@ -192,8 +192,8 @@ class RepoClass(_EmptyAttrMixin):
                 # file:///usr/share/doc/python3/html/library/errno.html
                 # no such file or directory
                 if (tail == '') and (head == '/'):
-                    msg = 'root repository object "%s" does not exists. ' % \
-                        self.root_object
+                    msg = f'root repository object "{self.root_object}" ' + \
+                        'does not exists. '
                     msg += 'Mountpoint will be empty.'
                     warnings.warn(msg)
                     ret = self._empty_dir_attr.copy()
@@ -203,7 +203,7 @@ class RepoClass(_EmptyAttrMixin):
                     return ret
                 self.lock.release_read()
                 raise fusepy.FuseOSError(errno.ENOENT)
-        ret = dict()
+        ret = {}
         ret['st_uid'], ret['st_gid'] = self.st_uid_st_gid
         ret['st_atime'] = ret['st_mtime'] = ret['st_ctime'] = self.time
         if (tail == '') or (path in self.tree):  # path is dir

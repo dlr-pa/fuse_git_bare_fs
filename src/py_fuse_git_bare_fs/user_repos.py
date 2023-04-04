@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2021-10-14 (last change).
+:Date: 2021-10-14, 2023-03-31, 2023-04-03 (last change).
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -31,7 +31,7 @@ def _filter_repo_names(reponame):
 class UserRepos():
     """
     :Author: Daniel Mohr
-    :Date: 2021-10-14
+    :Date: 2021-10-14, 2023-03-31, 2023-04-03
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -106,18 +106,19 @@ class UserRepos():
                 self.users = None
                 self.users_from_file = None
                 self.repos = None
-                self.userrepoaccess = dict()
+                self.userrepoaccess = {}
                 return False
             if commit_hash != self.commit_hash:
                 self.commit_hash = commit_hash
                 self.users = None
                 self.repos = None
-                self.userrepoaccess = dict()
+                self.userrepoaccess = {}
             if ((self.gitolite_user_file is not None) and
                     os.path.isfile(self.gitolite_user_file)):
                 mtime_gitolite_user_file = \
                     os.path.getmtime(self.gitolite_user_file)
-                with open(self.gitolite_user_file, 'r') as fd:
+                with open(self.gitolite_user_file,
+                          mode='r', encoding='utf-8') as fd:
                     users_from_file = set(fd.read().splitlines())
                 if self.mtime_gitolite_user_file != mtime_gitolite_user_file:
                     self.mtime_gitolite_user_file = mtime_gitolite_user_file
@@ -127,13 +128,13 @@ class UserRepos():
                     self.users_from_file = users_from_file
                     self.users = None
                     self.repos = None
-                    self.userrepoaccess = dict()
+                    self.userrepoaccess = {}
             else:
                 self.mtime_gitolite_user_file = None
                 self.users_from_file = None
                 self.users = None
                 self.repos = None
-                self.userrepoaccess = dict()
+                self.userrepoaccess = {}
         return True
 
     def get_users(self):
@@ -162,7 +163,7 @@ class UserRepos():
     def get_repos(self, user=None):
         """
         :Author: Daniel Mohr
-        :Date: 2021-10-14
+        :Date: 2021-10-14, 2023-03-31, 2023-04-03
         """
         # pylint: disable=too-many-branches
         if (not self._cache_up_to_date()) or (self.repos is None):
@@ -177,7 +178,7 @@ class UserRepos():
                            [line.strip().decode()
                             for line in cpi.stdout.split(b'\n')]))
                 if self.repos is None:
-                    self.repos = dict()
+                    self.repos = {}
                     for reponame in repos:
                         self.repos[reponame] = RepoClass(
                             os.path.join(self.repopath, reponame) + '.git',
@@ -186,6 +187,7 @@ class UserRepos():
                             file_st_modes=self.file_st_modes)
                 else:
                     for reponame in repos:
+                        # pylint: disable=consider-iterating-dictionary
                         if reponame not in self.repos.keys():
                             self.repos[reponame] = RepoClass(
                                 os.path.join(self.repopath, reponame) + '.git',
