@@ -46,44 +46,6 @@ jobs:
       # https://github.com/pre-commit/action
       #continue-on-error: true
 
-  ubuntu-1804_test_doc:
-    runs-on: ubuntu-18.04
-    needs: [pep8_check, pre-commit]
-    steps:
-    - uses: actions/checkout@v2
-    - name: apt-get update
-      run: sudo apt-get update
-    - name: install dependencies (ubuntu packages)
-      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
-    - name: setup author identity for git commits
-      run: |
-        test -n "$(git config user.name)" || git config --global user.name $USER
-        hostname=$HOSTNAME
-        test -n "$hostname" || hostname="runner"
-        test -n "$(git config user.email)" || git config --global user.email $(git config user.name)@$hostname
-    - name: local unittest
-      run: env python3 setup.py run_unittest --src local
-    - name: local pytest
-      run: env python3 setup.py run_pytest --src local
-    - name: install fuse_git_bare_fs
-      run: pip3 install .
-    - name: unittest
-      run: env python3 setup.py run_unittest
-    - name: pytest
-      run: env python3 setup.py run_pytest --parallel --coverage
-    - name: build doc
-      run: ./create_doc
-    - name: uninstall dulwich (ubuntu packages)
-      run: sudo apt-get remove python3-dulwich
-    - name: local unittest (using git instead of dulwich)
-      run: env python3 setup.py run_unittest --src local
-    - name: local pytest (using git instead of dulwich)
-      run: env python3 setup.py run_pytest --src local
-    - name: unittest (using git instead of dulwich)
-      run: env python3 setup.py run_unittest
-    - name: pytest (using git instead of dulwich)
-      run: env python3 setup.py run_pytest --parallel --coverage
-
   ubuntu-2004_test_doc:
     needs: [pep8_check, pre-commit]
     runs-on: ubuntu-20.04
