@@ -20,7 +20,7 @@ class PrepareSimpleTestEnvironment():
 
     def _prepare_simple_test_environment1(
             self, tmpdir, serverdir, clientdir, mountpointdir, reponame,
-            createdirs=None):
+            createdirs=None, add_git=False):
         """
         :Author: Daniel Mohr
         :Date: 2021-10-12, 2023-04-04
@@ -30,8 +30,11 @@ class PrepareSimpleTestEnvironment():
             createdirs = [serverdir, clientdir, mountpointdir]
         for dirpath in createdirs:
             os.mkdir(os.path.join(tmpdir, dirpath))
+        reponamegit = reponame
+        if add_git:
+            reponamegit = reponame + '.git'
         subprocess.run(
-            ['git init --bare ' + reponame],
+            ['git init --bare ' + reponamegit],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             shell=True, cwd=os.path.join(tmpdir, serverdir),
             timeout=3, check=True)

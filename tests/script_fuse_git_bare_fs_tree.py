@@ -30,6 +30,11 @@ import time
 import unittest
 
 try:
+    from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
+except ModuleNotFoundError:
+    from prepare_simple_test_environment import PrepareSimpleTestEnvironment
+
+try:
     from .terminate_wait_kill import _terminate_wait_kill
 except ModuleNotFoundError:
     from terminate_wait_kill import _terminate_wait_kill
@@ -77,7 +82,7 @@ def _prepare_test_environment(serverdir, clientdir, mountpointdir,
         timeout=3, check=True)
 
 
-class ScriptFuseGitBareFsTree(unittest.TestCase):
+class ScriptFuseGitBareFsTree(unittest.TestCase, PrepareSimpleTestEnvironment):
     """
     :Author: Daniel Mohr
     :Date: 2023-03-31
@@ -99,6 +104,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         reponame1 = 'repo1'
         reponame2 = 'foo/repo2'
         with tempfile.TemporaryDirectory() as tmpdir:
+            # prepare test environment
             _prepare_test_environment(serverdir, clientdir, mountpointdir,
                                       reponame1, reponame2, tmpdir)
             # run tests (bare repositories)
@@ -273,7 +279,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2021-04-26, 2023-04-04
         """
         # pylint: disable=invalid-name
         serverdir = 'server'
@@ -282,24 +288,9 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                add_git=True)
             # run tests
             subprocess.run(
                 ['fuse_git_bare_fs tree -daemon ' +
@@ -322,7 +313,7 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
     def test_fuse_git_bare_fs_tree_daemon2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         env python3 script_fuse_git_bare_fs_tree.py \
           ScriptFuseGitBareFsTree.test_fuse_git_bare_fs_tree_daemon2
@@ -335,24 +326,9 @@ class ScriptFuseGitBareFsTree(unittest.TestCase):
         logfile = 'log.txt'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame + '.git'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                add_git=True)
             # run tests
             subprocess.run(
                 ['fuse_git_bare_fs tree -daemon -logfile ' +
