@@ -23,6 +23,10 @@ jobs:
       run: sudo apt-get update
     - name: install dependencies for PEP 8 code style check (ubuntu packages)
       run: sudo apt-get install pep8 pylint python3-recommonmark python3-pytest python3-dulwich
+    - name: pep8 version
+      run: pep8 --version
+    - name: pylint version
+      run: pylint --version
     - name: check PEP 8 code style
       run: pep8 --show-source --show-pep8 --statistics $(find -name "*.py")
     - name: run pylint
