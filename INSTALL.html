@@ -1,21 +1,20 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>INSTALL: fuse_git_bare_fs &#8212; fuse_git_bare_fs 2022-01-13 documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>INSTALL: fuse_git_bare_fs &#8212; fuse_git_bare_fs 2023-04-04 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="search" type="application/opensearchdescription+xml"
-          title="Search within fuse_git_bare_fs 2022-01-13 documentation"
+          title="Search within fuse_git_bare_fs 2023-04-04 documentation"
           href="_static/opensearch.xml"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,7 +36,8 @@
         <li class="right" >
           <a href="README.html" title="README: fuse_git_bare_fs"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2022-01-13 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2023-04-04 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">INSTALL: fuse_git_bare_fs</a></li> 
       </ul>
     </div>  
 
@@ -46,52 +46,60 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="install-fuse-git-bare-fs">
+  <section id="install-fuse-git-bare-fs">
 <h1><a class="toc-backref" href="#id5">INSTALL: fuse_git_bare_fs</a><a class="headerlink" href="#install-fuse-git-bare-fs" title="Permalink to this headline">¶</a></h1>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Version:</th><td class="field-body">2021-08-09</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Author:</th><td class="field-body">Daniel Mohr</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Email:</th><td class="field-body"><a class="reference external" href="mailto:daniel&#46;mohr&#37;&#52;&#48;dlr&#46;de">daniel<span>&#46;</span>mohr<span>&#64;</span>dlr<span>&#46;</span>de</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Version</dt>
+<dd class="field-odd"><p>2023-04-04</p>
+</dd>
+<dt class="field-even">Author</dt>
+<dd class="field-even"><p>Daniel Mohr</p>
+</dd>
+<dt class="field-odd">Email</dt>
+<dd class="field-odd"><p><a class="reference external" href="mailto:daniel&#46;mohr&#37;&#52;&#48;dlr&#46;de">daniel<span>&#46;</span>mohr<span>&#64;</span>dlr<span>&#46;</span>de</a></p>
+</dd>
+</dl>
 <div class="contents topic" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#install-fuse-git-bare-fs" id="id5">INSTALL: fuse_git_bare_fs</a><ul>
-<li><a class="reference internal" href="#id1" id="id6">INSTALL: fuse_git_bare_fs</a><ul>
-<li><a class="reference internal" href="#info" id="id7">info</a></li>
-<li><a class="reference internal" href="#before-you-install" id="id8">before you install</a><ul>
-<li><a class="reference internal" href="#modules" id="id9">Modules</a></li>
-<li><a class="reference internal" href="#unittests" id="id10">unittests</a></li>
-<li><a class="reference internal" href="#pytest" id="id11">pytest</a></li>
+<li><p><a class="reference internal" href="#install-fuse-git-bare-fs" id="id5">INSTALL: fuse_git_bare_fs</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id6">INSTALL: fuse_git_bare_fs</a></p>
+<ul>
+<li><p><a class="reference internal" href="#info" id="id7">info</a></p></li>
+<li><p><a class="reference internal" href="#before-you-install" id="id8">before you install</a></p>
+<ul>
+<li><p><a class="reference internal" href="#modules" id="id9">Modules</a></p></li>
+<li><p><a class="reference internal" href="#unittests" id="id10">unittests</a></p></li>
+<li><p><a class="reference internal" href="#pytest" id="id11">pytest</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#install-by-setup-py-with-distutils" id="id12">install by setup.py with distutils</a><ul>
-<li><a class="reference internal" href="#global-install" id="id13">global-install</a></li>
-<li><a class="reference internal" href="#home-install" id="id14">home-install</a></li>
-<li><a class="reference internal" href="#uninstall-distutils" id="id15">uninstall (distutils)</a></li>
-<li><a class="reference internal" href="#hints-distutils" id="id16">hints (distutils)</a></li>
+<li><p><a class="reference internal" href="#install-by-setup-py-with-distutils" id="id12">install by setup.py with distutils</a></p>
+<ul>
+<li><p><a class="reference internal" href="#global-install" id="id13">global-install</a></p></li>
+<li><p><a class="reference internal" href="#home-install" id="id14">home-install</a></p></li>
+<li><p><a class="reference internal" href="#uninstall-distutils" id="id15">uninstall (distutils)</a></p></li>
+<li><p><a class="reference internal" href="#hints-distutils" id="id16">hints (distutils)</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#install-with-pip" id="id17">install with pip</a><ul>
-<li><a class="reference internal" href="#install-pip" id="id18">install (pip)</a></li>
-<li><a class="reference internal" href="#uninstall-pip" id="id19">uninstall (pip)</a></li>
-<li><a class="reference internal" href="#hints-pip" id="id20">hints (pip)</a></li>
+<li><p><a class="reference internal" href="#install-with-pip" id="id17">install with pip</a></p>
+<ul>
+<li><p><a class="reference internal" href="#install-pip" id="id18">install (pip)</a></p></li>
+<li><p><a class="reference internal" href="#uninstall-pip" id="id19">uninstall (pip)</a></p></li>
+<li><p><a class="reference internal" href="#hints-pip" id="id20">hints (pip)</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#after-you-install" id="id21">after you install</a><ul>
-<li><a class="reference internal" href="#unittests-after-installation" id="id22">unittests (after installation)</a></li>
-<li><a class="reference internal" href="#pytest-after-installation" id="id23">pytest (after installation)</a></li>
+<li><p><a class="reference internal" href="#after-you-install" id="id21">after you install</a></p>
+<ul>
+<li><p><a class="reference internal" href="#unittests-after-installation" id="id22">unittests (after installation)</a></p></li>
+<li><p><a class="reference internal" href="#pytest-after-installation" id="id23">pytest (after installation)</a></p></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#hints" id="id24">hints</a><ul>
-<li><a class="reference internal" href="#ubuntu-18-04" id="id25">Ubuntu 18.04</a></li>
+<li><p><a class="reference internal" href="#hints" id="id24">hints</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ubuntu-18-04" id="id25">Ubuntu 18.04</a></p></li>
+<li><p><a class="reference internal" href="#ubuntu-20-04-22-04-and-debian" id="id26">Ubuntu 20.04, 22.04 and Debian</a></p></li>
+<li><p><a class="reference internal" href="#opensuse-leap-15-5" id="id27">opensuse/leap 15.5</a></p></li>
 </ul>
 </li>
 </ul>
@@ -100,21 +108,21 @@
 </li>
 </ul>
 </div>
-<div class="section" id="id1">
+<section id="id1">
 <h2><a class="toc-backref" href="#id6">INSTALL: fuse_git_bare_fs</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="info">
+<section id="info">
 <h3><a class="toc-backref" href="#id7">info</a><a class="headerlink" href="#info" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="before-you-install">
+</section>
+<section id="before-you-install">
 <h3><a class="toc-backref" href="#id8">before you install</a><a class="headerlink" href="#before-you-install" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="modules">
+<section id="modules">
 <h4><a class="toc-backref" href="#id9">Modules</a><a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h4>
 <p>fuse_git_bare_fs needs the following python modules
 (most of them are standard and already in your python installation
 from a package management):</p>
 <blockquote>
 <div><ul class="simple">
-<li><a class="reference internal" href="#fusepy" id="id2">[fusepy]</a></li>
+<li><p><a class="reference internal" href="#fusepy" id="id2"><span>[fusepy]</span></a></p></li>
 </ul>
 </div></blockquote>
 <p>You can also asked the installation routine/script for the python modules:</p>
@@ -136,17 +144,16 @@ by using the modulefinder:</p>
 </div>
 <p>It is normal that there are many missing modules reported. Please look
 at the details.</p>
-<div class="section" id="references">
+<section id="references">
 <h5>References:<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h5>
-</div>
-<table class="docutils citation" frame="void" id="fusepy" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[fusepy]</a></td><td><a class="reference external" href="https://github.com/fusepy/fusepy">https://github.com/fusepy/fusepy</a></td></tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="unittests">
+</section>
+<dl class="citation">
+<dt class="label" id="fusepy"><span class="brackets"><a class="fn-backref" href="#id2">fusepy</a></span></dt>
+<dd><p><a class="reference external" href="https://github.com/fusepy/fusepy">https://github.com/fusepy/fusepy</a></p>
+</dd>
+</dl>
+</section>
+<section id="unittests">
 <h4><a class="toc-backref" href="#id10">unittests</a><a class="headerlink" href="#unittests" title="Permalink to this headline">¶</a></h4>
 <p>You can run a few unittests:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">run_unittest</span> <span class="o">--</span><span class="n">src</span> <span class="n">local</span>
@@ -155,8 +162,8 @@ at the details.</p>
 <p>But the scripts are not tested before installing.
 After installation you can run unittests on the scripts as well
 (see <a class="reference internal" href="#after-you-install-unittests"><span class="std std-ref">unittests (after installation)</span></a>).</p>
-</div>
-<div class="section" id="pytest">
+</section>
+<section id="pytest">
 <h4><a class="toc-backref" href="#id11">pytest</a><a class="headerlink" href="#pytest" title="Permalink to this headline">¶</a></h4>
 <p>Instead of the standard module unittest you can also use pytest to run
 all available unittests (including scripts):</p>
@@ -166,11 +173,11 @@ all available unittests (including scripts):</p>
 <p>But the scripts are not tested before installing.
 After installation you can run these tests on the scripts as well
 (see <a class="reference internal" href="#after-you-install-pytest"><span class="std std-ref">pytest (after installation)</span></a>).</p>
-</div>
-</div>
-<div class="section" id="install-by-setup-py-with-distutils">
+</section>
+</section>
+<section id="install-by-setup-py-with-distutils">
 <h3><a class="toc-backref" href="#id12">install by setup.py with distutils</a><a class="headerlink" href="#install-by-setup-py-with-distutils" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="global-install">
+<section id="global-install">
 <h4><a class="toc-backref" href="#id13">global-install</a><a class="headerlink" href="#global-install" title="Permalink to this headline">¶</a></h4>
 <p>To install this software global to / the following steps are to perform:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="n">xzf</span> <span class="n">fuse_git_bare_fs</span><span class="o">-*.</span><span class="n">tar</span><span class="o">.*</span>
@@ -183,8 +190,8 @@ After installation you can run these tests on the scripts as well
 </pre></div>
 </div>
 <p>Then you can uninstall with this information.</p>
-</div>
-<div class="section" id="home-install">
+</section>
+<section id="home-install">
 <h4><a class="toc-backref" href="#id14">home-install</a><a class="headerlink" href="#home-install" title="Permalink to this headline">¶</a></h4>
 <p>To install this software to your $HOME the following steps are to perform:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="n">xzf</span> <span class="n">fuse_git_bare_fs</span><span class="o">-*.</span><span class="n">tar</span><span class="o">.*</span>
@@ -197,8 +204,8 @@ After installation you can run these tests on the scripts as well
 </pre></div>
 </div>
 <p>Then you can uninstall with this information.</p>
-</div>
-<div class="section" id="uninstall-distutils">
+</section>
+<section id="uninstall-distutils">
 <h4><a class="toc-backref" href="#id15">uninstall (distutils)</a><a class="headerlink" href="#uninstall-distutils" title="Permalink to this headline">¶</a></h4>
 <p>If you have done the above installation and recorded the installed files,
 you can just remove them to uninstall, e. g.:</p>
@@ -207,8 +214,8 @@ you can just remove them to uninstall, e. g.:</p>
 </div>
 <p>In principle there is a problem with extraordinary file names, e. g. if
 spaces are part of. This should not be the case here.</p>
-</div>
-<div class="section" id="hints-distutils">
+</section>
+<section id="hints-distutils">
 <h4><a class="toc-backref" href="#id16">hints (distutils)</a><a class="headerlink" href="#hints-distutils" title="Permalink to this headline">¶</a></h4>
 <p>Keep in mind to have the right paths.</p>
 <blockquote>
@@ -224,24 +231,23 @@ export PYTHONPATH=~/lib/python
 </pre></div>
 </div>
 </div></blockquote>
-</div>
-</div>
-<div class="section" id="install-with-pip">
+</section>
+</section>
+<section id="install-with-pip">
 <h3><a class="toc-backref" href="#id17">install with pip</a><a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h3>
-<p>You can also use the python package manager system <a class="reference internal" href="#pip" id="id3">[pip]</a>. This allows you to
+<p>You can also use the python package manager system <a class="reference internal" href="#pip" id="id3"><span>[pip]</span></a>. This allows you to
 handle dependencies, too.</p>
-<div class="section" id="id4">
+<section id="id4">
 <h4>References:<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
-</div>
-<table class="docutils citation" frame="void" id="pip" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[pip]</a></td><td><a class="reference external" href="https://en.wikipedia.org/wiki/Pip_(package_manager">https://en.wikipedia.org/wiki/Pip_(package_manager</a>),
+</section>
+<dl class="citation">
+<dt class="label" id="pip"><span class="brackets"><a class="fn-backref" href="#id3">pip</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Pip_(package_manager">https://en.wikipedia.org/wiki/Pip_(package_manager</a>),
 <a class="reference external" href="https://pip.pypa.io/en/stable/">https://pip.pypa.io/en/stable/</a>,
-<a class="reference external" href="https://pypi.org/">https://pypi.org/</a></td></tr>
-</tbody>
-</table>
-<div class="section" id="install-pip">
+<a class="reference external" href="https://pypi.org/">https://pypi.org/</a></p>
+</dd>
+</dl>
+<section id="install-pip">
 <h4><a class="toc-backref" href="#id18">install (pip)</a><a class="headerlink" href="#install-pip" title="Permalink to this headline">¶</a></h4>
 <p>You can use pip to install:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">.</span>
@@ -251,15 +257,15 @@ handle dependencies, too.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span> <span class="o">.</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="uninstall-pip">
+</section>
+<section id="uninstall-pip">
 <h4><a class="toc-backref" href="#id19">uninstall (pip)</a><a class="headerlink" href="#uninstall-pip" title="Permalink to this headline">¶</a></h4>
 <p>You can use pip to uninstall:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">uninstall</span> <span class="n">fuse_git_bare_fs</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="hints-pip">
+</section>
+<section id="hints-pip">
 <h4><a class="toc-backref" href="#id20">hints (pip)</a><a class="headerlink" href="#hints-pip" title="Permalink to this headline">¶</a></h4>
 <p>Keep in mind to have the right paths.</p>
 <blockquote>
@@ -271,22 +277,22 @@ handle dependencies, too.</p>
 <p>Please make sure to have these paths in $PATH and $PYTHONPATH, respectively.
 For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PATH=$PATH:~/.local/bin
-export PYTHONPATH=~/.local/lib/python3.6
+export PYTHONPATH=~/.local/lib/python3.10
 </pre></div>
 </div>
 </div></blockquote>
-</div>
-</div>
-<div class="section" id="after-you-install">
+</section>
+</section>
+<section id="after-you-install">
 <h3><a class="toc-backref" href="#id21">after you install</a><a class="headerlink" href="#after-you-install" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="unittests-after-installation">
+<section id="unittests-after-installation">
 <span id="after-you-install-unittests"></span><h4><a class="toc-backref" href="#id22">unittests (after installation)</a><a class="headerlink" href="#unittests-after-installation" title="Permalink to this headline">¶</a></h4>
 <p>Now you can run all available unittests (including scripts):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">run_unittest</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="pytest-after-installation">
+</section>
+<section id="pytest-after-installation">
 <span id="after-you-install-pytest"></span><h4><a class="toc-backref" href="#id23">pytest (after installation)</a><a class="headerlink" href="#pytest-after-installation" title="Permalink to this headline">¶</a></h4>
 <p>Instead of the standard module unittest you can also use pytest to run
 all available unittests (including scripts):</p>
@@ -297,22 +303,43 @@ all available unittests (including scripts):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">env</span> <span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">run_pytest</span> <span class="o">--</span><span class="n">parallel</span> <span class="o">--</span><span class="n">coverage</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="hints">
+</section>
+</section>
+<section id="hints">
 <h3><a class="toc-backref" href="#id24">hints</a><a class="headerlink" href="#hints" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="ubuntu-18-04">
+<p>The github workflows run tests on different platforms and show how you can
+install <cite>fuse_git_bare_fs</cite>.</p>
+<section id="ubuntu-18-04">
 <h4><a class="toc-backref" href="#id25">Ubuntu 18.04</a><a class="headerlink" href="#ubuntu-18-04" title="Permalink to this headline">¶</a></h4>
 <p>You can find most necessary modules in the package management of Ubuntu 18.04, e. g.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">app</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">fusepy</span>
 </pre></div>
 </div>
+</section>
+<section id="ubuntu-20-04-22-04-and-debian">
+<h4><a class="toc-backref" href="#id26">Ubuntu 20.04, 22.04 and Debian</a><a class="headerlink" href="#ubuntu-20-04-22-04-and-debian" title="Permalink to this headline">¶</a></h4>
+<p>You can find most necessary modules in the package management of Ubuntu 18.04, e. g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">app</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">fusepy</span> <span class="n">fuse</span>
+</pre></div>
 </div>
+<p>To use everything including testing and generating documentation, you need:</p>
+<blockquote>
+<div><p>sudo app install pep8 pylint3 python3-recommonmark python3-pytest python3-dulwich python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra python3-pip fuse</p>
+</div></blockquote>
+</section>
+<section id="opensuse-leap-15-5">
+<h4><a class="toc-backref" href="#id27">opensuse/leap 15.5</a><a class="headerlink" href="#opensuse-leap-15-5" title="Permalink to this headline">¶</a></h4>
+<p>You can find most necessary modules in the package management, e. g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">app</span> <span class="n">install</span> <span class="n">git</span><span class="o">-</span><span class="n">annex</span> <span class="n">python3</span><span class="o">-</span><span class="n">fusepy</span> <span class="n">python3</span><span class="o">-</span><span class="n">pytest</span> <span class="n">python3</span><span class="o">-</span><span class="n">pytest</span><span class="o">-</span><span class="n">cov</span> <span class="n">python3</span><span class="o">-</span><span class="n">pytest</span><span class="o">-</span><span class="n">xdist</span> <span class="n">python3</span><span class="o">-</span><span class="n">setuptools</span> <span class="n">python3</span><span class="o">-</span><span class="n">dulwich</span> <span class="n">git</span><span class="o">-</span><span class="n">annex</span> <span class="n">git</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span> <span class="n">fuse</span>
+</pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
@@ -332,23 +359,21 @@ all available unittests (including scripts):</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="script_fuse_git_bare_fs.html">command line script: <strong class="program">fuse_git_bare_fs</strong></a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_py_fuse_git_bare_fs.html">python module: <code class="docutils literal notranslate"><span class="pre">py_fuse_git_bare_fs</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_py_fuse_git_bare_fs.html">python module: <code class="xref py py-mod docutils literal notranslate"><span class="pre">py_fuse_git_bare_fs</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="test_coverage_report/index.html">test coverage report</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpl.html">GPL</a></li>
 </ul>
 
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -375,12 +400,13 @@ all available unittests (including scripts):</p>
         <li class="right" >
           <a href="README.html" title="README: fuse_git_bare_fs"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2022-01-13 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">fuse_git_bare_fs 2023-04-04 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">INSTALL: fuse_git_bare_fs</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, 2022, Daniel Mohr.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+        &#169; Copyright 2021, 2022, 2023, Daniel Mohr.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.2.
     </div>
   </body>
 </html>
