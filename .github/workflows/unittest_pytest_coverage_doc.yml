@@ -131,7 +131,7 @@ jobs:
     - name: apt-get update
       run: sudo apt-get update
     - name: install dependencies (ubuntu packages)
-      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+      run: sudo apt-get install python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra fuse
     - name: setup author identity for git commits
       run: |
         test -n "$(git config user.name)" || git config --global user.name $USER
