@@ -178,6 +178,7 @@ class ScriptFuseGitBareFsRepo(
                 _terminate_wait_kill(cpi, sleepbefore=3)
                 _, cpistderr = cpi.communicate()
                 self.assertEqual(1, cpi.returncode)  # error return
+                print('cpistderr.decode() = "%s"' % cpistderr.decode())
                 self.assertTrue(cpistderr.decode().startswith(
                     'fuse: bad mount point'))
             # run test: nofail
