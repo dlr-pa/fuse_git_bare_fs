@@ -27,6 +27,11 @@ import tempfile
 import time
 import unittest
 
+try:
+    from .prepare_simple_test_environment import PrepareSimpleTestEnvironment
+except ModuleNotFoundError:
+    from prepare_simple_test_environment import PrepareSimpleTestEnvironment
+
 
 def _terminate_wait_kill(cpi, timeout=3, sleepbefore=None, sleepafter=None):
     """
@@ -42,16 +47,17 @@ def _terminate_wait_kill(cpi, timeout=3, sleepbefore=None, sleepafter=None):
         time.sleep(sleepafter)
 
 
-class ScriptFuseGitBareFsRepo(unittest.TestCase):
+class ScriptFuseGitBareFsRepo(
+        unittest.TestCase, PrepareSimpleTestEnvironment):
     """
     :Author: Daniel Mohr
-    :Date: 2023-03-31
+    :Date: 2023-03-31, 2023-04-04
     """
 
     def test_fuse_git_bare_fs_repo1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it, check for files.
@@ -67,24 +73,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
             # run tests
             with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
@@ -112,7 +102,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it, check for files.
@@ -128,24 +118,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
             # run tests
             with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
@@ -191,7 +165,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-nofail'.
@@ -207,24 +181,9 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                createdirs=[serverdir, clientdir])
             # run test: error
             with subprocess.Popen(
                 ['exec ' + 'fuse_git_bare_fs repo ' +
@@ -265,7 +224,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo4(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-logfile'.
@@ -283,24 +242,9 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         logfile = 'log.txt'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                createdirs=[serverdir, clientdir])
             # run test: error
             self.assertFalse(os.path.isfile(os.path.join(serverdir, logfile)))
             with subprocess.Popen(
@@ -362,7 +306,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon1(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it, check for fiels.
@@ -374,24 +318,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
             # run tests
             subprocess.run(
                 ['fuse_git_bare_fs repo -daemon ' +
@@ -496,7 +424,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon2(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-04-26
+        :Date: 2021-04-26, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it, check for files.
@@ -513,24 +441,8 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir, mountpointdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame)
             # run tests
             subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo -daemon ' +
@@ -562,7 +474,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon3(self):
         """
         :Author: Daniel Mohr
-        :Date: 2022-01-13
+        :Date: 2022-01-13, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-nofail'.
@@ -579,24 +491,9 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         reponame = 'repo1'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                createdirs=[serverdir, clientdir])
             # run test: error
             cpi = subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo -daemon ' +
@@ -636,7 +533,7 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
     def test_fuse_git_bare_fs_repo_daemon4(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31
+        :Date: 2023-03-31, 2023-04-04
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-logfile'.
@@ -654,24 +551,9 @@ class ScriptFuseGitBareFsRepo(unittest.TestCase):
         logfile = 'log.txt'
         with tempfile.TemporaryDirectory() as tmpdir:
             # prepare test environment
-            for dirpath in [serverdir, clientdir]:
-                os.mkdir(os.path.join(tmpdir, dirpath))
-            subprocess.run(
-                ['git init --bare ' + reponame],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, serverdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['git clone ../' + os.path.join(serverdir, reponame)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir),
-                timeout=3, check=True)
-            subprocess.run(
-                ['echo "a">a; echo "b">b; ln -s a l; mkdir d; echo "abc">d/c;'
-                 'git add a b l d/c; git commit -m init; git push'],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                shell=True, cwd=os.path.join(tmpdir, clientdir, reponame),
-                timeout=3, check=True)
+            self._prepare_simple_test_environment1(
+                tmpdir, serverdir, clientdir, mountpointdir, reponame,
+                createdirs=[serverdir, clientdir])
             # run test: nofail
             subprocess.run(
                 ['fuse_git_bare_fs repo -root_object foo ' +
