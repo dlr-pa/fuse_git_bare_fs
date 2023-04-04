@@ -42,6 +42,7 @@ try:
 except (ModuleNotFoundError, ImportError):
     from list_dir_compare import ListDirCompare
 
+
 class ScriptFuseGitBareFsRepo(
         unittest.TestCase, PrepareSimpleTestEnvironment, ListDirCompare):
     """
