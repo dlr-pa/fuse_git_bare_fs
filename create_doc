@@ -4,4 +4,4 @@ cp -p README.md doc/source/ || exit $?
 # build all documentation formats in parallel
 ./create_doc_pdf skipcp &
 ./create_doc_html skipcp &
-wait -n
+wait
