@@ -2,7 +2,7 @@
 INSTALL: fuse_git_bare_fs
 =========================
 
-:Version: 2023-04-04
+:Version: 2023-04-05
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
 
@@ -251,13 +251,20 @@ You can find most necessary modules in the package management of Ubuntu 18.04, e
 
     sudo app install python3-fusepy fuse
 
-To use everything including testing and generating documentation, you need:
+To use everything including testing and generating documentation, you need::
 
-    sudo app install pep8 pylint3 python3-recommonmark python3-pytest python3-dulwich python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools git-annex python3-sphinx python3-sphinx-argparse python3-recommonmark latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra python3-pip fuse
+    sudo app install pep8 pylint3 python3-recommonmark python3-pytest \
+      python3-dulwich python3-fusepy python3-pytest python3-pytest-cov \
+      python3-pytest-xdist python3-setuptools git-annex python3-sphinx \
+      python3-sphinx-argparse python3-recommonmark latexmk \
+      texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra \
+      python3-pip fuse
 
 opensuse/leap 15.5
 ------------------
 
 You can find most necessary modules in the package management, e. g. ::
 
-    sudo app install git-annex python3-fusepy python3-pytest python3-pytest-cov python3-pytest-xdist python3-setuptools python3-dulwich git-annex git python3-pip fuse
+    sudo app install git-annex python3-fusepy python3-pytest \
+      python3-pytest-cov python3-pytest-xdist python3-setuptools \
+      python3-dulwich git-annex git python3-pip fuse
