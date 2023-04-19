@@ -1,21 +1,21 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2023-04-04
+:Date: 2023-04-19
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
-import distutils  # we need distutils for distutils.errors.DistutilsArgError
-from distutils.core import Command, setup
 import os
 import sys
 
+import setuptools
 
-class TestWithPytest(Command):
+
+class TestWithPytest(setuptools.Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-25, 2023-03-31
+    :Date: 2021-06-25, 2023-03-31, 2023-04-19
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with pytest
@@ -40,6 +40,7 @@ class TestWithPytest(Command):
         :Author: Daniel Mohr
         :Date: 2021-02-18
         """
+        # pylint: disable=attribute-defined-outside-init
         self.src = 'installed'
         self.coverage = False
         self.pylint = False
@@ -55,7 +56,7 @@ class TestWithPytest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-25, 2023-03-31
+        :Date: 2021-06-25, 2023-03-31, 2023-04-19
         """
         # pylint: disable=too-many-branches
         # env python3 setup.py run_pytest
@@ -64,7 +65,7 @@ class TestWithPytest(Command):
         elif self.src == 'local':
             sys.path.insert(0, os.path.abspath('src'))
         else:
-            raise distutils.core.DistutilsArgError(
+            raise Exception(
                 "error in command line: " +
                 "value for option 'src' is not 'installed' or 'local'")
         sys.path.append(os.path.abspath('.'))
@@ -119,11 +120,11 @@ class TestWithPytest(Command):
         sys.exit(pytest.main(pyargs, pyplugins))
 
 
-class TestWithUnittest(Command):
+class TestWithUnittest(setuptools.Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-25
+    :Date: 2021-06-25, 2023-04-19
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with unittest
@@ -144,6 +145,7 @@ class TestWithUnittest(Command):
         :Author: Daniel Mohr
         :Date: 2021-02-04
         """
+        # pylint: disable=attribute-defined-outside-init
         self.src = 'installed'
 
     def finalize_options(self):
@@ -155,7 +157,7 @@ class TestWithUnittest(Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-25
+        :Date: 2021-06-25, 2023-04-19
         """
         # env python3 setup.py run_unittest
         if self.src == 'installed':
@@ -163,7 +165,7 @@ class TestWithUnittest(Command):
         elif self.src == 'local':
             sys.path.insert(0, os.path.abspath('src'))
         else:
-            raise distutils.core.DistutilsArgError(
+            raise Exception(
                 "error in command line: " +
                 "value for option 'src' is not 'installed' or 'local'")
         sys.path.append(os.path.abspath('.'))
@@ -201,7 +203,7 @@ class TestWithUnittest(Command):
             sys.exit(1)
 
 
-class CheckModules(Command):
+class CheckModules(setuptools.Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@gmx.de
@@ -214,12 +216,15 @@ class CheckModules(Command):
     user_options = []
 
     def initialize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def finalize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def run(self):
+        # pylint: disable=missing-function-docstring
         # pylint: disable=bad-option-value,import-outside-toplevel
         import importlib
         summary = ""
@@ -242,7 +247,7 @@ class CheckModules(Command):
               f"{summary}\n")
 
 
-class CheckModulesModulefinder(Command):
+class CheckModulesModulefinder(setuptools.Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@gmx.de
@@ -255,12 +260,15 @@ class CheckModulesModulefinder(Command):
     user_options = []
 
     def initialize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def finalize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def run(self):
+        # pylint: disable=missing-function-docstring
         # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
@@ -281,6 +289,7 @@ REQUIRED_MODULES = ['argparse',
                     'os.path',
                     'pwd',
                     're',
+                    'setuptools',
                     'subprocess',
                     'sys',
                     'threading',
@@ -303,9 +312,9 @@ REQUIRED_MODULES += ['xdist']
 # the starting process is therefore slow:
 # REQUIRED_MODULES += ['dulwich']
 
-setup(
+setuptools.setup(
     name='fuse_git_bare_fs',
-    version='2023.04.04',
+    version='2023.04.19',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
