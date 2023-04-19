@@ -40,6 +40,7 @@ class TestWithPytest(setuptools.Command):
         :Author: Daniel Mohr
         :Date: 2021-02-18
         """
+        # pylint: disable=attribute-defined-outside-init
         self.src = 'installed'
         self.coverage = False
         self.pylint = False
@@ -144,6 +145,7 @@ class TestWithUnittest(setuptools.Command):
         :Author: Daniel Mohr
         :Date: 2021-02-04
         """
+        # pylint: disable=attribute-defined-outside-init
         self.src = 'installed'
 
     def finalize_options(self):
@@ -214,12 +216,15 @@ class CheckModules(setuptools.Command):
     user_options = []
 
     def initialize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def finalize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def run(self):
+        # pylint: disable=missing-function-docstring
         # pylint: disable=bad-option-value,import-outside-toplevel
         import importlib
         summary = ""
@@ -255,12 +260,15 @@ class CheckModulesModulefinder(setuptools.Command):
     user_options = []
 
     def initialize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def finalize_options(self):
+        # pylint: disable=missing-function-docstring
         pass
 
     def run(self):
+        # pylint: disable=missing-function-docstring
         # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
