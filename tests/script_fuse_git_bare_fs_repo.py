@@ -578,7 +578,7 @@ class ScriptFuseGitBareFsRepo(
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
-            time.sleep(0.1) # give time to unmount
+            time.sleep(0.1)  # give time to unmount
 
 
 if __name__ == '__main__':
