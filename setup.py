@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2023-04-19
+:Date: 2023-04-20
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -124,7 +124,7 @@ class TestWithUnittest(setuptools.Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-25, 2023-04-19
+    :Date: 2021-06-25, 2023-04-19, 2023-04-20
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with unittest
@@ -157,7 +157,7 @@ class TestWithUnittest(setuptools.Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-25, 2023-04-19
+        :Date: 2021-06-25, 2023-04-19, 2023-04-20
         """
         # env python3 setup.py run_unittest
         if self.src == 'installed':
@@ -182,9 +182,9 @@ class TestWithUnittest(setuptools.Command):
             def test_required_module_import(self):
                 import importlib
                 for module in setup_self.distribution.metadata.get_requires():
-                    if module == 'fusepy':
+                    if module in ['fuse', 'fusepy']:
                         try:
-                            importlib.import_module(module)
+                            importlib.import_module('fusepy')
                         except ModuleNotFoundError:
                             # pylint: disable=import-error,unused-variable
                             # pylint: disable=unused-variable,unused-import
@@ -216,15 +216,22 @@ class CheckModules(setuptools.Command):
     user_options = []
 
     def initialize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def finalize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def run(self):
-        # pylint: disable=missing-function-docstring
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08, 2023-03-31, 2023-04-20
+        """
         # pylint: disable=bad-option-value,import-outside-toplevel
         import importlib
         summary = ""
@@ -240,11 +247,26 @@ class CheckModules(setuptools.Command):
                 if self.verbose:
                     print("  loaded.")
             except ImportError:
+                fuse_or_fusepy = set(['fuse', 'fusepy'])
+                if module in ['fuse', 'fusepy']:
+                    fuse_or_fusepy = set(['fuse', 'fusepy'])
+                    fuse_or_fusepy.remove(module)
+                    alternative_module = fuse_or_fusepy.pop()
+                    if self.verbose:
+                        print(f"try to load alternative {alternative_module}")
+                    try:
+                        importlib.import_module(alternative_module)
+                        if self.verbose:
+                            print("  loaded.")
+                        continue
+                    except ImportError:
+                        pass
                 i += 1
                 summary += f"module '{module}' is not available\n"
-                print(f"module '{module}' is not available <---WARNING---")
+                sys.exit(f"module '{module}' is not available <---WARNING---")
         print(f"\nSummary\n{i} modules are not available (not unique)\n" +
               f"{summary}\n")
+        sys.exit(0)
 
 
 class CheckModulesModulefinder(setuptools.Command):
@@ -260,15 +282,22 @@ class CheckModulesModulefinder(setuptools.Command):
     user_options = []
 
     def initialize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def finalize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def run(self):
-        # pylint: disable=missing-function-docstring
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08, 2023-03-31
+        """
         # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
@@ -281,6 +310,7 @@ class CheckModulesModulefinder(setuptools.Command):
 # necessary modules
 REQUIRED_MODULES = ['argparse',
                     'errno',
+                    'fuse',
                     'fusepy',
                     'grp',
                     'hashlib',
@@ -314,7 +344,7 @@ REQUIRED_MODULES += ['xdist']
 
 setuptools.setup(
     name='fuse_git_bare_fs',
-    version='2023.04.19',
+    version='2023.04.20',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
