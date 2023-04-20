@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2023-03-31, 2023-04-04
+:Date: 2023-03-31, 2023-04-04, 2023-04-20
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
 tests the script 'fuse_git_bare_fs repo'
@@ -47,7 +47,7 @@ class ScriptFuseGitBareFsRepo(
         unittest.TestCase, PrepareSimpleTestEnvironment, ListDirCompare):
     """
     :Author: Daniel Mohr
-    :Date: 2023-03-31, 2023-04-04
+    :Date: 2023-03-31, 2023-04-04, 2023-04-20
     """
 
     def test_fuse_git_bare_fs_repo1(self):
@@ -518,7 +518,7 @@ class ScriptFuseGitBareFsRepo(
     def test_fuse_git_bare_fs_repo_daemon4(self):
         """
         :Author: Daniel Mohr
-        :Date: 2023-03-31, 2023-04-04
+        :Date: 2023-03-31, 2023-04-04, 2023-04-20
 
         This test creates a repo, put some files in and
         mount it to non existing directory and check the flag '-logfile'.
@@ -578,6 +578,7 @@ class ScriptFuseGitBareFsRepo(
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 shell=True, cwd=tmpdir,
                 timeout=3, check=True)
+            time.sleep(0.1) # give time to unmount
 
 
 if __name__ == '__main__':
