@@ -247,6 +247,20 @@ class CheckModules(setuptools.Command):
                 if self.verbose:
                     print("  loaded.")
             except ImportError:
+                fuse_or_fusepy = set(['fuse', 'fusepy'])
+                if module in ['fuse', 'fusepy']:
+                    fuse_or_fusepy = set(['fuse', 'fusepy'])
+                    fuse_or_fusepy.remove(module)
+                    alternative_module = fuse_or_fusepy.pop()
+                    if self.verbose:
+                        print(f"try to load alternative {alternative_module}")
+                    try:
+                        importlib.import_module(alternative_module)
+                        if self.verbose:
+                            print("  loaded.")
+                        continue
+                    except ImportError:
+                        pass
                 i += 1
                 summary += f"module '{module}' is not available\n"
                 sys.exit(f"module '{module}' is not available <---WARNING---")
@@ -296,6 +310,7 @@ class CheckModulesModulefinder(setuptools.Command):
 # necessary modules
 REQUIRED_MODULES = ['argparse',
                     'errno',
+                    'fuse',
                     'fusepy',
                     'grp',
                     'hashlib',
