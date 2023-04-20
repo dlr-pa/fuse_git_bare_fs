@@ -184,7 +184,7 @@ class TestWithUnittest(setuptools.Command):
                 for module in setup_self.distribution.metadata.get_requires():
                     if module in ['fuse', 'fusepy']:
                         try:
-                            importlib.import_module(module)
+                            importlib.import_module('fusepy')
                         except ModuleNotFoundError:
                             # pylint: disable=import-error,unused-variable
                             # pylint: disable=unused-variable,unused-import
