@@ -124,7 +124,7 @@ class TestWithUnittest(setuptools.Command):
     """
     :Author: Daniel Mohr
     :Email: daniel.mohr@dlr.de
-    :Date: 2021-06-25, 2023-04-19
+    :Date: 2021-06-25, 2023-04-19, 2023-04-20
     :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 
     running automatic tests with unittest
@@ -157,7 +157,7 @@ class TestWithUnittest(setuptools.Command):
     def run(self):
         """
         :Author: Daniel Mohr
-        :Date: 2021-06-25, 2023-04-19
+        :Date: 2021-06-25, 2023-04-19, 2023-04-20
         """
         # env python3 setup.py run_unittest
         if self.src == 'installed':
@@ -182,7 +182,7 @@ class TestWithUnittest(setuptools.Command):
             def test_required_module_import(self):
                 import importlib
                 for module in setup_self.distribution.metadata.get_requires():
-                    if module == 'fusepy':
+                    if module in ['fuse', 'fusepy']:
                         try:
                             importlib.import_module(module)
                         except ModuleNotFoundError:
