@@ -1,7 +1,7 @@
 """
 :Author: Daniel Mohr
 :Email: daniel.mohr@dlr.de
-:Date: 2023-04-19
+:Date: 2023-04-20
 :License: GNU GENERAL PUBLIC LICENSE, Version 2, June 1991.
 """
 
@@ -216,15 +216,22 @@ class CheckModules(setuptools.Command):
     user_options = []
 
     def initialize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def finalize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def run(self):
-        # pylint: disable=missing-function-docstring
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08, 2023-03-31, 2023-04-20
+        """
         # pylint: disable=bad-option-value,import-outside-toplevel
         import importlib
         summary = ""
@@ -242,9 +249,10 @@ class CheckModules(setuptools.Command):
             except ImportError:
                 i += 1
                 summary += f"module '{module}' is not available\n"
-                print(f"module '{module}' is not available <---WARNING---")
+                sys.exit(f"module '{module}' is not available <---WARNING---")
         print(f"\nSummary\n{i} modules are not available (not unique)\n" +
               f"{summary}\n")
+        sys.exit(0)
 
 
 class CheckModulesModulefinder(setuptools.Command):
@@ -260,15 +268,22 @@ class CheckModulesModulefinder(setuptools.Command):
     user_options = []
 
     def initialize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def finalize_options(self):
-        # pylint: disable=missing-function-docstring
-        pass
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08
+        """
 
     def run(self):
-        # pylint: disable=missing-function-docstring
+        """
+        :Author: Daniel Mohr
+        :Date: 2017-01-08, 2023-03-31
+        """
         # pylint: disable=bad-option-value,import-outside-toplevel
         import modulefinder
         for script in self.distribution.scripts:
@@ -314,7 +329,7 @@ REQUIRED_MODULES += ['xdist']
 
 setuptools.setup(
     name='fuse_git_bare_fs',
-    version='2023.04.19',
+    version='2023.04.20',
     cmdclass={
         'check_modules': CheckModules,
         'check_modules_modulefinder': CheckModulesModulefinder,
